@@ -104,22 +104,98 @@ When a subagent returns its result, look for the metadata header at the top:
 
 **Accept** → proceed. **Fixable issues** → re-delegate with corrections. **Fundamental misunderstanding** → re-delegate to different agent or handle directly.
 
-## Result Merging for Parallel Delegation
-When delegating to multiple subagents in parallel (independent tasks):
+## Workflow Phase Management
 
-1. **Do NOT wait for all results** — process each result as it arrives (see below).
+### ⚠️ CRITICAL: Phase Barriers (MUST FOLLOW)
+
+When executing a multi-phase workflow (explore → plan → fix → review), you **MUST** respect phase boundaries:
+
+```
+Phase 1: Explore/Research
+  ├── @explore (module A, background=true)
+  ├── @explore (module B, background=true)
+  ├── @explore (module C, background=true)
+  └── @explore (module D, background=true)
+  
+  ⛔ BARRIER: Wait for ALL explore tasks to complete
+  ⛔ DO NOT launch any fix/implementation tasks yet
+  ⛔ Even if one explore returns early, WAIT for the rest
+  
+Phase 2: Analyze & Plan
+  ├── Synthesize ALL explore results together
+  ├── Identify dependencies between issues
+  ├── Create prioritized fix plan
+  └── Get user approval (if applicable)
+  
+Phase 3: Execute Fixes
+  ├── Launch fix tasks based on COMPLETE information
+  └── Use parallel delegation for independent fixes
+```
+
+**WHY THIS MATTERS:**
+- Explore tasks discover root causes and dependencies
+- Launching fix agents with incomplete information leads to:
+  - Fixing symptoms instead of root causes
+  - Missing cross-module dependencies
+  - Duplicate or conflicting fixes
+  - Wasted agent cycles on wrong problems
+
+**COMMON MISTAKE TO AVOID:**
+```
+❌ WRONG: Launch explore → first explore returns → immediately launch fix agents
+✅ RIGHT: Launch explore → wait for ALL explores → analyze together → then launch fix agents
+```
+
+### Within-Phase Parallel Tasks (First-Come-First-Serve)
+
+**ONLY** use first-come-first-serve processing for tasks **within the same phase**:
+
+When multiple independent tasks are launched in the same phase (e.g., multiple explore tasks, or multiple independent fix tasks):
+
+When any task completes, **immediately**:
+1. **Verify** the result
+2. **Process** the result — record findings, update state
+3. **Wait for remaining tasks** — do NOT launch next-phase tasks yet
+4. **Only after ALL phase tasks complete** — synthesize results and proceed to next phase
+
+**Implementation Pattern:**
+```
+Step 1: Launch multiple independent tasks in single message
+        Use background=true for independent tasks:
+        @explore (module A, background=true), @explore (module B, background=true)
+
+Step 2: As soon as ANY task completes (first-come-first-serve):
+        - Immediately verify the result
+        - Process the result (record findings, update state)
+        - Continue waiting for remaining phase tasks
+        - ⛔ DO NOT launch next-phase tasks yet
+
+Step 3: Repeat Step 2 for each subsequent completion
+
+Step 4: ONLY after ALL phase tasks are processed:
+        - Synthesize all results
+        - Proceed to next phase
+        - Now you can launch next-phase tasks
+```
+
+### Phase Transition Checklist
+
+Before moving from one phase to the next, verify:
+
+- [ ] All tasks in current phase have completed (check background tasks)
+- [ ] All results have been verified and processed
+- [ ] Results have been synthesized into coherent understanding
+- [ ] Any blockers or issues have been resolved
+- [ ] Next phase tasks have clear requirements based on current phase output
+
+### Result Merging for Parallel Delegation
+
+When delegating to multiple subagents in parallel (independent tasks within the same phase):
+
+1. **Use background=true** for independent tasks that can run asynchronously
 2. **Check each metadata header** — if any subagent is `blocked` or `needs_input`, resolve that first.
 3. **Merge results by scope**: each subagent owns its domain. When two subagents give conflicting suggestions, prefer the one with higher domain authority (security-auditor > reviewer > validator > others).
-4. **Synthesize before delegating next**: after parallel results are collected, combine relevant context from all subagents into a coherent prompt for the next sequential delegation.
-
-### Async Result Processing (First-Come-First-Serve)
-**Critical: Do NOT wait for all subagents to finish before processing results.**
-
-When any subagent completes, immediately:
-1. **Verify** the result
-2. **Process** the result — apply changes, merge code, update state
-3. **Launch follow-up tasks** if this result enables downstream work
-4. **Continue waiting** for remaining subagents
+4. **Synthesize before delegating next phase**: after parallel results are collected, combine relevant context from all subagents into a coherent prompt for the next phase.
 
 ### Subagent Timeout Detection
 When launching subagent tasks:
