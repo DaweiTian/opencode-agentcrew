@@ -6,6 +6,7 @@ set -euo pipefail
 
 REPO_URL="https://gitee.com/aerlee/opencode-agents.git"
 TARGET_DIR="${HOME}/.config/opencode/agents"
+REFERENCES_DIR="${HOME}/.config/opencode/references"
 BACKUP_DIR="${HOME}/.config/opencode/agents-备份-$(date +%Y%m%d%H%M%S)"
 TEMP_DIR=$(mktemp -d)
 
@@ -30,10 +31,17 @@ git clone --depth 1 "$REPO_URL" "$TEMP_DIR" 2>/dev/null
 
 # 创建目标目录
 mkdir -p "$TARGET_DIR"
+mkdir -p "$REFERENCES_DIR"
 
 # 复制 agents 文件
 echo "📂 安装 agents 到: $TARGET_DIR"
 cp "$TEMP_DIR"/agents/*.md "$TARGET_DIR/"
+
+# 复制 references 文件
+if [ -d "$TEMP_DIR/references" ]; then
+    echo "📚 安装 references 到: $REFERENCES_DIR"
+    cp -r "$TEMP_DIR"/references/* "$REFERENCES_DIR/"
+fi
 
 # 复制 plugins 文件
 PLUGIN_DIR="${HOME}/.config/opencode/plugins"
@@ -47,10 +55,35 @@ fi
 # 清理
 rm -rf "$TEMP_DIR"
 
+# 配置环境变量以启用异步子代理处理
+echo "⚙️  配置环境变量..."
+
+# 设置 shell 环境变量
+SHELL_RC=""
+if [ -f "$HOME/.bashrc" ]; then
+    SHELL_RC="$HOME/.bashrc"
+elif [ -f "$HOME/.zshrc" ]; then
+    SHELL_RC="$HOME/.zshrc"
+fi
+
+if [ -n "$SHELL_RC" ]; then
+    if ! grep -q "OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS" "$SHELL_RC"; then
+        echo "" >> "$SHELL_RC"
+        echo "# OpenCode 异步子代理支持" >> "$SHELL_RC"
+        echo "export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true" >> "$SHELL_RC"
+        echo "  ✅ 已添加环境变量到 $SHELL_RC"
+        # 立即生效
+        export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
+    else
+        echo "  ℹ️  环境变量已存在于 $SHELL_RC"
+    fi
+fi
+
 # 统计
 AGENT_COUNT=$(ls -1 "$TARGET_DIR"/*.md 2>/dev/null | wc -l)
+REFERENCE_COUNT=$(find "$REFERENCES_DIR" -name "*.md" 2>/dev/null | wc -l)
 echo ""
-echo "✅ 安装完成！共 ${AGENT_COUNT} 个智能体"
+echo "✅ 安装完成！共 ${AGENT_COUNT} 个智能体，${REFERENCE_COUNT} 个参考文档"
 echo ""
 echo "已安装的智能体:"
 echo "  主智能体:"
@@ -63,10 +96,19 @@ ls -1 "$TARGET_DIR"/*.md 2>/dev/null | grep -v -E '(Zero|Erribaba)\.md' | while 
 done
 
 echo ""
+echo "已安装的参考文档:"
+find "$REFERENCES_DIR" -name "*.md" 2>/dev/null | while read f; do
+    echo "    - $(basename "$f" .md)"
+done
+
+echo ""
 echo "📋 下一步："
 echo "  1. 编辑 ~/.config/opencode/opencode.json 配置模型和 provider"
 echo "  2. 在 opencode.json 中设置 \"default_agent\" 选择主智能体"
-echo "  3. 启动 opencode 开始使用"
+echo "  3. 在 opencode.json 中配置 \"references\" 指向参考文档目录"
+echo "  4. 启动 opencode 开始使用"
+echo ""
+echo "⚡ 已启用异步子代理处理功能，主智能体现在可以并行处理多个子任务！"
 echo ""
 echo "💡 提示：将下方提示词复制到你的 OpenCode 智能体中，"
 echo "   它会帮你自动配置模型并更新智能体文件。"
@@ -97,7 +139,7 @@ cat << 'PROMPT'
 | db-engineer | opencode-go/deepseek-v4-pro | 数据库工程 |
 | debugger | opencode-go/deepseek-v4-pro | 调试诊断 |
 | devops | opencode-go/mimo-v2.5-pro | DevOps/CI-CD |
-| doc-writer | opencode-go/qwen3.6-plus | 文档编写 |
+| doc-writer | opencode-go/qwen3.7-plus | 文档编写 |
 | e2e-tester | opencode-go/mimo-v2.5-pro | 端到端测试 |
 | executor | opencode-go/minimax-m2.7 | 命令执行 |
 | frontend-dev | opencode-go/kimi-k2.6 | 前端开发 |
@@ -105,16 +147,19 @@ cat << 'PROMPT'
 | git-assistant | opencode-go/mimo-v2.5 | Git 工作流 |
 | migration | opencode-go/deepseek-v4-pro | 迁移专家 |
 | perf-optimizer | opencode-go/mimo-v2.5-pro | 性能优化 |
-| project-manager | opencode-go/qwen3.6-plus | 项目管理 |
+| plan-writer | opencode-go/mimo-v2.5-pro | 实现计划编写 |
+| project-manager | opencode-go/qwen3.7-plus | 项目管理 |
 | refactorer | opencode-go/mimo-v2.5-pro | 代码重构 |
-| research | opencode-go/qwen3.6-plus | 信息研究 |
-| reviewer | opencode-go/deepseek-v4-pro | 代码审查 |
+| research | opencode-go/qwen3.7-plus | 信息研究 |
+| reviewer | opencode-go/deepseek-v4-pro | 代码审查（Stage 2） |
 | security-auditor | opencode-go/deepseek-v4-pro | 安全审计 |
 | software-engineer | opencode-go/mimo-v2.5 | 全栈实现 |
+| spec-reviewer | opencode-go/deepseek-v4-pro | 规范合规性审查（Stage 1） |
 | test-writer | opencode-go/mimo-v2.5-pro | 测试编写 |
 | ui-designer | opencode-go/kimi-k2.6 | UI 设计 |
 | validator | opencode-go/minimax-m2.7 | 结果验证 |
 | vision-dev | opencode-go/mimo-v2.5 | 视觉开发 |
+| workflow-orchestrator | opencode-go/mimo-v2.5-pro | 工作流编排 |
 
 如果我没有某个 provider，告诉我哪些模型需要额外配置。
 如果我已有对应的模型，直接进入第三步。
@@ -129,8 +174,23 @@ cat << 'PROMPT'
 将 ~/.config/opencode/opencode.json 中的 `default_agent` 设置为 "Erribaba"。
 （如果用户更喜欢快速原型模式，改为 "Zero"）
 
-## 第五步：验证
+## 第五步：配置参考文档
+
+在 ~/.config/opencode/opencode.json 中添加 references 配置，指向工作流文档：
+
+```json
+"references": {
+  "workflow-docs": {
+    "path": "~/.config/opencode/references/workflow",
+    "description": "智能体工作流文档和快速参考，包含结构化工作流指南、代理配置和最佳实践",
+    "hidden": false
+  }
+}
+```
+
+## 第六步：验证
 
 列出所有智能体及其使用的模型，确认配置完成。
+验证 references 配置是否正确。
 PROMPT
 echo ""

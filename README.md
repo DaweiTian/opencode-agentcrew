@@ -1,10 +1,12 @@
 # opencode-agentcrew
 
-**开箱即用的 OpenCode 智能体团队，26 个专业角色覆盖全栈开发流程。**
+**开箱即用的 OpenCode 智能体团队，29 个专业角色覆盖全栈开发流程。**
 
 ## ✨ 特点
 
-- **26 个专业智能体** — 架构设计、代码生成、调试诊断、测试编写、前端开发、安全审计等
+- **29 个专业智能体** — 架构设计、代码生成、调试诊断、测试编写、前端开发、安全审计等
+- **结构化工作流** — 参考 MiMo Compose 模式，支持 brainstorm→plan→execute→review→merge 完整流程
+- **两阶段审查** — 规范合规性审查 + 代码质量审查，确保实现符合需求且代码质量高
 - **双主智能体** — Erribaba（生产代码）+ Zero（快速原型/多模态）
 - **多模型协作** — MiMo-V2.5、GLM-5.1、Kimi K2.6、Qwen3.6 Plus、DeepSeek V4 Pro 等 7 个模型
 - **图片处理** — 自动拦截粘贴图片，委托 vision-dev 分析
@@ -62,7 +64,7 @@ rm -rf /tmp/opencode-agents
 | DeepSeek V4 Pro | 3,450 | 8,550 | 17,150 |
 | DeepSeek V4 Flash | 31,650 | 79,050 | 158,150 |
 
-> 本智能体集合的 26 个智能体使用的 7 个模型（MiMo-V2.5、MiMo-V2.5-Pro、DeepSeek V4 Pro、Kimi K2.6、Qwen3.6 Plus、MiniMax M2.7、GLM-5.1）全部包含在 Go 套餐中。
+> 本智能体集合的 29 个智能体使用的 7 个模型（MiMo-V2.5、MiMo-V2.5-Pro、DeepSeek V4 Pro、Kimi K2.6、Qwen3.6 Plus、MiniMax M2.7、GLM-5.1）全部包含在 Go 套餐中。
 
 ## 配置模型
 
@@ -94,7 +96,7 @@ rm -rf /tmp/opencode-agents
 | db-engineer | opencode-go/deepseek-v4-pro | 数据库工程 |
 | debugger | opencode-go/deepseek-v4-pro | 调试诊断 |
 | devops | opencode-go/mimo-v2.5-pro | DevOps/CI-CD |
-| doc-writer | opencode-go/qwen3.6-plus | 文档编写 |
+| doc-writer | opencode-go/qwen3.7-plus | 文档编写 |
 | e2e-tester | opencode-go/mimo-v2.5-pro | 端到端测试 |
 | executor | opencode-go/minimax-m2.7 | 命令执行 |
 | frontend-dev | opencode-go/kimi-k2.6 | 前端开发 |
@@ -102,16 +104,19 @@ rm -rf /tmp/opencode-agents
 | git-assistant | opencode-go/mimo-v2.5 | Git 工作流 |
 | migration | opencode-go/deepseek-v4-pro | 迁移专家 |
 | perf-optimizer | opencode-go/mimo-v2.5-pro | 性能优化 |
-| project-manager | opencode-go/qwen3.6-plus | 项目管理 |
+| plan-writer | opencode-go/mimo-v2.5-pro | 实现计划编写 |
+| project-manager | opencode-go/qwen3.7-plus | 项目管理 |
 | refactorer | opencode-go/mimo-v2.5-pro | 代码重构 |
-| research | opencode-go/qwen3.6-plus | 信息研究 |
-| reviewer | opencode-go/deepseek-v4-pro | 代码审查 |
+| research | opencode-go/qwen3.7-plus | 信息研究 |
+| reviewer | opencode-go/deepseek-v4-pro | 代码审查（Stage 2） |
 | security-auditor | opencode-go/deepseek-v4-pro | 安全审计 |
 | software-engineer | opencode-go/mimo-v2.5 | 全栈实现 |
+| spec-reviewer | opencode-go/deepseek-v4-pro | 规范合规性审查（Stage 1） |
 | test-writer | opencode-go/mimo-v2.5-pro | 测试编写 |
 | ui-designer | opencode-go/kimi-k2.6 | UI 设计 |
 | validator | opencode-go/minimax-m2.7 | 结果验证 |
 | vision-dev | opencode-go/mimo-v2.5 | 视觉开发 |
+| workflow-orchestrator | opencode-go/mimo-v2.5-pro | 工作流编排 |
 
 如果我没有某个 provider，告诉我哪些模型需要额外配置。
 如果我已有对应的模型，直接进入第三步。
@@ -136,32 +141,46 @@ rm -rf /tmp/opencode-agents
 ## 目录结构
 
 ```
-agents/
-├── Zero.md              # 主智能体（快速原型，多模态）
-├── Erribaba.md          # 主智能体（生产代码，深度分析）
-├── architect.md         # 架构设计
-├── code-generator.md    # 代码生成
-├── db-engineer.md       # 数据库工程
-├── debugger.md          # 调试诊断
-├── devops.md            # DevOps/CI-CD
-├── doc-writer.md        # 文档编写
-├── e2e-tester.md        # 端到端测试
-├── executor.md          # 命令执行
-├── frontend-dev.md      # 前端开发
-├── frontend-reviewer.md # 前端审查
-├── git-assistant.md     # Git 工作流
-├── migration.md         # 迁移专家
-├── perf-optimizer.md    # 性能优化
-├── project-manager.md   # 项目管理
-├── refactorer.md        # 代码重构
-├── research.md          # 信息研究
-├── reviewer.md          # 代码审查
-├── security-auditor.md  # 安全审计
-├── software-engineer.md # 全栈实现
-├── test-writer.md       # 测试编写
-├── ui-designer.md       # UI 设计
-├── validator.md         # 结果验证
-└── vision-dev.md        # 视觉开发
+├── agents/                    # 智能体配置文件（29个）
+│   ├── Zero.md              # 主智能体（快速原型，多模态）
+│   ├── Erribaba.md          # 主智能体（生产代码，深度分析）
+│   ├── architect.md         # 架构设计
+│   ├── code-generator.md    # 代码生成
+│   ├── db-engineer.md       # 数据库工程
+│   ├── debugger.md          # 调试诊断
+│   ├── devops.md            # DevOps/CI-CD
+│   ├── doc-writer.md        # 文档编写
+│   ├── e2e-tester.md        # 端到端测试
+│   ├── executor.md          # 命令执行
+│   ├── frontend-dev.md      # 前端开发
+│   ├── frontend-reviewer.md # 前端审查
+│   ├── git-assistant.md     # Git 工作流
+│   ├── migration.md         # 迁移专家
+│   ├── perf-optimizer.md    # 性能优化
+│   ├── plan-writer.md       # 实现计划编写
+│   ├── project-manager.md   # 项目管理
+│   ├── refactorer.md        # 代码重构
+│   ├── research.md          # 信息研究
+│   ├── reviewer.md          # 代码审查（Stage 2）
+│   ├── security-auditor.md  # 安全审计
+│   ├── software-engineer.md # 全栈实现
+│   ├── spec-reviewer.md     # 规范合规性审查（Stage 1）
+│   ├── test-writer.md       # 测试编写
+│   ├── ui-designer.md       # UI 设计
+│   ├── validator.md         # 结果验证
+│   ├── vision-dev.md        # 视觉开发
+│   └── workflow-orchestrator.md # 工作流编排
+├── references/                # 参考文档（OpenCode References 功能）
+│   └── workflow/            # 工作流相关文档
+│       └── WORKFLOW-QUICKREF.md # 结构化工作流快速参考
+├── plugins/                   # OpenCode 插件
+│   └── image-paste-saver.js # 图片粘贴保存插件
+├── install.sh                 # Linux/macOS 一键安装脚本
+├── install.ps1                # Windows 一键安装脚本
+├── AGENTS.md                  # 代理配置和使用指南
+├── README.md                  # 项目说明
+├── WORKFLOW-QUICKREF.md       # 工作流快速参考（项目根目录副本）
+└── LICENSE                    # MIT 许可证
 ```
 
 ## 智能体一览
@@ -191,16 +210,80 @@ agents/
 | `git-assistant.md` | 提交消息、分支命名、PR 描述 | ✗ | ✗ |
 | `migration.md` | 框架升级、数据库迁移、技术栈切换 | ✓ | ✓ |
 | `perf-optimizer.md` | 性能分析与优化 | ✗ | ✓ |
+| `plan-writer.md` | 实现计划编写、TDD 任务分解 | ✓ | ✗ |
 | `project-manager.md` | 需求分析、任务拆解、Sprint 规划 | ✓ | ✗ |
 | `refactorer.md` | 代码重构、消除重复、改善结构 | ✓ | ✗ |
 | `research.md` | 查找文档、调研技术方案 | ✗ | ✗ |
-| `reviewer.md` | 代码审查（逻辑/安全/性能） | ✗ | ✗ |
+| `reviewer.md` | 代码审查（Stage 2：代码质量） | ✗ | ✗ |
 | `security-auditor.md` | OWASP Top 10 安全审计 | ✗ | ✗ |
 | `software-engineer.md` | 全栈功能端到端实现 | ✓ | ✓ |
+| `spec-reviewer.md` | 规范合规性审查（Stage 1） | ✗ | ✗ |
 | `test-writer.md` | 单元/集成/边界测试 | ✓ | ✗ |
 | `ui-designer.md` | CSS/Tailwind/响应式布局/动画 | ✓ | ✗ |
 | `validator.md` | 最终验证（构建/测试/类型检查） | ✗ | ✓ |
 | `vision-dev.md` | 设计稿分析、截图还原、视觉开发 | ✓ | ✗ |
+| `workflow-orchestrator.md` | 工作流编排、多阶段任务管理 | ✓ | ✓ |
+
+## 结构化工作流
+
+本智能体集合支持参考 MiMo Compose 模式的结构化开发工作流，适合复杂、多步骤的任务。
+
+### 工作流阶段
+
+```
+用户需求
+    ↓
+[阶段 1: 构思] — architect, research（可选但推荐）
+    ↓
+[阶段 2: 计划] — plan-writer, project-manager（3+ 步骤任务必需）
+    ↓
+[阶段 3: 执行] — test-writer, code-generator, executor（TDD 循环）
+    ↓
+[阶段 4: 审查] — spec-reviewer（Stage 1）→ reviewer（Stage 2）
+    ↓
+[阶段 5: 合并] — validator, git-assistant
+```
+
+### 关键概念
+
+#### 两阶段审查
+审查阶段使用两阶段流程：
+1. **阶段 1：规范合规性审查**（`@spec-reviewer`）— 验证实现是否符合需求
+2. **阶段 2：代码质量审查**（@reviewer）— 验证代码是否良好构建
+
+**重要：** 阶段 1 必须通过后才能运行阶段 2。
+
+#### TDD 集成
+执行阶段遵循测试驱动开发：
+1. 编写失败测试（`@test-writer`）
+2. 验证测试失败（`@executor`）
+3. 编写最小实现（`@code-generator`）
+4. 验证测试通过（`@executor`）
+5. 重构（如需要）
+6. 提交（`@git-assistant`）
+
+#### 工作流编排
+对于复杂任务，使用 `@workflow-orchestrator` 管理完整工作流。它协调其他代理按正确顺序执行，并确保质量门控。
+
+### 何时使用结构化工作流
+
+| 任务类型 | 推荐方式 |
+|---------|---------|
+| 简单、单步骤 | 直接处理 |
+| 2-3 步骤、需求清晰 | 直接实现 + 审查 |
+| 3+ 步骤、复杂 | 完整结构化工作流 |
+| 新功能、需求模糊 | 完整工作流 + 构思 |
+| Bug 修复、问题清晰 | 跳过构思，使用计划 + 执行 |
+
+### 代理在工作流中的角色
+
+| 阶段 | 主要代理 | 支持代理 |
+|------|---------|---------|
+| 构思 | `architect`, `research` | `project-manager` |
+| 计划 | `plan-writer`, `project-manager` | `architect` |
+| 执行 | `test-writer`, `code-generator` | `executor`, `git-assistant` |
+| 审查 | `spec-reviewer`, `reviewer` | `security-auditor`, `frontend-reviewer` |
+| 合并 | `validator` | `git-assistant`, `devops` |
 
 ## 使用方式
 

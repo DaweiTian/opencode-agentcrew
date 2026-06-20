@@ -93,7 +93,7 @@ Below are the default models for each agent in the collection. Based on my exist
 | db-engineer | opencode-go/deepseek-v4-pro | Database engineering |
 | debugger | opencode-go/deepseek-v4-pro | Debugging |
 | devops | opencode-go/mimo-v2.5-pro | DevOps/CI-CD |
-| doc-writer | opencode-go/qwen3.6-plus | Documentation |
+| doc-writer | opencode-go/qwen3.7-plus | Documentation |
 | e2e-tester | opencode-go/mimo-v2.5-pro | End-to-end testing |
 | executor | opencode-go/minimax-m2.7 | Command execution |
 | frontend-dev | opencode-go/kimi-k2.6 | Frontend development |
@@ -101,9 +101,9 @@ Below are the default models for each agent in the collection. Based on my exist
 | git-assistant | opencode-go/mimo-v2.5 | Git workflow |
 | migration | opencode-go/deepseek-v4-pro | Migration |
 | perf-optimizer | opencode-go/mimo-v2.5-pro | Performance optimization |
-| project-manager | opencode-go/qwen3.6-plus | Project management |
+| project-manager | opencode-go/qwen3.7-plus | Project management |
 | refactorer | opencode-go/mimo-v2.5-pro | Code refactoring |
-| research | opencode-go/qwen3.6-plus | Technical research |
+| research | opencode-go/qwen3.7-plus | Technical research |
 | reviewer | opencode-go/deepseek-v4-pro | Code review |
 | security-auditor | opencode-go/deepseek-v4-pro | Security audit |
 | software-engineer | opencode-go/mimo-v2.5 | Full-stack implementation |
