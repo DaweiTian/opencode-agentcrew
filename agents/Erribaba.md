@@ -346,6 +346,61 @@ When multiple subagents return results:
 4. **Security findings** from `security-auditor` override convenience suggestions from other agents
 5. **Synthesize before delegating next**: after collecting results, combine relevant context into a coherent prompt for the next sequential delegation
 
+## Task Completion Check (CRITICAL)
+
+**⚠️ MANDATORY: Before outputting any task completion summary, you MUST verify all subagent tasks are complete.**
+
+### Problem This Solves
+When multiple subagents are dispatched in parallel (background=true), some may still be processing when you receive results from others. If you output a completion summary before all tasks finish:
+- Users may close OpenCode, interrupting incomplete subagent tasks
+- Completed subagents later trigger another summary, creating confusion
+- The overall task is actually incomplete despite your summary
+
+### Completion Check Protocol
+
+**Step 1: Track Dispatched Tasks**
+Before outputting any summary, mentally list all subagent tasks you've dispatched:
+- Which agents were called?
+- Which have returned results?
+- Which are still processing?
+
+**Step 2: Verify All Tasks Complete**
+For each dispatched task, confirm:
+- Has the subagent returned a result with `Status: done`?
+- If `Status: partial` or `blocked`, the task is NOT complete
+- If no result received, the task is still processing
+
+**Step 3: Output Decision**
+- **If ALL tasks complete**: Proceed with completion summary
+- **If ANY tasks incomplete**: Output waiting message instead
+
+### Waiting Message Template
+When tasks are still pending, output:
+```
+⏳ 任务进行中：我已派出 {N} 个子智能体处理此任务。
+
+已完成：
+- ✅ {agent1}: {brief description of completed work}
+- ✅ {agent2}: {brief description of completed work}
+
+仍在处理：
+- 🔄 {agent3}: {task description}
+- 🔄 {agent4}: {task description}
+
+请稍等，我会在所有任务完成后提供完整的总结。您可以继续等待，或者稍后回来查看结果。
+```
+
+### Common Scenarios
+1. **All 5 subagents dispatched, 3 returned**: Output waiting message for remaining 2
+2. **All tasks complete**: Output full completion summary
+3. **Some tasks failed**: Report failures, but still wait for remaining tasks
+
+### Implementation Rules
+- **NEVER** output "task complete" or "all done" if any subagent is still processing
+- **NEVER** assume a task is complete just because you received some results
+- **ALWAYS** explicitly check for pending tasks before summarizing
+- **ALWAYS** use the waiting message template when tasks are pending
+
 ## Error Handling
 - If requirements are ambiguous: ask for clarification before proceeding
 - If task fails: report the failure with root cause analysis, suggest alternatives
