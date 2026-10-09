@@ -271,41 +271,42 @@ opencode-agentcrew/
 
 ### 子智能体（Subagent）
 
-| 文件 | 职责 | 可写 | 可执行 |
-|------|------|:----:|:------:|
-| `api-designer.md` | API 端点设计、OpenAPI 规范 | ✓ | ✗ |
-| `architect.md` | 系统设计、模块划分、技术选型 | ✗ | ✗ |
-| `code-generator.md` | 高质量代码生成、bug 修复 | ✓ | ✗ |
-| `db-engineer.md` | 数据库 Schema、Migration、SQL 优化 | ✓ | ✓ |
-| `debugger.md` | 系统化定位和修复代码缺陷 | ✓ | ✓ |
-| `devops.md` | Docker、CI/CD、Kubernetes、部署 | ✓ | ✓ |
-| `doc-writer.md` | 技术文档、API 参考、README | ✓ | ✗ |
-| `e2e-tester.md` | Playwright/Cypress 端到端测试 | ✓ | ✗ |
-| `executor.md` | 运行命令、执行测试、构建项目 | ✓ | ✓ |
-| `frontend-dev.md` | React/Vue/Svelte 组件开发 | ✓ | ✗ |
-| `frontend-reviewer.md` | 前端审查、无障碍合规、性能 | ✗ | ✗ |
-| `git-assistant.md` | 提交消息、分支命名、PR 描述 | ✗ | ✗ |
-| `migration.md` | 框架升级、数据库迁移、技术栈切换 | ✓ | ✓ |
-| `perf-optimizer.md` | 性能分析与优化 | ✗ | ✓ |
-| `plan-writer.md` | 实现计划编写、TDD 任务分解 | 部分* | ✗ |
-| `project-manager.md` | 需求分析、任务拆解、Sprint 规划 | 部分* | ✗ |
-| `refactorer.md` | 代码重构、消除重复、改善结构 | ✓ | ✗ |
-| `research.md` | 查找文档、调研技术方案 | ✗ | ✗ |
-| `reviewer.md` | 代码审查（Stage 2：代码质量） | ✗ | ✗ |
-| `security-auditor.md` | OWASP Top 10 安全审计 | ✗ | ✗ |
-| `software-engineer.md` | 全栈功能端到端实现 | ✓ | ✓ |
-| `spec-reviewer.md` | 规范合规性审查（Stage 1） | ✗ | ✗ |
-| `test-writer.md` | 单元/集成/边界测试 | ✓ | ✗ |
-| `ui-designer.md` | CSS/Tailwind/响应式布局/动画 | ✓ | ✗ |
-| `validator.md` | 最终验证（构建/测试/类型检查） | ✗ | ✓ |
-| `vision-dev.md` | 设计稿分析、截图还原、视觉开发 | ✓ | ✗ |
-| `workflow-orchestrator.md` | 工作流编排计划输出（只读顾问，不直接派发子智能体） | ✗ | ✗ |
+| 文件 | 职责 | 可写 | 可执行 | 可派发 |
+|------|------|:----:|:------:|:------:|
+| `api-designer.md` | API 端点设计、OpenAPI 规范 | ✓ | ✗ | ✗ |
+| `architect.md` | 系统设计、模块划分、技术选型 | ✗ | ✗ | ✗ |
+| `code-generator.md` | 高质量代码生成、bug 修复 | ✓ | ✗ | ✗ |
+| `db-engineer.md` | 数据库 Schema、Migration、SQL 优化 | ✓ | ✓ | ✗ |
+| `debugger.md` | 系统化定位和修复代码缺陷 | ✓ | ✓ | ✗ |
+| `devops.md` | Docker、CI/CD、Kubernetes、部署 | ✓ | ✓ | ✗ |
+| `doc-writer.md` | 技术文档、API 参考、README | ✓ | ✗ | ✗ |
+| `e2e-tester.md` | Playwright/Cypress 端到端测试 | ✓ | ✗ | ✗ |
+| `executor.md` | 运行命令、执行测试、构建项目 | ✓ | ✓ | ✗ |
+| `frontend-dev.md` | React/Vue/Svelte 组件开发 | ✓ | ✗ | ✗ |
+| `frontend-reviewer.md` | 前端审查、无障碍合规、性能 | ✗ | ✗ | ✗ |
+| `git-assistant.md` | 提交消息、分支命名、PR 描述 | ✗ | ✗ | ✗ |
+| `migration.md` | 框架升级、数据库迁移、技术栈切换 | ✓ | ✓ | ✗ |
+| `perf-optimizer.md` | 性能分析与优化 | ✗ | ✓ | ✗ |
+| `plan-writer.md` | 实现计划编写、TDD 任务分解 | 部分* | ✗ | ✗ |
+| `project-manager.md` | 需求分析、任务拆解、Sprint 规划 | 部分* | ✗ | ✗ |
+| `refactorer.md` | 代码重构、消除重复、改善结构 | ✓ | ✗ | ✗ |
+| `research.md` | 查找文档、调研技术方案 | ✗ | ✗ | ✗ |
+| `reviewer.md` | 代码审查（Stage 2：代码质量） | ✗ | ✗ | ✗ |
+| `security-auditor.md` | OWASP Top 10 安全审计 | ✗ | ✗ | ✗ |
+| `software-engineer.md` | 全栈功能端到端实现 | ✓ | ✓ | ✗ |
+| `spec-reviewer.md` | 规范合规性审查（Stage 1） | ✗ | ✗ | ✗ |
+| `test-writer.md` | 单元/集成/边界测试 | ✓ | ✗ | ✗ |
+| `ui-designer.md` | CSS/Tailwind/响应式布局/动画 | ✓ | ✗ | ✗ |
+| `validator.md` | 最终验证（构建/测试/类型检查） | ✗ | ✓ | ✗ |
+| `vision-dev.md` | 设计稿分析、截图还原、视觉开发 | ✓ | ✗ | ✗ |
+| `workflow-orchestrator.md` | 工作流编排计划输出（只读顾问，不直接派发子智能体） | ✗ | ✗ | ✗ |
 
 > \* **部分可写**：仅可写入 `~/.opencode/plan/` 目录（目录级 allow 例外，置于通配 deny 之后生效）；其余路径只读，且不可执行命令。
+> **可派发**：全部 35 个子智能体（含 Lite 版）均在 frontmatter 中 deny `subagent`，即不可再向下派发；只有 3 个主智能体（smart-router、Zero、Erribaba）可派发子智能体。
 
 ### 子智能体（Lite 轻量版）
 
-全部使用 `mimo-v2.6-flash`，由 `smart-router` 按复杂度自动选择。
+全部使用 `mimo-v2.6-flash`，由 `smart-router` 按复杂度自动选择。权限规则与对应标准版一致（均 deny `subagent`，不可再派发）。
 
 | 文件 | 标准版 | 职责 |
 |------|--------|------|
@@ -424,11 +425,14 @@ opencode-agentcrew/
 description: 中文描述（OpenCode 用于匹配触发场景）
 mode: primary | subagent
 model: provider/model-name
-permissions:        # 可选 — 省略则允许所有工具
+permissions:        # 主智能体可省略（省略则允许所有工具）；子智能体必须声明且包含 subagent deny
   - action: edit
     resource: "*"
     effect: deny
   - action: shell
+    resource: "*"
+    effect: deny
+  - action: subagent    # 所有子智能体必填 — 只有主智能体可派发
     resource: "*"
     effect: deny
 ---
@@ -436,7 +440,7 @@ permissions:        # 可选 — 省略则允许所有工具
 <系统提示词>
 ```
 
-> ℹ️ 2026-09 起本仓库已从 V1 的 `tools:` 字段全面迁移到 V2 的 `permissions:` 列表（V1 `tools:` 在 OpenCode V2 中会被静默忽略）。`edit` 动作覆盖 edit/write/patch 三种文件修改工具，`shell` 动作覆盖命令执行；多条规则同时命中时以最后一条为准。
+> ℹ️ 2026-09 起本仓库已从 V1 的 `tools:` 字段全面迁移到 V2 的 `permissions:` 列表（V1 `tools:` 在 OpenCode V2 中会被静默忽略）。`edit` 动作覆盖 edit/write/patch 三种文件修改工具，`shell` 动作覆盖命令执行，`subagent` 动作控制能否再向下派发子智能体；多条规则同时命中时以最后一条为准。35 个子智能体全部 deny `subagent`，只有 3 个主智能体可派发。
 
 ## 参与贡献
 

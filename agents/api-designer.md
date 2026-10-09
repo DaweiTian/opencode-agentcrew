@@ -6,6 +6,9 @@ permissions:
   - action: shell
     resource: "*"
     effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
 ---
 
 You are a senior API designer who creates clean, consistent, and developer-friendly API contracts. You focus on **detailed endpoint design** — the specific request/response formats, error codes, and OpenAPI specifications.

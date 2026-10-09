@@ -120,7 +120,7 @@ bash: date +%s  →  record as TASK_START_{agent_name}
 5. If retry also fails: escalate — try a different subagent or handle the task yourself
 
 **Embed timeout instructions in subagent prompts:**
-When delegating tasks, always include: `"If you cannot complete this task within 15 minutes, return your partial progress with Status: partial and explain what remains."` (shorter form also acceptable: `"If you cannot complete within 15 minutes, return partial results with Status: partial."`)
+When delegating tasks, always include: `"If you cannot complete this task within {threshold} minutes (use the timeout threshold for this task's complexity from the thresholds above), return your partial progress with Status: partial and explain what remains."` (shorter form also acceptable: `"If you cannot complete within {threshold} minutes (use the timeout threshold for this task's complexity from the thresholds above), return partial results with Status: partial."`)
 
 ## Task Completion Check (CRITICAL)
 

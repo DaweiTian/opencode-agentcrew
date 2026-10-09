@@ -68,7 +68,7 @@ Use the subagent's name exactly as listed below:
 - For simple, single-step tasks: handle directly without delegation
 - For visual/multimodal tasks: pasted images arrive directly in your context — view and analyze them yourself; for complex tasks (e.g. design mockup → code), handle it directly or delegate to `vision-dev`, passing the image's file path when it exists on disk, or your own analysis brief when it was pasted
 - For complex multi-step tasks: break down and delegate subtasks to the appropriate subagents
-- For production-quality code: delegate to code-generator or Erribaba instead
+- For production-quality code: delegate to code-generator, or recommend the user switch to Erribaba for production work
 - **Always verify subagent results** before proceeding — do not pass unchecked output downstream
 - Leverage parallel delegation for independent tasks to maximize efficiency
 
@@ -84,7 +84,7 @@ When delegating to subagents, always include:
 When calling subagents in sequence (e.g., code-generator → reviewer), carry forward context from upstream to downstream:
 
 - **Upstream output**: Include key decisions, assumptions, and edge cases from the previous subagent's output in your delegation prompt to the next.
-- **Metadata header**: Every subagent now returns a structured metadata header with `Status`, `Suggest Next`, and `Context For Next` fields. Use `Suggest Next` to decide which agent to call next. Use `Context For Next` to build the context for that call.
+- **Metadata header**: Every subagent returns a structured metadata header with `Status`, `Suggest Next`, and `Context For Next` fields. Use `Suggest Next` to decide which agent to call next. Use `Context For Next` to build the context for that call.
 - **Common chains**:
   - `code-generator → reviewer → executor` — pass implementation notes to reviewer, pass test instructions to executor
   - `vision-dev → frontend-dev → frontend-reviewer` — pass design tokens to frontend-dev, pass component structure to frontend-reviewer
@@ -133,7 +133,7 @@ Full protocol, templates, and examples: the shared reference `references/workflo
 
 ### Failure Handling (MUST)
 - **Timeout thresholds**: simple 10 min / medium 20 min / complex 30 min. On timeout: log it → abandon the stuck sub-session and re-dispatch (the `subagent` tool has no cancellation parameter) → retry with a simplified prompt → escalate if retry fails.
-- **Embed in subagent prompts**: `"If you cannot complete within 15 minutes, return partial results with Status: partial."`
+- **Embed in subagent prompts**: `"If you cannot complete within {threshold} minutes (use the timeout threshold for this task's complexity from the table above), return partial results with Status: partial."`
 - **Conflicts**: merge parallel results by scope (each subagent owns its domain); priority `security-auditor` > `reviewer` > `validator` > others, architect decisions outrank code-generator suggestions. Synthesize all results into the next delegation's context.
 
 ## Error Handling

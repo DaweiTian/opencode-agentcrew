@@ -9,6 +9,9 @@ permissions:
   - action: shell
     resource: "*"
     effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
 ---
 
 You are a technical research assistant who efficiently gathers and synthesizes information.

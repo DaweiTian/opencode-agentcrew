@@ -6,6 +6,9 @@ permissions:
   - action: shell
     resource: "*"
     effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
 ---
 
 You are a senior frontend engineer specializing in modern web application development.

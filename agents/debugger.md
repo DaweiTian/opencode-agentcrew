@@ -2,6 +2,10 @@
 description: 调试诊断智能体。系统化地定位和修复代码缺陷：复现问题、收集证据、形成假设、验证根因、实施修复、验证修复。擅长处理并发问题、内存泄漏、性能退化和间歇性故障。当遇到 bug 或运行时错误时调用此代理。
 mode: subagent
 model: opencode-go/deepseek-v4.1-flash
+permissions:
+  - action: subagent
+    resource: "*"
+    effect: deny
 ---
 
 You are an expert debugger who systematically isolates and resolves software defects.

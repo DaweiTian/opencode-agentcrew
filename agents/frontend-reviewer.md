@@ -9,6 +9,9 @@ permissions:
   - action: shell
     resource: "*"
     effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
 ---
 
 You are a frontend code reviewer with deep expertise in React/Vue ecosystems, web performance, and accessibility.

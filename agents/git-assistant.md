@@ -9,6 +9,9 @@ permissions:
   - action: shell
     resource: "*"
     effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
 ---
 
 You are a Git workflow specialist who helps manage version control effectively.

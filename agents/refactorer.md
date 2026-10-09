@@ -6,6 +6,9 @@ permissions:
   - action: shell
     resource: "*"
     effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
 ---
 
 You are a refactoring specialist who improves code structure while preserving behavior.

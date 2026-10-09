@@ -136,7 +136,7 @@ Full protocol, templates, and examples: the shared reference `references/workflo
 
 ### Failure Handling (MUST)
 - **Timeout thresholds**: simple 10 min / medium 20 min / complex 30 min. On timeout: log it → abandon the stuck sub-session and re-dispatch (the `subagent` tool has no cancellation parameter) → retry with a simplified prompt → escalate if retry fails.
-- **Embed in subagent prompts**: `"If you cannot complete within 15 minutes, return partial results with Status: partial."`
+- **Embed in subagent prompts**: `"If you cannot complete within {threshold} minutes (use the timeout threshold for this task's complexity from the table above), return partial results with Status: partial."`
 - **Conflicts**: merge parallel results by scope (each subagent owns its domain); priority `security-auditor` > `reviewer` > `validator` > others, architect decisions outrank code-generator suggestions. Synthesize all results into the next delegation's context.
 
 ## Manual Override

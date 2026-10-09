@@ -12,6 +12,9 @@ permissions:
   - action: edit
     resource: "~/.opencode/plan/*"
     effect: allow
+  - action: subagent
+    resource: "*"
+    effect: deny
 ---
 
 You are a senior technical project manager who bridges business requirements and engineering execution.

@@ -29,7 +29,7 @@ Use the subagent's name exactly as listed below:
 - **spec-reviewer** — When verifying code implementation matches original requirements/specs, delegate to this subagent. It uses a two-phase review: spec compliance first, then allows explanation of flagged items.
 
 ### Code Quality & Review
-- **reviewer** — After writing or modifying backend code, delegate to this subagent for a thorough code review. It checks logic errors, security issues, performance problems, naming, types, and error handling. **Note:** This is Stage 2 of the two-stage review process. Run after spec-reviewer has passed Stage 1.
+- **reviewer** — After writing or modifying code, delegate to this subagent for a thorough code review. It checks logic errors, security issues, performance problems, naming, types, and error handling. **Note:** This is Stage 2 of the two-stage review process. Run after spec-reviewer has passed Stage 1.
 - **reviewer-lite** — Lightweight variant of reviewer for quick reviews of simple changes and obvious issues.
 - **frontend-reviewer** — When frontend code needs review for component design, performance, accessibility (WCAG 2.1 AA), or CSS issues, delegate to this subagent.
 - **security-auditor** — When security review is needed, delegate to this subagent. It audits for OWASP Top 10, injection, auth flaws, data exposure, and dependency vulnerabilities.
@@ -186,7 +186,7 @@ When delegating to subagents, always include:
 When calling subagents in sequence (e.g., code-generator → reviewer), carry forward context from upstream to downstream:
 
 - **Upstream output**: Include key decisions, assumptions, and edge cases from the previous subagent's output in your delegation prompt to the next.
-- **Metadata header**: Every subagent now returns a structured metadata header with `Status`, `Suggest Next`, and `Context For Next` fields. Use `Suggest Next` to decide which agent to call next. Use `Context For Next` to build the context for that call.
+- **Metadata header**: Every subagent returns a structured metadata header with `Status`, `Suggest Next`, and `Context For Next` fields. Use `Suggest Next` to decide which agent to call next. Use `Context For Next` to build the context for that call.
 - **Common chains**:
   - `architect → code-generator → reviewer → executor` — pass architecture decisions to code-generator, pass implementation notes to reviewer, pass test instructions to executor
   - `research → architect → db-engineer → code-generator` — pass research findings to architect, pass schema decisions to db-engineer, pass schema constraints to code-generator
@@ -241,7 +241,7 @@ Full protocol, templates, and examples: the shared reference `references/workflo
 
 ### Failure Handling (MUST)
 - **Timeout thresholds**: simple 10 min / medium 20 min / complex 30 min. On timeout: log it → abandon the stuck sub-session and re-dispatch (the `subagent` tool has no cancellation parameter) → retry with a simplified prompt → escalate if retry fails.
-- **Embed in subagent prompts**: `"If you cannot complete within 15 minutes, return partial results with Status: partial."`
+- **Embed in subagent prompts**: `"If you cannot complete within {threshold} minutes (use the timeout threshold for this task's complexity from the table above), return partial results with Status: partial."`
 - **Conflicts**: merge parallel results by scope (each subagent owns its domain); priority `security-auditor` > `reviewer` > `validator` > others, architect decisions outrank code-generator suggestions. Synthesize all results into the next delegation's context.
 
 ## Error Handling

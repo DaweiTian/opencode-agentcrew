@@ -9,9 +9,15 @@ A collection of OpenCode agent configuration files. No code, no build, no tests 
 ```
 agents/
   *.md          # 38 agent definitions (3 primary + 35 subagent)
+references/
+  workflow/     # workflow docs and quick reference (OpenCode references)
+AGENTS.md       # repo conventions and agent tables (this file)
 README.md       # Chinese (38 agents, model table included)
 README.en.md    # English (same)
+install.sh      # Linux/macOS one-shot install script
+install.ps1     # Windows one-shot install script
 LICENSE         # MIT
+.gitignore      # Git ignore rules
 ```
 
 ## Agent File Format
@@ -23,11 +29,14 @@ Every file in `agents/` uses this structure:
 description: <Chinese description — this is what OpenCode uses to decide when to invoke the agent>
 mode: primary | subagent
 model: <provider/model-name>
-permissions:      # optional — omit to allow all tools
+permissions:      # primary agents may omit (all tools allowed); every subagent declares one
   - action: edit        # deny specific actions per agent role
     resource: "*"
     effect: deny
   - action: shell
+    resource: "*"
+    effect: deny
+  - action: subagent    # required for every subagent — only primary agents may delegate
     resource: "*"
     effect: deny
 ---
@@ -45,7 +54,7 @@ permissions:      # optional — omit to allow all tools
 - **`mode: subagent`** means the agent is only invoked via delegation from a primary agent.
 - **Filename = agent name** used in delegation (e.g., `reviewer.md` → delegate as `reviewer`).
 - **Model naming**: all agents use the `opencode-go/` provider prefix — models include `opencode-go/mimo-v2.6-flash`, `opencode-go/mimo-v2.6-pro`, `opencode-go/deepseek-v4.1-flash`, `opencode-go/glm-5.2`, `opencode-go/kimi-k2.7-code`, `opencode-go/qwen3.8-flash`, `opencode-go/minimax-m3`, `opencode-go/longcat-2.5-preview-free`, `opencode-go/step-5-preview-free`.
-- **Tool access** defaults to all tools allowed when `permissions` key is omitted (primary agents). Subagents declare explicit `permissions` deny rules: agents that write code omit the `edit` deny (or allow specific paths such as `~/.opencode/plan/*`); read-only subagents deny both `edit` and `shell`; agents needing shell access omit the `shell` deny.
+- **Tool access** defaults to all tools allowed when the `permissions` key is omitted — only the three primary agents omit it. Every subagent declares an explicit `permissions` block that ends with a `subagent` deny (only primary agents may delegate). Beyond that deny: read-only subagents deny both `edit` and `shell`; code-writing subagents deny `shell` and omit the `edit` deny; `perf-optimizer` and `validator` deny `edit` but keep `shell`; agents needing full tool access (edit and shell) declare only the `subagent` deny (e.g. `db-engineer`, `executor`); `plan-writer` and `project-manager` additionally allow `edit` under `~/.opencode/plan/*` (the allow is placed after the wildcard denies so it wins for that path).
 
 ## All 38 Agents
 
@@ -59,7 +68,7 @@ permissions:      # optional — omit to allow all tools
 
 ### Subagents — Read-only (12)
 
-Denied both `edit` and `shell` in `permissions` frontmatter (equivalent to all tools `false`):
+Denied `edit`, `shell`, and `subagent` in `permissions` frontmatter (except `plan-writer`/`project-manager`, which allow `edit` under `~/.opencode/plan/*`; other actions remain available via the allow-all base):
 
 | File | Model | Role |
 |------|-------|------|
@@ -76,11 +85,11 @@ Denied both `edit` and `shell` in `permissions` frontmatter (equivalent to all t
 | `spec-reviewer.md` | `opencode-go/deepseek-v4.1-flash` | Spec compliance review (Stage 1) |
 | `workflow-orchestrator.md` | `opencode-go/mimo-v2.6-pro` | Workflow orchestration |
 
-Plus `perf-optimizer` (`opencode-go/mimo-v2.6-pro`) and `validator` (`opencode-go/step-5-preview-free`) — deny `edit` but allow `shell`: read-only for file edits, have bash for running commands.
+Plus `perf-optimizer` (`opencode-go/mimo-v2.6-pro`) and `validator` (`opencode-go/step-5-preview-free`) — deny `edit` and `subagent` but allow `shell`: read-only for file edits, have bash for running commands.
 
 ### Subagents — With write/edit (21)
 
-No `edit` deny (or only path-scoped denies) in `permissions` frontmatter:
+No `edit` deny (or only path-scoped denies) in `permissions` frontmatter. Every row also carries the mandatory `subagent` deny; the bash ✗ rows additionally deny `shell`, while the bash ✓ rows (db-engineer, debugger, debugger-lite, devops, executor, migration, software-engineer) declare only the `subagent` deny:
 
 | File | Model | Has bash | Role |
 |------|-------|:--------:|------|
@@ -125,7 +134,7 @@ All eight `-lite` variants run on `opencode-go/mimo-v2.6-flash`. They are lightw
 
 ## When Adding or Editing Agents
 
-1. Match the frontmatter field order: `description`, `mode`, `model`, then optional `permissions`.
+1. Match the frontmatter field order: `description`, `mode`, `model`, then `permissions` (optional only for primary agents — every subagent must declare a block that ends with the `subagent` deny).
 2. Write `description` in Chinese — start with the role name (e.g., "代码审查智能体"), then describe capabilities and trigger scenarios.
 3. Keep system prompts concise and structured with `##` sections.
 4. **Primary agents must list all available subagents in their body** — update all three primaries (`smart-router.md`, `Zero.md`, and `Erribaba.md`) if adding a new subagent.
@@ -171,7 +180,7 @@ The execute phase follows Test-Driven Development:
 6. Commit (`@git-assistant`)
 
 #### Workflow Orchestration
-For complex tasks, use `@workflow-orchestrator` to manage the full workflow. It coordinates other agents in the correct order and ensures quality gates are met.
+For complex tasks, use `@workflow-orchestrator` to produce a structured orchestration plan (phases, dispatch order, phase barriers, quality gates). It is a read-only advisor — it does not dispatch subagents itself; the primary agent executes the plan.
 
 ### When to Use Structured Workflow
 

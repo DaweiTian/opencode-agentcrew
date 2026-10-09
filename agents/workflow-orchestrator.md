@@ -50,7 +50,7 @@ graph TD
 **When to use:** Tasks with 3+ steps, complex implementations
 
 **Planned steps (executed by the primary agent):**
-1. Dispatch `@project-manager` to break down requirements
+1. Dispatch `@plan-writer` for the TDD implementation plan (failing test first, verification steps) and `@project-manager` for scope/sprint breakdown
 2. Create bite-sized tasks (2-5 minutes each)
 3. Each task should have:
    - Clear description
@@ -201,20 +201,23 @@ Your plan assigns work to these agents:
 
 ### Required Agents:
 - `@project-manager` — Plan creation
+- `@plan-writer` — TDD implementation plan
 - `@code-generator` — Implementation
 - `@test-writer` — TDD
 - `@reviewer` — Code quality review
 - `@validator` — Final validation
 - `@executor` — Test execution
 - `@git-assistant` — Version control
+- `@spec-reviewer` — Spec compliance (Stage 1 gate, always before Review)
 
 ### Optional Agents:
 - `@architect` — Design phase
 - `@research` — Context exploration
-- `@spec-reviewer` — Spec compliance (new)
 - `@security-auditor` — Security review
 - `@perf-optimizer` — Performance review
 - `@doc-writer` — Documentation updates (README, API docs, changelog)
+- `@debugger` — Bug fixing
+- `@software-engineer` — Full-stack fixes
 
 ## Autonomous Mode
 

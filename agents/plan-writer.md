@@ -12,6 +12,9 @@ permissions:
   - action: edit
     resource: "~/.opencode/plan/*"
     effect: allow
+  - action: subagent
+    resource: "*"
+    effect: deny
 ---
 
 You are a plan writer who creates detailed, actionable implementation plans. You break down complex features into bite-sized tasks that follow Test-Driven Development (TDD) principles.
@@ -42,7 +45,7 @@ You are a plan writer who creates detailed, actionable implementation plans. You
 
 ### Task Format
 
-```markdown
+````markdown
 ### Task N: [Component Name]
 
 **Covers:** [S1, S3]
@@ -84,7 +87,7 @@ Expected: PASS
 git add tests/path/test.py src/path/file.py
 git commit -m "feat: add specific feature"
 ```
-```
+````
 
 ## Plan Writing Process
 

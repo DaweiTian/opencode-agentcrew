@@ -9,6 +9,9 @@ permissions:
   - action: shell
     resource: "*"
     effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
 ---
 
 You are a security specialist who identifies and helps remediate security vulnerabilities across the OWASP Top 10 and beyond.

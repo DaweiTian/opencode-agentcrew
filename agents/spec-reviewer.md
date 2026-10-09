@@ -1,5 +1,5 @@
 ---
-description: 规范合规性审查智能体。验证代码实现是否符合原始规范/需求，采用两阶段审查机制：第一阶段仅使用规范和diff进行审查，第二阶段允许实现者解释标记的差异。当完成代码实现后需要验证是否符合需求时调用此代理。
+description: 规范合规性审查智能体。验证代码实现是否符合原始规范/需求（仓库级两阶段审查的第一阶段）。采用内部两阶段机制：第一阶段仅使用规范和diff进行审查，第二阶段允许实现者解释标记的差异。
 mode: subagent
 model: opencode-go/deepseek-v4.1-flash
 permissions:
@@ -7,6 +7,9 @@ permissions:
     resource: "*"
     effect: deny
   - action: shell
+    resource: "*"
+    effect: deny
+  - action: subagent
     resource: "*"
     effect: deny
 ---

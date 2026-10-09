@@ -270,41 +270,42 @@ opencode-agentcrew/
 
 ### Subagents
 
-| File | Responsibility | Writable | Executable |
-|------|---------------|:--------:|:----------:|
-| `api-designer.md` | API endpoint design, OpenAPI specs | ✓ | ✗ |
-| `architect.md` | System design, module planning, tech selection | ✗ | ✗ |
-| `code-generator.md` | High-quality code generation, bug fixes | ✓ | ✗ |
-| `db-engineer.md` | Database schema, migrations, SQL optimization | ✓ | ✓ |
-| `debugger.md` | Systematic bug isolation and fixing | ✓ | ✓ |
-| `devops.md` | Docker, CI/CD, Kubernetes, deployment | ✓ | ✓ |
-| `doc-writer.md` | Technical docs, API references, README | ✓ | ✗ |
-| `e2e-tester.md` | Playwright/Cypress end-to-end tests | ✓ | ✗ |
-| `executor.md` | Run commands, execute tests, build projects | ✓ | ✓ |
-| `frontend-dev.md` | React/Vue/Svelte component development | ✓ | ✗ |
-| `frontend-reviewer.md` | Frontend review, accessibility, performance | ✗ | ✗ |
-| `git-assistant.md` | Commit messages, branch naming, PR descriptions | ✗ | ✗ |
-| `migration.md` | Framework upgrades, DB migrations, tech stack switches | ✓ | ✓ |
-| `perf-optimizer.md` | Performance profiling and optimization | ✗ | ✓ |
-| `plan-writer.md` | Implementation planning, TDD task breakdown | Partial* | ✗ |
-| `project-manager.md` | Requirement analysis, task breakdown, sprint planning | Partial* | ✗ |
-| `refactorer.md` | Code refactoring, duplication removal, structure improvement | ✓ | ✗ |
-| `research.md` | Documentation lookup, tech research | ✗ | ✗ |
-| `reviewer.md` | Code review (Stage 2: code quality) | ✗ | ✗ |
-| `security-auditor.md` | OWASP Top 10 security audit | ✗ | ✗ |
-| `software-engineer.md` | Full-stack feature end-to-end implementation | ✓ | ✓ |
-| `spec-reviewer.md` | Spec compliance review (Stage 1) | ✗ | ✗ |
-| `test-writer.md` | Unit, integration, and edge-case tests | ✓ | ✗ |
-| `ui-designer.md` | CSS/Tailwind, responsive layouts, animations | ✓ | ✗ |
-| `validator.md` | Final validation (build, tests, type check) | ✗ | ✓ |
-| `vision-dev.md` | Design analysis, screenshot reproduction, visual dev | ✓ | ✗ |
-| `workflow-orchestrator.md` | Workflow orchestration plan output (read-only advisor, does not dispatch subagents) | ✗ | ✗ |
+| File | Responsibility | Writable | Executable | Delegation |
+|------|---------------|:--------:|:----------:|:----------:|
+| `api-designer.md` | API endpoint design, OpenAPI specs | ✓ | ✗ | ✗ |
+| `architect.md` | System design, module planning, tech selection | ✗ | ✗ | ✗ |
+| `code-generator.md` | High-quality code generation, bug fixes | ✓ | ✗ | ✗ |
+| `db-engineer.md` | Database schema, migrations, SQL optimization | ✓ | ✓ | ✗ |
+| `debugger.md` | Systematic bug isolation and fixing | ✓ | ✓ | ✗ |
+| `devops.md` | Docker, CI/CD, Kubernetes, deployment | ✓ | ✓ | ✗ |
+| `doc-writer.md` | Technical docs, API references, README | ✓ | ✗ | ✗ |
+| `e2e-tester.md` | Playwright/Cypress end-to-end tests | ✓ | ✗ | ✗ |
+| `executor.md` | Run commands, execute tests, build projects | ✓ | ✓ | ✗ |
+| `frontend-dev.md` | React/Vue/Svelte component development | ✓ | ✗ | ✗ |
+| `frontend-reviewer.md` | Frontend review, accessibility, performance | ✗ | ✗ | ✗ |
+| `git-assistant.md` | Commit messages, branch naming, PR descriptions | ✗ | ✗ | ✗ |
+| `migration.md` | Framework upgrades, DB migrations, tech stack switches | ✓ | ✓ | ✗ |
+| `perf-optimizer.md` | Performance profiling and optimization | ✗ | ✓ | ✗ |
+| `plan-writer.md` | Implementation planning, TDD task breakdown | Partial* | ✗ | ✗ |
+| `project-manager.md` | Requirement analysis, task breakdown, sprint planning | Partial* | ✗ | ✗ |
+| `refactorer.md` | Code refactoring, duplication removal, structure improvement | ✓ | ✗ | ✗ |
+| `research.md` | Documentation lookup, tech research | ✗ | ✗ | ✗ |
+| `reviewer.md` | Code review (Stage 2: code quality) | ✗ | ✗ | ✗ |
+| `security-auditor.md` | OWASP Top 10 security audit | ✗ | ✗ | ✗ |
+| `software-engineer.md` | Full-stack feature end-to-end implementation | ✓ | ✓ | ✗ |
+| `spec-reviewer.md` | Spec compliance review (Stage 1) | ✗ | ✗ | ✗ |
+| `test-writer.md` | Unit, integration, and edge-case tests | ✓ | ✗ | ✗ |
+| `ui-designer.md` | CSS/Tailwind, responsive layouts, animations | ✓ | ✗ | ✗ |
+| `validator.md` | Final validation (build, tests, type check) | ✗ | ✓ | ✗ |
+| `vision-dev.md` | Design analysis, screenshot reproduction, visual dev | ✓ | ✗ | ✗ |
+| `workflow-orchestrator.md` | Workflow orchestration plan output (read-only advisor, does not dispatch subagents) | ✗ | ✗ | ✗ |
 
 > \* **Partial write**: can only write under the `~/.opencode/plan/` directory (a directory-level allow exception placed after the wildcard denies); read-only everywhere else, and cannot run commands.
+> **Delegation**: all 35 subagents (lite variants included) deny `subagent` in their frontmatter — none can delegate further; only the 3 primary agents (smart-router, Zero, Erribaba) dispatch subagents.
 
 ### Lite Subagents
 
-All use `mimo-v2.6-flash`, dispatched by `smart-router` for `complexity: simple` tasks.
+All use `mimo-v2.6-flash`, dispatched by `smart-router` for `complexity: simple` tasks. Their permission rules mirror their standard counterparts (all deny `subagent` — no further delegation).
 
 | File | Standard Variant | Responsibility |
 |------|------------------|----------------|
@@ -423,11 +424,14 @@ Each agent file consists of YAML frontmatter + Markdown body:
 description: Chinese description (used by OpenCode for trigger matching)
 mode: primary | subagent
 model: provider/model-name
-permissions:        # optional — omit to allow all tools
+permissions:        # primary agents may omit (all tools allowed); subagents must declare it, including a subagent deny
   - action: edit
     resource: "*"
     effect: deny
   - action: shell
+    resource: "*"
+    effect: deny
+  - action: subagent    # required for every subagent — only primary agents may delegate
     resource: "*"
     effect: deny
 ---
@@ -435,7 +439,7 @@ permissions:        # optional — omit to allow all tools
 <System prompt>
 ```
 
-> ℹ️ Since 2026-09 this repo has fully migrated from the V1 `tools:` field to the V2 `permissions:` list (the V1 `tools:` key is silently ignored by OpenCode V2). The `edit` action covers all three file-modification tools (edit/write/patch), the `shell` action covers command execution, and the last matching rule wins.
+> ℹ️ Since 2026-09 this repo has fully migrated from the V1 `tools:` field to the V2 `permissions:` list (the V1 `tools:` key is silently ignored by OpenCode V2). The `edit` action covers all three file-modification tools (edit/write/patch), the `shell` action covers command execution, the `subagent` action controls further delegation, and the last matching rule wins. All 35 subagents deny `subagent`; only the 3 primary agents dispatch subagents.
 
 ## Contributing
 
