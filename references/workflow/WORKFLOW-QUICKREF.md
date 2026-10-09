@@ -1,6 +1,6 @@
 # 结构化工作流快速参考
 
-> **智能调度**：默认主代理 `smart-router` 按任务的领域/复杂度/成本自动分流到合适的子智能体；8 个 `*-lite` 轻量变体专门处理简单任务（最快最省）。详见 [`../../README.md`](../../README.md) 的「智能调度」章节。
+> **智能调度**：默认主代理 `smart-router` 按任务的领域/复杂度/成本自动分流到合适的子智能体；8 个 `*-lite` 轻量变体专门处理简单任务（最快最省）。调度策略详见仓库 README 的「智能调度策略」章节。
 
 ## 核心代理
 
@@ -67,6 +67,8 @@ Phase 5: Merge
 ```
 
 ## 并行任务完成检查
+
+> 前提：并行派发需使用 `background=true`，且已设置环境变量 `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true`（安装脚本已自动配置；缺失时 `background=true` 退化为同步阻塞）。完整协议见同目录 [`parallel-task-management.md`](parallel-task-management.md)。
 
 **⚠️ 关键：在输出任务完成总结前，必须确认所有子智能体任务已完成。**
 
