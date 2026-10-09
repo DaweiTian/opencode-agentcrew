@@ -38,13 +38,13 @@
 ### Linux / macOS
 
 ```bash
-curl -fsSL https://gitee.com/aerlee/opencode-agents/raw/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/DaweiTian/opencode-agentcrew/master/install.sh | bash
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-irm https://gitee.com/aerlee/opencode-agents/raw/master/install.ps1 | iex
+irm https://raw.githubusercontent.com/DaweiTian/opencode-agentcrew/master/install.ps1 | iex
 ```
 
 > The install script automatically does three things:
@@ -56,7 +56,7 @@ irm https://gitee.com/aerlee/opencode-agents/raw/master/install.ps1 | iex
 ### Manual Install
 
 ```bash
-git clone --depth 1 https://gitee.com/aerlee/opencode-agents.git /tmp/opencode-agents
+git clone --depth 1 https://github.com/DaweiTian/opencode-agentcrew.git /tmp/opencode-agents
 
 # 1. Copy agent files
 mkdir -p ~/.config/opencode/agents

@@ -2,7 +2,7 @@
 
 ## What This Repo Is
 
-A collection of OpenCode agent configuration files. No code, no build, no tests — only `.md` files that define agent behavior via YAML frontmatter + prompt body. Hosted on Gitee at `aerlee/opencode-agents`.
+A collection of OpenCode agent configuration files. No code, no build, no tests — only `.md` files that define agent behavior via YAML frontmatter + prompt body. Hosted on GitHub at `DaweiTian/opencode-agentcrew`.
 
 ## Structure
 
