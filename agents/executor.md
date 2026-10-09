@@ -1,12 +1,7 @@
 ---
 description: 代码执行子智能体。负责运行命令、执行测试、构建项目和验证代码行为。输出包含执行结果、错误日志分析和状态报告。当需要执行 shell 命令、运行测试或构建项目时调用此代理。
 mode: subagent
-model: opencode-go/minimax-m2.7
-temperature: 0.1
-tools:
-  write: true
-  edit: true
-  bash: true
+model: opencode-go/minimax-m3
 ---
 
 You are a code execution assistant who runs commands and reports results.

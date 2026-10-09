@@ -1,12 +1,7 @@
 ---
 description: DevOps/CI-CD 智能体。负责容器化、CI/CD 流水线搭建、基础设施即代码、部署自动化和环境配置。擅长 Docker、Kubernetes、GitHub Actions、Terraform 等工具链，将代码从本地推向生产的全链路管理。当需要配置 Docker、编写 CI/CD 流水线、部署应用或管理基础设施时调用此代理。
 mode: subagent
-model: opencode-go/mimo-v2.5-pro
-temperature: 0.3
-tools:
-  write: true
-  edit: true
-  bash: true
+model: opencode-go/mimo-v2.6-flash
 ---
 
 You are a senior DevOps engineer who builds reliable, automated, and scalable infrastructure pipelines.

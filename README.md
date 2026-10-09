@@ -1,15 +1,36 @@
 # opencode-agentcrew
 
-**开箱即用的 OpenCode 智能体团队，29 个专业角色覆盖全栈开发流程。**
+<div align="right">
+
+**[English](README.en.md)** | **中文**
+
+</div>
+
+**开箱即用的 OpenCode 智能体团队，38 个专业角色覆盖全栈开发流程。**
+
+## 📑 目录
+
+- [快速安装](#快速安装)
+- [推荐：OpenCode Go 套餐](#推荐opencode-go-套餐)
+- [配置模型](#配置模型)
+- [目录结构](#目录结构)
+- [智能体一览](#智能体一览)
+- [结构化工作流](#结构化工作流)
+- [使用方式](#使用方式)
+- [配置格式](#配置格式)
+- [参与贡献](#参与贡献)
+- [许可证](#许可证)
 
 ## ✨ 特点
 
-- **29 个专业智能体** — 架构设计、代码生成、调试诊断、测试编写、前端开发、安全审计等
+- **38 个专业智能体** — 架构设计、代码生成、调试诊断、测试编写、前端开发、安全审计等
+- **智能调度** — `smart-router` 根据任务复杂度、领域、成本自动调度 skill 与模型
+- **分层子智能体** — 8 个高频角色提供 `-lite` 轻量版（`mimo-v2.6-flash`），简单任务最快最省
 - **结构化工作流** — 参考 MiMo Compose 模式，支持 brainstorm→plan→execute→review→merge 完整流程
 - **两阶段审查** — 规范合规性审查 + 代码质量审查，确保实现符合需求且代码质量高
-- **双主智能体** — Erribaba（生产代码）+ Zero（快速原型/多模态）
-- **多模型协作** — MiMo-V2.5、GLM-5.1、Kimi K2.6、Qwen3.6 Plus、DeepSeek V4 Pro 等 7 个模型
-- **图片处理** — 自动拦截粘贴图片，委托 vision-dev 分析
+- **三主智能体** — smart-router（智能调度）+ Erribaba（生产代码）+ Zero（快速原型/多模态）
+- **多模型协作** — MiMo-V2.6-Flash、MiMo-V2.6-Pro、DeepSeek V4.1 Flash、GLM-5.2、Kimi K2.7 Code、Qwen3.8 Flash、MiniMax M3、LongCat 2.5 Preview Free、Step 5 Preview Free 共 9 个模型
+- **图片处理** — 三个主智能体均为原生全模态，粘贴图片直接分析；磁盘上的图片文件可交 vision-dev 处理
 - **开箱即用** — 一条命令安装，自动配置
 
 ## 快速安装
@@ -26,45 +47,64 @@ curl -fsSL https://gitee.com/aerlee/opencode-agents/raw/master/install.sh | bash
 irm https://gitee.com/aerlee/opencode-agents/raw/master/install.ps1 | iex
 ```
 
-> 脚本会自动下载所有智能体文件到 `~/.config/opencode/agents/`，并备份已有配置。
+> 安装脚本会自动完成三件事：
+>
+> 1. **安装智能体** — 下载 `agents/*.md` 到 `~/.config/opencode/agents/`（已有的 agents 目录会先备份到 `~/.config/opencode/agents-备份-<时间戳>`）；
+> 2. **安装参考文档** — 复制 `references/*` 到 `~/.config/opencode/references/`（含结构化工作流快速参考 WORKFLOW-QUICKREF 与三主智能体共享的并行任务协议 parallel-task-management）；
+> 3. **启用后台子智能体并行** — 向 `~/.bashrc` 或 `~/.zshrc` 追加 `export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true`（Windows 脚本改为设置同名用户级环境变量）。该环境变量用于启用主智能体后台并行派发子任务的能力；如需撤销，删除 shell 配置文件末尾对应的 export 行（Windows：移除该用户环境变量）后重开终端即可。
 
 ### 手动安装
 
 ```bash
 git clone --depth 1 https://gitee.com/aerlee/opencode-agents.git /tmp/opencode-agents
+
+# 1. 复制智能体文件
+mkdir -p ~/.config/opencode/agents
 cp /tmp/opencode-agents/agents/*.md ~/.config/opencode/agents/
+
+# 2. 复制参考文档（结构化工作流快速参考等）
+mkdir -p ~/.config/opencode/references
+cp -r /tmp/opencode-agents/references/* ~/.config/opencode/references/
+
+# 3. 启用后台子智能体并行（zsh 用户请改用 ~/.zshrc）
+echo 'export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true' >> ~/.bashrc
+source ~/.bashrc
+
 rm -rf /tmp/opencode-agents
+```
+
+> Windows（PowerShell）手动安装：目标路径为 `$env:USERPROFILE\.config\opencode\`，环境变量改用
+> `[Environment]::SetEnvironmentVariable("OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS", "true", "User")` 设置。
+
+最后，在 `~/.config/opencode/opencode.json` 中添加 `references` 字段指向参考文档目录——**缺少此配置时，结构化工作流参考文档不会生效**：
+
+```json
+{
+  "references": {
+    "workflow-docs": {
+      "path": "~/.config/opencode/references/workflow",
+      "description": "智能体工作流文档和快速参考，包含结构化工作流指南、代理配置和最佳实践",
+      "hidden": false
+    }
+  }
+}
 ```
 
 ## 推荐：OpenCode Go 套餐
 
-本智能体集合需要多个模型配合使用。推荐使用 [OpenCode Go 套餐](https://opencode.ai/go?ref=4BZQW1YPFK)，一次订阅即可使用全部 12 个模型，无需单独配置 API Key。
+本智能体集合需要多个模型配合使用。推荐使用 [OpenCode Go 套餐](https://opencode.ai/go?ref=4BZQW1YPFK)，一次订阅即可使用套餐内全部模型（官方共 36 个模型），无需单独配置 API Key。
 
 **优势：**
-- 模型丰富：覆盖 12 个主流模型，满足不同智能体的需求
+- 模型丰富：官方套餐覆盖 36 个模型，本集合使用的全部 9 个模型均包含于 Go 套餐
 - 性价比高：相比单独购买 API，价格更优惠
-- 开箱即用：无需配置多个 provider，`opencode-go/` 前缀直接可用
+- 开箱即用：无需配置多个 provider，按 `opencode-go/<model-id>` 格式直接可用
 
-**套餐模型及配额：**
-
-| 模型 | 每 5 小时 | 每周 | 每月 |
-|------|----------|------|------|
-| GLM-5.1 | 880 | 2,150 | 4,300 |
-| GLM-5 | 1,150 | 2,880 | 5,750 |
-| Kimi K2.6 | 1,150 | 2,880 | 5,750 |
-| Kimi K2.5 | 1,850 | 4,630 | 9,250 |
-| MiMo-V2.5 | 30,100 | 75,200 | 150,400 |
-| MiMo-V2.5-Pro | 3,250 | 8,150 | 16,300 |
-| MiniMax M3 | 1,400 | 3,500 | 7,000 |
-| MiniMax M2.7 | 3,400 | 8,500 | 17,000 |
-| MiniMax M2.5 | 6,300 | 15,900 | 31,800 |
-| Qwen3.7 Max | 950 | 2,390 | 4,770 |
-| Qwen3.7 Plus | 4,300 | 10,800 | 21,600 |
-| Qwen3.6 Plus | 3,300 | 8,200 | 16,300 |
-| DeepSeek V4 Pro | 3,450 | 8,550 | 17,150 |
-| DeepSeek V4 Flash | 31,650 | 79,050 | 158,150 |
-
-> 本智能体集合的 29 个智能体使用的 7 个模型（MiMo-V2.5、MiMo-V2.5-Pro、DeepSeek V4 Pro、Kimi K2.6、Qwen3.6 Plus、MiniMax M2.7、GLM-5.1）全部包含在 Go 套餐中。
+> 本集合 38 个智能体使用的 9 个模型（MiMo-V2.6-Flash、MiMo-V2.6-Pro、DeepSeek V4.1 Flash、GLM-5.2、Kimi K2.7 Code、Qwen3.8 Flash、MiniMax M3、LongCat 2.5 Preview Free、Step 5 Preview Free）已全部确认包含于 Go 套餐。其中 LongCat 2.5 Preview Free 与 Step 5 Preview Free 为**限时免费**模型（价格 $0、用量无限，活动结束后需更换）。
+> 本集合选用的模型均为**国产模型**，国内可直接使用，无需 GPT/Claude/Grok 等国外模型。
+>
+> 各模型配额由官方维护且变动频繁，本 README 不保留本地配额快照，请以官方页面为准：
+> - 套餐总览：<https://opencode.ai/go>
+> - 用量限制：<https://opencode.ai/docs/go#usage-limits>
 
 ## 配置模型
 
@@ -73,7 +113,9 @@ rm -rf /tmp/opencode-agents
 <details>
 <summary>📋 点击展开配置提示词</summary>
 
-```
+````
+--- 复制以下提示词发送给你的 OpenCode 智能体 ---
+
 我刚刚安装了 opencode-agents 智能体集合（位于 ~/.config/opencode/agents/）。
 请你帮我完成以下配置：
 
@@ -88,35 +130,44 @@ rm -rf /tmp/opencode-agents
 
 | 智能体 | 默认模型 | 角色 |
 |--------|----------|------|
-| Zero | opencode-go/mimo-v2.5 | 主智能体（快速原型，多模态） |
-| Erribaba | Xianyu/mimo-v2.5-pro | 主智能体（生产代码，深度分析） |
-| api-designer | opencode-go/mimo-v2.5-pro | API 设计 |
-| architect | opencode-go/glm-5.1 | 架构设计 |
-| code-generator | opencode-go/mimo-v2.5-pro | 代码生成 |
-| db-engineer | opencode-go/deepseek-v4-pro | 数据库工程 |
-| debugger | opencode-go/deepseek-v4-pro | 调试诊断 |
-| devops | opencode-go/mimo-v2.5-pro | DevOps/CI-CD |
-| doc-writer | opencode-go/qwen3.7-plus | 文档编写 |
-| e2e-tester | opencode-go/mimo-v2.5-pro | 端到端测试 |
-| executor | opencode-go/minimax-m2.7 | 命令执行 |
-| frontend-dev | opencode-go/kimi-k2.6 | 前端开发 |
-| frontend-reviewer | opencode-go/mimo-v2.5 | 前端审查 |
-| git-assistant | opencode-go/mimo-v2.5 | Git 工作流 |
-| migration | opencode-go/deepseek-v4-pro | 迁移专家 |
-| perf-optimizer | opencode-go/mimo-v2.5-pro | 性能优化 |
-| plan-writer | opencode-go/mimo-v2.5-pro | 实现计划编写 |
-| project-manager | opencode-go/qwen3.7-plus | 项目管理 |
-| refactorer | opencode-go/mimo-v2.5-pro | 代码重构 |
-| research | opencode-go/qwen3.7-plus | 信息研究 |
-| reviewer | opencode-go/deepseek-v4-pro | 代码审查（Stage 2） |
-| security-auditor | opencode-go/deepseek-v4-pro | 安全审计 |
-| software-engineer | opencode-go/mimo-v2.5 | 全栈实现 |
-| spec-reviewer | opencode-go/deepseek-v4-pro | 规范合规性审查（Stage 1） |
-| test-writer | opencode-go/mimo-v2.5-pro | 测试编写 |
-| ui-designer | opencode-go/kimi-k2.6 | UI 设计 |
-| validator | opencode-go/minimax-m2.7 | 结果验证 |
-| vision-dev | opencode-go/mimo-v2.5 | 视觉开发 |
-| workflow-orchestrator | opencode-go/mimo-v2.5-pro | 工作流编排 |
+| smart-router | opencode-go/mimo-v2.6-flash | 主智能体（智能调度，推荐默认） |
+| Zero | opencode-go/mimo-v2.6-flash | 主智能体（快速原型，多模态） |
+| Erribaba | opencode-go/mimo-v2.6-pro | 主智能体（生产代码，深度分析） |
+| api-designer | opencode-go/mimo-v2.6-pro | API 设计 |
+| architect | opencode-go/glm-5.2 | 架构设计 |
+| code-generator | opencode-go/mimo-v2.6-pro | 代码生成 |
+| code-generator-lite | opencode-go/mimo-v2.6-flash | 代码生成（轻量版） |
+| db-engineer | opencode-go/deepseek-v4.1-flash | 数据库工程 |
+| debugger | opencode-go/deepseek-v4.1-flash | 调试诊断 |
+| debugger-lite | opencode-go/mimo-v2.6-flash | 调试诊断（轻量版） |
+| devops | opencode-go/mimo-v2.6-flash | DevOps/CI-CD |
+| doc-writer | opencode-go/qwen3.8-flash | 文档编写 |
+| doc-writer-lite | opencode-go/mimo-v2.6-flash | 文档编写（轻量版） |
+| e2e-tester | opencode-go/mimo-v2.6-flash | 端到端测试 |
+| executor | opencode-go/minimax-m3 | 命令执行 |
+| frontend-dev | opencode-go/kimi-k2.7-code | 前端开发 |
+| frontend-dev-lite | opencode-go/mimo-v2.6-flash | 前端开发（轻量版） |
+| frontend-reviewer | opencode-go/mimo-v2.6-flash | 前端审查 |
+| git-assistant | opencode-go/longcat-2.5-preview-free | Git 工作流 |
+| migration | opencode-go/deepseek-v4.1-flash | 迁移专家 |
+| perf-optimizer | opencode-go/mimo-v2.6-pro | 性能优化 |
+| plan-writer | opencode-go/mimo-v2.6-pro | 实现计划编写 |
+| project-manager | opencode-go/qwen3.8-flash | 项目管理 |
+| refactorer | opencode-go/mimo-v2.6-pro | 代码重构 |
+| refactorer-lite | opencode-go/mimo-v2.6-flash | 代码重构（轻量版） |
+| research | opencode-go/qwen3.8-flash | 信息研究 |
+| research-lite | opencode-go/mimo-v2.6-flash | 信息研究（轻量版） |
+| reviewer | opencode-go/deepseek-v4.1-flash | 代码审查（Stage 2） |
+| reviewer-lite | opencode-go/mimo-v2.6-flash | 代码审查（轻量版） |
+| security-auditor | opencode-go/deepseek-v4.1-flash | 安全审计 |
+| software-engineer | opencode-go/mimo-v2.6-flash | 全栈实现 |
+| spec-reviewer | opencode-go/deepseek-v4.1-flash | 规范合规性审查（Stage 1） |
+| test-writer | opencode-go/mimo-v2.6-pro | 测试编写 |
+| test-writer-lite | opencode-go/mimo-v2.6-flash | 测试编写（轻量版） |
+| ui-designer | opencode-go/kimi-k2.7-code | UI 设计 |
+| validator | opencode-go/step-5-preview-free | 结果验证 |
+| vision-dev | opencode-go/mimo-v2.6-flash | 视觉开发 |
+| workflow-orchestrator | opencode-go/mimo-v2.6-pro | 工作流编排 |
 
 如果我没有某个 provider，告诉我哪些模型需要额外配置。
 如果我已有对应的模型，直接进入第三步。
@@ -128,59 +179,84 @@ rm -rf /tmp/opencode-agents
 
 ## 第四步：设置主智能体
 
-将 ~/.config/opencode/opencode.json 中的 `default_agent` 设置为 "Erribaba"。
-（如果用户更喜欢快速原型模式，改为 "Zero"）
+将 ~/.config/opencode/opencode.json 中的 `default_agent` 设置为 "smart-router"（推荐默认；生产代码模式用 "Erribaba"，快速原型用 "Zero"）。
 
-## 第五步：验证
+## 第五步：配置参考文档
+
+在 ~/.config/opencode/opencode.json 中添加 references 配置，指向工作流文档：
+
+```json
+"references": {
+  "workflow-docs": {
+    "path": "~/.config/opencode/references/workflow",
+    "description": "智能体工作流文档和快速参考，包含结构化工作流指南、代理配置和最佳实践",
+    "hidden": false
+  }
+}
+```
+
+## 第六步：验证
 
 列出所有智能体及其使用的模型，确认配置完成。
-```
+验证 references 配置是否正确。
+````
 
 </details>
 
 ## 目录结构
 
 ```
-├── agents/                    # 智能体配置文件（29个）
-│   ├── Zero.md              # 主智能体（快速原型，多模态）
-│   ├── Erribaba.md          # 主智能体（生产代码，深度分析）
-│   ├── architect.md         # 架构设计
-│   ├── code-generator.md    # 代码生成
-│   ├── db-engineer.md       # 数据库工程
-│   ├── debugger.md          # 调试诊断
-│   ├── devops.md            # DevOps/CI-CD
-│   ├── doc-writer.md        # 文档编写
-│   ├── e2e-tester.md        # 端到端测试
-│   ├── executor.md          # 命令执行
-│   ├── frontend-dev.md      # 前端开发
-│   ├── frontend-reviewer.md # 前端审查
-│   ├── git-assistant.md     # Git 工作流
-│   ├── migration.md         # 迁移专家
-│   ├── perf-optimizer.md    # 性能优化
-│   ├── plan-writer.md       # 实现计划编写
-│   ├── project-manager.md   # 项目管理
-│   ├── refactorer.md        # 代码重构
-│   ├── research.md          # 信息研究
-│   ├── reviewer.md          # 代码审查（Stage 2）
-│   ├── security-auditor.md  # 安全审计
-│   ├── software-engineer.md # 全栈实现
-│   ├── spec-reviewer.md     # 规范合规性审查（Stage 1）
-│   ├── test-writer.md       # 测试编写
-│   ├── ui-designer.md       # UI 设计
-│   ├── validator.md         # 结果验证
-│   ├── vision-dev.md        # 视觉开发
+opencode-agentcrew/
+├── agents/                      # 智能体配置文件（38 个）
+│   ├── smart-router.md          # 主智能体（智能调度，推荐默认）
+│   ├── Zero.md                  # 主智能体（快速原型，多模态）
+│   ├── Erribaba.md              # 主智能体（生产代码，深度分析）
+│   ├── api-designer.md          # API 设计
+│   ├── architect.md             # 架构设计
+│   ├── code-generator.md        # 代码生成
+│   ├── code-generator-lite.md   # 代码生成（轻量版）
+│   ├── db-engineer.md           # 数据库工程
+│   ├── debugger.md              # 调试诊断
+│   ├── debugger-lite.md         # 调试诊断（轻量版）
+│   ├── devops.md                # DevOps/CI-CD
+│   ├── doc-writer.md            # 文档编写
+│   ├── doc-writer-lite.md       # 文档编写（轻量版）
+│   ├── e2e-tester.md            # 端到端测试
+│   ├── executor.md              # 命令执行
+│   ├── frontend-dev.md          # 前端开发
+│   ├── frontend-dev-lite.md     # 前端开发（轻量版）
+│   ├── frontend-reviewer.md     # 前端审查
+│   ├── git-assistant.md         # Git 工作流
+│   ├── migration.md             # 迁移专家
+│   ├── perf-optimizer.md        # 性能优化
+│   ├── plan-writer.md           # 实现计划编写
+│   ├── project-manager.md       # 项目管理
+│   ├── refactorer.md            # 代码重构
+│   ├── refactorer-lite.md       # 代码重构（轻量版）
+│   ├── research.md              # 信息研究
+│   ├── research-lite.md         # 信息研究（轻量版）
+│   ├── reviewer.md              # 代码审查（Stage 2）
+│   ├── reviewer-lite.md         # 代码审查（轻量版）
+│   ├── security-auditor.md      # 安全审计
+│   ├── software-engineer.md     # 全栈实现
+│   ├── spec-reviewer.md         # 规范合规性审查（Stage 1）
+│   ├── test-writer.md           # 测试编写
+│   ├── test-writer-lite.md      # 测试编写（轻量版）
+│   ├── ui-designer.md           # UI 设计
+│   ├── validator.md             # 结果验证
+│   ├── vision-dev.md            # 视觉开发
 │   └── workflow-orchestrator.md # 工作流编排
-├── references/                # 参考文档（OpenCode References 功能）
-│   └── workflow/            # 工作流相关文档
-│       └── WORKFLOW-QUICKREF.md # 结构化工作流快速参考
-├── plugins/                   # OpenCode 插件
-│   └── image-paste-saver.js # 图片粘贴保存插件
-├── install.sh                 # Linux/macOS 一键安装脚本
-├── install.ps1                # Windows 一键安装脚本
-├── AGENTS.md                  # 代理配置和使用指南
-├── README.md                  # 项目说明
-├── WORKFLOW-QUICKREF.md       # 工作流快速参考（项目根目录副本）
-└── LICENSE                    # MIT 许可证
+├── references/                  # 参考文档（OpenCode References 功能）
+│   └── workflow/                # 工作流相关文档
+│       ├── WORKFLOW-QUICKREF.md        # 结构化工作流快速参考
+│       └── parallel-task-management.md # 三主智能体共享的并行任务协议
+├── .gitignore                   # Git 忽略规则
+├── AGENTS.md                    # 代理配置和使用指南
+├── install.sh                   # Linux/macOS 一键安装脚本
+├── install.ps1                  # Windows 一键安装脚本
+├── LICENSE                      # MIT 许可证
+├── README.en.md                 # 项目说明（英文）
+└── README.md                    # 项目说明（中文）
 ```
 
 ## 智能体一览
@@ -189,8 +265,9 @@ rm -rf /tmp/opencode-agents
 
 | 文件 | 模型 | 说明 |
 |------|------|------|
-| `Zero.md` | mimo-v2.5 | 快速原型、多模态输入、轻量级任务 |
-| `Erribaba.md` | mimo-v2.5-pro | 生产代码、复杂算法、深度分析 |
+| `smart-router.md` | mimo-v2.6-flash | 智能调度（复杂度 + 领域 + 成本路由），推荐默认 |
+| `Zero.md` | mimo-v2.6-flash | 快速原型、多模态输入、轻量级任务 |
+| `Erribaba.md` | mimo-v2.6-pro | 生产代码、复杂算法、深度分析 |
 
 ### 子智能体（Subagent）
 
@@ -210,8 +287,8 @@ rm -rf /tmp/opencode-agents
 | `git-assistant.md` | 提交消息、分支命名、PR 描述 | ✗ | ✗ |
 | `migration.md` | 框架升级、数据库迁移、技术栈切换 | ✓ | ✓ |
 | `perf-optimizer.md` | 性能分析与优化 | ✗ | ✓ |
-| `plan-writer.md` | 实现计划编写、TDD 任务分解 | ✓ | ✗ |
-| `project-manager.md` | 需求分析、任务拆解、Sprint 规划 | ✓ | ✗ |
+| `plan-writer.md` | 实现计划编写、TDD 任务分解 | 部分* | ✗ |
+| `project-manager.md` | 需求分析、任务拆解、Sprint 规划 | 部分* | ✗ |
 | `refactorer.md` | 代码重构、消除重复、改善结构 | ✓ | ✗ |
 | `research.md` | 查找文档、调研技术方案 | ✗ | ✗ |
 | `reviewer.md` | 代码审查（Stage 2：代码质量） | ✗ | ✗ |
@@ -222,7 +299,24 @@ rm -rf /tmp/opencode-agents
 | `ui-designer.md` | CSS/Tailwind/响应式布局/动画 | ✓ | ✗ |
 | `validator.md` | 最终验证（构建/测试/类型检查） | ✗ | ✓ |
 | `vision-dev.md` | 设计稿分析、截图还原、视觉开发 | ✓ | ✗ |
-| `workflow-orchestrator.md` | 工作流编排、多阶段任务管理 | ✓ | ✓ |
+| `workflow-orchestrator.md` | 工作流编排计划输出（只读顾问，不直接派发子智能体） | ✗ | ✗ |
+
+> \* **部分可写**：仅可写入 `~/.opencode/plan/` 目录（目录级 allow 例外，置于通配 deny 之后生效）；其余路径只读，且不可执行命令。
+
+### 子智能体（Lite 轻量版）
+
+全部使用 `mimo-v2.6-flash`，由 `smart-router` 按复杂度自动选择。
+
+| 文件 | 标准版 | 职责 |
+|------|--------|------|
+| `code-generator-lite.md` | `code-generator` | 简单代码生成、样板代码 |
+| `reviewer-lite.md` | `reviewer` | 快速 diff 审查（明显问题） |
+| `debugger-lite.md` | `debugger` | 简单可复现 bug |
+| `test-writer-lite.md` | `test-writer` | 单函数单元测试 |
+| `doc-writer-lite.md` | `doc-writer` | Docstring、README 段落、changelog |
+| `frontend-dev-lite.md` | `frontend-dev` | 简单展示型组件 |
+| `research-lite.md` | `research` | 事实查证（API、语法） |
+| `refactorer-lite.md` | `refactorer` | 重命名、提取、条件简化 |
 
 ## 结构化工作流
 
@@ -249,7 +343,7 @@ rm -rf /tmp/opencode-agents
 #### 两阶段审查
 审查阶段使用两阶段流程：
 1. **阶段 1：规范合规性审查**（`@spec-reviewer`）— 验证实现是否符合需求
-2. **阶段 2：代码质量审查**（@reviewer）— 验证代码是否良好构建
+2. **阶段 2：代码质量审查**（`@reviewer`）— 验证代码是否良好构建
 
 **重要：** 阶段 1 必须通过后才能运行阶段 2。
 
@@ -263,7 +357,7 @@ rm -rf /tmp/opencode-agents
 6. 提交（`@git-assistant`）
 
 #### 工作流编排
-对于复杂任务，使用 `@workflow-orchestrator` 管理完整工作流。它协调其他代理按正确顺序执行，并确保质量门控。
+对于复杂任务，使用 `@workflow-orchestrator` 输出完整的工作流编排计划（阶段划分、派发顺序、阶段屏障与质量门控）。它是只读顾问（deny edit + shell + subagent），由主智能体按计划依次派发子智能体执行。
 
 ### 何时使用结构化工作流
 
@@ -285,23 +379,41 @@ rm -rf /tmp/opencode-agents
 | 审查 | `spec-reviewer`, `reviewer` | `security-auditor`, `frontend-reviewer` |
 | 合并 | `validator` | `git-assistant`, `devops` |
 
+> 📖 详见 [WORKFLOW-QUICKREF](references/workflow/WORKFLOW-QUICKREF.md)。一键安装脚本会自动将 `references/` 装入 `~/.config/opencode/references/`；还需在 `~/.config/opencode/opencode.json` 中配置 `references` 字段（见[手动安装](#手动安装)），结构化工作流参考文档才会生效。
+
 ## 使用方式
 
-1. 主智能体（`Zero.md` 或 `Erribaba.md`）作为默认智能体
-2. 在对话中直接描述任务，主智能体会自动调度对应的子智能体
-3. 子智能体通过 `@agent-name` 方式被主智能体调用
+1. **推荐：`smart-router` 作为默认主智能体** — 自动按复杂度、领域、成本调度 skill 与模型
+2. 也可手动切换到 `Erribaba`（生产代码深度分析）或 `Zero`（快速原型/多模态）
+3. 在对话中直接描述任务，主智能体会自动调度对应的子智能体
+4. 子智能体通过 `@agent-name` 方式被主智能体调用
 
 ### 选择主智能体
 
-- **Erribaba**（推荐）：适合生产代码、复杂任务、需要深度分析的场景
-- **Zero**：适合快速原型、多模态输入（图片）、轻量级任务
+> 三个主智能体均为原生全模态，对话中粘贴的图片可直接由任一主智能体分析，无需专门切换；磁盘上的图片文件（设计稿、截图等）可委托 vision-dev 处理。
+
+- **smart-router**（推荐）：智能调度，简单任务用 lite 版（最快最省），复杂任务组合多智能体
+- **Erribaba**：适合生产代码、复杂任务、需要深度分析的场景
+- **Zero**：适合快速原型、轻量级任务
 
 在 `~/.config/opencode/opencode.json` 中设置：
 ```json
 {
-  "default_agent": "Erribaba"
+  "default_agent": "smart-router"
 }
 ```
+
+### 智能调度策略
+
+`smart-router` 沿三个维度路由：
+
+| 维度 | 取值 | 作用 |
+|------|------|------|
+| **领域** | frontend / backend / fullstack / db / docs / review / security / debug / test / e2e / research / refactor / perf / api / arch / plan / pm / git / migration / devops / exec / validate / vision / workflow | 选择子智能体 |
+| **复杂度** | simple / medium / complex | simple 且该领域存在 `-lite` 变体时走 `-lite` 版，否则一律标准版；complex 组合多智能体 |
+| **成本** | 默认偏向便宜模型 | 只有明确需要时才升级到 `mimo-v2.6-pro` / `glm-5.2` / `kimi-k2.7-code` |
+
+**手动覆盖**：用户可以显式指定 `@agent-name` 或模型（如 "用 mimo-v2.6-pro 实现"），smart-router 会跳过智能调度直接执行。
 
 ## 配置格式
 
@@ -312,15 +424,19 @@ rm -rf /tmp/opencode-agents
 description: 中文描述（OpenCode 用于匹配触发场景）
 mode: primary | subagent
 model: provider/model-name
-temperature: 0.0-1.0
-tools:              # 可选，限制工具权限
-  write: false
-  edit: false
-  bash: false
+permissions:        # 可选 — 省略则允许所有工具
+  - action: edit
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: "*"
+    effect: deny
 ---
 
 <系统提示词>
 ```
+
+> ℹ️ 2026-09 起本仓库已从 V1 的 `tools:` 字段全面迁移到 V2 的 `permissions:` 列表（V1 `tools:` 在 OpenCode V2 中会被静默忽略）。`edit` 动作覆盖 edit/write/patch 三种文件修改工具，`shell` 动作覆盖命令执行；多条规则同时命中时以最后一条为准。
 
 ## 参与贡献
 

@@ -1,5 +1,6 @@
 # opencode-agents 一键安装脚本 (Windows PowerShell)
 # 用法: irm https://gitee.com/aerlee/opencode-agents/raw/master/install.ps1 | iex
+# 注: URL 中的 raw/master 分支已核实——Gitee 仓库默认分支为 master（git ls-remote --symref origin HEAD → refs/heads/master，2026-09-26）
 
 $ErrorActionPreference = "Stop"
 
@@ -46,20 +47,6 @@ if (Test-Path "$TempDir\references") {
     Copy-Item -Path "$TempDir\references\*" -Destination $ReferencesDir -Recurse -Force
 }
 
-# 复制 plugins 文件
-$PluginDir = "$env:USERPROFILE\.config\opencode\plugins"
-$PluginFiles = Get-ChildItem -Path "$TempDir\plugins" -Filter "*.js" -ErrorAction SilentlyContinue
-$PluginFiles += Get-ChildItem -Path "$TempDir\plugins" -Filter "*.ts" -ErrorAction SilentlyContinue
-if ($PluginFiles.Count -gt 0) {
-    if (-not (Test-Path $PluginDir)) {
-        New-Item -ItemType Directory -Path $PluginDir -Force | Out-Null
-    }
-    Write-Host "🔌 安装 plugins 到: $PluginDir"
-    $PluginFiles | ForEach-Object {
-        Copy-Item -Path $_.FullName -Destination $PluginDir -Force
-    }
-}
-
 # 清理
 Remove-Item -Path $TempDir -Recurse -Force
 
@@ -77,20 +64,174 @@ if (-not $CurrentValue) {
     Write-Host "  ℹ️  环境变量已存在"
 }
 
-# 统计
-$AgentCount = (Get-ChildItem -Path $TargetDir -Filter "*.md").Count
-$ReferenceCount = (Get-ChildItem -Path $ReferencesDir -Filter "*.md" -Recurse).Count
+# 配置提示词（安装结束时输出给用户复制）。
+# 其"第二步"表格同时是本脚本内嵌模型表的唯一数据源，下方安装校验会解析它与 agents/*.md 的 frontmatter 比对。
+$Prompt = @"
+--- 复制以下提示词发送给你的 OpenCode 智能体 ---
+
+我刚刚安装了 opencode-agents 智能体集合（位于 ~/.config/opencode/agents/）。
+请你帮我完成以下配置：
+
+## 第一步：确认已有 provider 和模型
+
+请读取 ~/.config/opencode/opencode.json，列出我当前已配置的 provider 和模型。
+
+## 第二步：选择模型
+
+以下是智能体集合中每个智能体默认使用的模型，请根据我已有的 provider 和模型，
+为每个智能体选择一个可用的模型（优先选择能力更强的模型）：
+
+| 智能体 | 默认模型 | 角色 |
+|--------|----------|------|
+| smart-router | opencode-go/mimo-v2.6-flash | 主智能体（智能调度，推荐默认） |
+| Zero | opencode-go/mimo-v2.6-flash | 主智能体（快速原型，多模态） |
+| Erribaba | opencode-go/mimo-v2.6-pro | 主智能体（生产代码，深度分析） |
+| api-designer | opencode-go/mimo-v2.6-pro | API 设计 |
+| architect | opencode-go/glm-5.2 | 架构设计 |
+| code-generator | opencode-go/mimo-v2.6-pro | 代码生成 |
+| code-generator-lite | opencode-go/mimo-v2.6-flash | 代码生成（轻量版） |
+| db-engineer | opencode-go/deepseek-v4.1-flash | 数据库工程 |
+| debugger | opencode-go/deepseek-v4.1-flash | 调试诊断 |
+| debugger-lite | opencode-go/mimo-v2.6-flash | 调试诊断（轻量版） |
+| devops | opencode-go/mimo-v2.6-flash | DevOps/CI-CD |
+| doc-writer | opencode-go/qwen3.8-flash | 文档编写 |
+| doc-writer-lite | opencode-go/mimo-v2.6-flash | 文档编写（轻量版） |
+| e2e-tester | opencode-go/mimo-v2.6-flash | 端到端测试 |
+| executor | opencode-go/minimax-m3 | 命令执行 |
+| frontend-dev | opencode-go/kimi-k2.7-code | 前端开发 |
+| frontend-dev-lite | opencode-go/mimo-v2.6-flash | 前端开发（轻量版） |
+| frontend-reviewer | opencode-go/mimo-v2.6-flash | 前端审查 |
+| git-assistant | opencode-go/longcat-2.5-preview-free | Git 工作流 |
+| migration | opencode-go/deepseek-v4.1-flash | 迁移专家 |
+| perf-optimizer | opencode-go/mimo-v2.6-pro | 性能优化 |
+| plan-writer | opencode-go/mimo-v2.6-pro | 实现计划编写 |
+| project-manager | opencode-go/qwen3.8-flash | 项目管理 |
+| refactorer | opencode-go/mimo-v2.6-pro | 代码重构 |
+| refactorer-lite | opencode-go/mimo-v2.6-flash | 代码重构（轻量版） |
+| research | opencode-go/qwen3.8-flash | 信息研究 |
+| research-lite | opencode-go/mimo-v2.6-flash | 信息研究（轻量版） |
+| reviewer | opencode-go/deepseek-v4.1-flash | 代码审查（Stage 2） |
+| reviewer-lite | opencode-go/mimo-v2.6-flash | 代码审查（轻量版） |
+| security-auditor | opencode-go/deepseek-v4.1-flash | 安全审计 |
+| software-engineer | opencode-go/mimo-v2.6-flash | 全栈实现 |
+| spec-reviewer | opencode-go/deepseek-v4.1-flash | 规范合规性审查（Stage 1） |
+| test-writer | opencode-go/mimo-v2.6-pro | 测试编写 |
+| test-writer-lite | opencode-go/mimo-v2.6-flash | 测试编写（轻量版） |
+| ui-designer | opencode-go/kimi-k2.7-code | UI 设计 |
+| validator | opencode-go/step-5-preview-free | 结果验证 |
+| vision-dev | opencode-go/mimo-v2.6-flash | 视觉开发 |
+| workflow-orchestrator | opencode-go/mimo-v2.6-pro | 工作流编排 |
+
+如果我没有某个 provider，告诉我哪些模型需要额外配置。
+如果我已有对应的模型，直接进入第三步。
+
+## 第三步：更新智能体文件
+
+读取 ~/.config/opencode/agents/ 下所有 .md 文件，将每个文件 frontmatter 中的 `model:`
+字段替换为你在第二步中为该智能体选择的模型。
+
+## 第四步：设置主智能体
+
+将 ~/.config/opencode/opencode.json 中的 `default_agent` 设置为 "smart-router"（推荐默认；生产代码模式用 "Erribaba"，快速原型用 "Zero"）。
+
+## 第五步：配置参考文档
+
+在 ~/.config/opencode/opencode.json 中添加 references 配置，指向工作流文档：
+
+```json
+"references": {
+  "workflow-docs": {
+    "path": "~/.config/opencode/references/workflow",
+    "description": "智能体工作流文档和快速参考，包含结构化工作流指南、代理配置和最佳实践",
+    "hidden": false
+  }
+}
+```
+
+## 第六步：验证
+
+列出所有智能体及其使用的模型，确认配置完成。
+验证 references 配置是否正确。
+"@
+
+# 统计（@() 包裹保证空目录时计数为 0；-ErrorAction SilentlyContinue 显式处理缺失目录）
+$AgentCount = @(Get-ChildItem -Path $TargetDir -Filter "*.md" -File -ErrorAction SilentlyContinue).Count
+$ReferenceCount = @(Get-ChildItem -Path $ReferencesDir -Filter "*.md" -File -Recurse -ErrorAction SilentlyContinue).Count
 Write-Host ""
 Write-Host "✅ 安装完成！共 $AgentCount 个智能体，$ReferenceCount 个参考文档" -ForegroundColor Green
+
+# ============================================
+# 安装一致性校验（仅醒目告警，不中断安装）
+# ============================================
+$ExpectedAgentCount = 38
+
+# 1) 数量断言：动态统计已安装 .md 数量，与内置期望值 38 比对
+if ($AgentCount -ne $ExpectedAgentCount) {
+    Write-Host ""
+    Write-Host "⚠️  =============================================" -ForegroundColor Yellow
+    Write-Host "⚠️  WARNING: 智能体数量与预期不符！" -ForegroundColor Yellow
+    Write-Host "⚠️  预期 $ExpectedAgentCount 个，实际安装 $AgentCount 个。" -ForegroundColor Yellow
+    Write-Host "⚠️  仓库 agents/ 目录可能已变更，请同步更新安装脚本内置断言。" -ForegroundColor Yellow
+    Write-Host "⚠️  =============================================" -ForegroundColor Yellow
+}
+
+# 2) 模型表漂移断言：内嵌模型表（提示词第二步表格）vs agents/*.md frontmatter 的 model: 字段
+$TableDriftFound = $false
+$TableAgentNames = @{}
+foreach ($line in ($Prompt -split "\r?\n")) {
+    if ($line -match '^\|\s*([A-Za-z][A-Za-z0-9-]*)\s*\|\s*(\S+)\s*\|') {
+        $agentName = $Matches[1]
+        $expectedModel = $Matches[2]
+        $TableAgentNames[$agentName] = $expectedModel
+        $agentFile = Join-Path $TargetDir "$agentName.md"
+        if (Test-Path $agentFile) {
+            # Select-String 逐文件读取，兼容 CRLF 文件与带引号的 model 值
+            $modelLine = Select-String -Path $agentFile -Pattern '^model:' | Select-Object -First 1
+            $actualModel = ""
+            if ($modelLine) {
+                $actualModel = ($modelLine.Line -replace '^model:\s*', '').Trim().Trim('"').Trim("'")
+            }
+            if ($actualModel -ne $expectedModel) {
+                if (-not $TableDriftFound) {
+                    Write-Host ""
+                    Write-Host "⚠️  =============================================" -ForegroundColor Yellow
+                    Write-Host "⚠️  WARNING: 脚本内嵌模型表与 agents/*.md frontmatter 不一致（表已漂移）！" -ForegroundColor Yellow
+                }
+                $shownActual = if ($actualModel) { $actualModel } else { "<无 model 字段>" }
+                Write-Host "⚠️  - ${agentName}: 表=$expectedModel，实际=$shownActual" -ForegroundColor Yellow
+                $TableDriftFound = $true
+            }
+        }
+    }
+}
+
+# 反向检查：已安装但内嵌模型表中缺失的智能体同样属于"表已漂移"
+Get-ChildItem -Path $TargetDir -Filter "*.md" -File -ErrorAction SilentlyContinue | ForEach-Object {
+    $agentName = $_.BaseName
+    if (-not $TableAgentNames.ContainsKey($agentName)) {
+        if (-not $TableDriftFound) {
+            Write-Host ""
+            Write-Host "⚠️  =============================================" -ForegroundColor Yellow
+            Write-Host "⚠️  WARNING: 脚本内嵌模型表与 agents/*.md frontmatter 不一致（表已漂移）！" -ForegroundColor Yellow
+        }
+        Write-Host "⚠️  - ${agentName}: 已安装但内嵌模型表中缺失" -ForegroundColor Yellow
+        $TableDriftFound = $true
+    }
+}
+if ($TableDriftFound) {
+    Write-Host "⚠️  请同步更新安装脚本内嵌模型表（提示词第二步表格）。" -ForegroundColor Yellow
+    Write-Host "⚠️  =============================================" -ForegroundColor Yellow
+}
+
 Write-Host ""
 Write-Host "已安装的智能体:"
 Write-Host "  主智能体:"
-@("Zero", "Erribaba") | ForEach-Object {
+@("smart-router", "Zero", "Erribaba") | ForEach-Object {
     $f = Join-Path $TargetDir "$_.md"
     if (Test-Path $f) { Write-Host "    - $_" }
 }
 Write-Host "  子智能体:"
-Get-ChildItem -Path $TargetDir -Filter "*.md" | Where-Object { $_.Name -notin @("Zero.md", "Erribaba.md") } | ForEach-Object {
+Get-ChildItem -Path $TargetDir -Filter "*.md" | Where-Object { $_.Name -notin @("smart-router.md", "Zero.md", "Erribaba.md") } | ForEach-Object {
     Write-Host "    - $($_.BaseName)"
 }
 
@@ -113,86 +254,5 @@ Write-Host "💡 提示：将下方提示词复制到你的 OpenCode 智能体�
 Write-Host "   它会帮你自动配置模型并更新智能体文件。"
 Write-Host ""
 Write-Host "================================"
-
-$Prompt = @"
---- 复制以下提示词发送给你的 OpenCode 智能体 ---
-
-我刚刚安装了 opencode-agents 智能体集合（位于 ~/.config/opencode/agents/）。
-请你帮我完成以下配置：
-
-## 第一步：确认已有 provider 和模型
-
-请读取 ~/.config/opencode/opencode.json，列出我当前已配置的 provider 和模型。
-
-## 第二步：选择模型
-
-以下是智能体集合中每个智能体默认使用的模型，请根据我已有的 provider 和模型，
-为每个智能体选择一个可用的模型（优先选择能力更强的模型）：
-
-| 智能体 | 默认模型 | 角色 |
-|--------|----------|------|
-| Zero | opencode-go/mimo-v2.5 | 主智能体（快速原型，多模态） |
-| Erribaba | Xianyu/mimo-v2.5-pro | 主智能体（生产代码，深度分析） |
-| api-designer | opencode-go/mimo-v2.5-pro | API 设计 |
-| architect | opencode-go/glm-5.1 | 架构设计 |
-| code-generator | opencode-go/mimo-v2.5-pro | 代码生成 |
-| db-engineer | opencode-go/deepseek-v4-pro | 数据库工程 |
-| debugger | opencode-go/deepseek-v4-pro | 调试诊断 |
-| devops | opencode-go/mimo-v2.5-pro | DevOps/CI-CD |
-| doc-writer | opencode-go/qwen3.7-plus | 文档编写 |
-| e2e-tester | opencode-go/mimo-v2.5-pro | 端到端测试 |
-| executor | opencode-go/minimax-m2.7 | 命令执行 |
-| frontend-dev | opencode-go/kimi-k2.6 | 前端开发 |
-| frontend-reviewer | opencode-go/mimo-v2.5 | 前端审查 |
-| git-assistant | opencode-go/mimo-v2.5 | Git 工作流 |
-| migration | opencode-go/deepseek-v4-pro | 迁移专家 |
-| perf-optimizer | opencode-go/mimo-v2.5-pro | 性能优化 |
-| plan-writer | opencode-go/mimo-v2.5-pro | 实现计划编写 |
-| project-manager | opencode-go/qwen3.7-plus | 项目管理 |
-| refactorer | opencode-go/mimo-v2.5-pro | 代码重构 |
-| research | opencode-go/qwen3.7-plus | 信息研究 |
-| reviewer | opencode-go/deepseek-v4-pro | 代码审查（Stage 2） |
-| security-auditor | opencode-go/deepseek-v4-pro | 安全审计 |
-| software-engineer | opencode-go/mimo-v2.5 | 全栈实现 |
-| spec-reviewer | opencode-go/deepseek-v4-pro | 规范合规性审查（Stage 1） |
-| test-writer | opencode-go/mimo-v2.5-pro | 测试编写 |
-| ui-designer | opencode-go/kimi-k2.6 | UI 设计 |
-| validator | opencode-go/minimax-m2.7 | 结果验证 |
-| vision-dev | opencode-go/mimo-v2.5 | 视觉开发 |
-| workflow-orchestrator | opencode-go/mimo-v2.5-pro | 工作流编排 |
-
-如果我没有某个 provider，告诉我哪些模型需要额外配置。
-如果我已有对应的模型，直接进入第三步。
-
-## 第三步：更新智能体文件
-
-读取 ~/.config/opencode/agents/ 下所有 .md 文件，将每个文件 frontmatter 中的 `model:`
-字段替换为你在第二步中为该智能体选择的模型。
-
-## 第四步：设置主智能体
-
-将 ~/.config/opencode/opencode.json 中的 `default_agent` 设置为 "Erribaba"。
-（如果用户更喜欢快速原型模式，改为 "Zero"）
-
-## 第五步：配置参考文档
-
-在 ~/.config/opencode/opencode.json 中添加 references 配置，指向工作流文档：
-
-```json
-"references": {
-  "workflow-docs": {
-    "path": "~/.config/opencode/references/workflow",
-    "description": "智能体工作流文档和快速参考，包含结构化工作流指南、代理配置和最佳实践",
-    "hidden": false
-  }
-}
-```
-
-## 第六步：验证
-
-列出所有智能体及其使用的模型，确认配置完成。
-验证 references 配置是否正确。
-"@
-
 Write-Host $Prompt
 Write-Host ""

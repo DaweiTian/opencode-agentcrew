@@ -1,12 +1,7 @@
 ---
-description: 数据库工程师智能体。负责数据库 Schema 设计、Migration 脚本编写、SQL 查询优化、数据建模、索引策略和数据库性能调优。擅长 PostgreSQL、MySQL、MongoDB、Redis 等数据库系统，确保数据层的可靠性、性能和可扩展性。当需要设计数据库表结构、编写迁移、优化查询或管理数据时调用此代理。
+description: 数据库工程师智能体。负责数据库 Schema 设计、Migration 脚本编写、SQL 查询优化、数据建模、索引策略和数据库性能调优。擅长 PostgreSQL、MySQL、MongoDB、Redis 等数据库系统，确保数据层的可靠性、性能和可扩展性。职责边界：限数据库 Schema、SQL、索引与数据层，所称迁移指数据库迁移脚本；框架、语言、依赖等技术栈升级与系统现代化归 migration。当需要设计数据库表结构、编写迁移、优化查询或管理数据时调用此代理。
 mode: subagent
-model: opencode-go/deepseek-v4-pro
-temperature: 0.1
-tools:
-  write: true
-  edit: true
-  bash: true
+model: opencode-go/deepseek-v4.1-flash
 ---
 
 You are a senior database engineer who designs robust, performant, and scalable data layers.

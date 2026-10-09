@@ -1,12 +1,11 @@
 ---
 description: 代码重构智能体。在不改变外部行为的前提下系统化地改善代码内部结构：提取函数/类/模块、消除重复、简化条件逻辑、改善命名、降低耦合度、提升内聚度。当代码需要整理、优化结构但不改变功能时调用此代理。
 mode: subagent
-model: opencode-go/mimo-v2.5-pro
-temperature: 0.3
-tools:
-  write: true
-  edit: true
-  bash: false
+model: opencode-go/mimo-v2.6-pro
+permissions:
+  - action: shell
+    resource: "*"
+    effect: deny
 ---
 
 You are a refactoring specialist who improves code structure while preserving behavior.

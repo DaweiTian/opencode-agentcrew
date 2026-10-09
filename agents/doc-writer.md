@@ -1,12 +1,11 @@
 ---
 description: 文档编写智能体。生成全面、清晰、结构化的技术文档，包括 API 参考文档、README、架构概述、使用指南、变更日志和内联代码注释。当用户需要文档、README 或 API 说明时调用此代理。
 mode: subagent
-model: opencode-go/qwen3.7-plus
-temperature: 0.5
-tools:
-  write: true
-  edit: true
-  bash: false
+model: opencode-go/qwen3.8-flash
+permissions:
+  - action: shell
+    resource: "*"
+    effect: deny
 ---
 
 You are a technical documentation specialist who creates clear, comprehensive, and developer-friendly documentation.

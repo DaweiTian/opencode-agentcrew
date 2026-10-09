@@ -8,10 +8,8 @@ A collection of OpenCode agent configuration files. No code, no build, no tests 
 
 ```
 agents/
-  *.md          # 29 agent definitions (2 primary + 27 subagent)
-plugins/
-  image-paste-saver.js  # Auto-saves pasted images to /tmp/ for vision-dev
-README.md       # Chinese (outdated — lists 18 agents, actual count is 29)
+  *.md          # 38 agent definitions (3 primary + 35 subagent)
+README.md       # Chinese (38 agents, model table included)
 README.en.md    # English (same)
 LICENSE         # MIT
 ```
@@ -25,11 +23,13 @@ Every file in `agents/` uses this structure:
 description: <Chinese description — this is what OpenCode uses to decide when to invoke the agent>
 mode: primary | subagent
 model: <provider/model-name>
-temperature: <0.0-1.0>
-tools:            # optional — omit keys to allow all
-  write: false
-  edit: false
-  bash: false
+permissions:      # optional — omit to allow all tools
+  - action: edit        # deny specific actions per agent role
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: "*"
+    effect: deny
 ---
 
 <System prompt in English or Chinese>
@@ -38,66 +38,97 @@ tools:            # optional — omit keys to allow all
 ## Key Conventions
 
 - **`description` is always in Chinese** — this is the trigger text OpenCode matches against. Match the style: role name + capabilities + trigger scenarios.
-- **`mode: primary`** means the agent can be a top-level session. Only `Zero.md` and `Erribaba.md` are primary agents.
-  - **Zero.md** (`opencode-go/mimo-v2.5`) — rapid prototyping, multimodal (image input), lightweight tasks
-  - **Erribaba.md** (`Xianyu/mimo-v2.5-pro`) — production code, complex algorithms, deep analysis
+- **`mode: primary`** means the agent can be a top-level session. Three files are primary agents: `smart-router.md`, `Zero.md`, and `Erribaba.md`.
+  - **smart-router.md** (`opencode-go/mimo-v2.6-flash`) — intelligent dispatching, multimodal (image input): routes tasks by complexity/domain/cost to the right subagent and model tier (recommended default entry point)
+  - **Zero.md** (`opencode-go/mimo-v2.6-flash`) — rapid prototyping, multimodal (image input), lightweight tasks
+  - **Erribaba.md** (`opencode-go/mimo-v2.6-pro`) — production code, complex algorithms, deep analysis, multimodal (image input)
 - **`mode: subagent`** means the agent is only invoked via delegation from a primary agent.
 - **Filename = agent name** used in delegation (e.g., `reviewer.md` → delegate as `reviewer`).
-- **Model naming**: provider prefix matters — models include `opencode-go/mimo-v2.5`, `opencode-go/mimo-v2.5-pro`, `opencode-go/deepseek-v4-pro`, `opencode-go/kimi-k2.6`, `opencode-go/qwen3.7-plus`, `opencode-go/minimax-m2.7`, `opencode-go/glm-5.1`. Primary agents use different providers: `opencode-go/` vs `Xianyu/`.
-- **Tool access** defaults to all tools allowed when `tools` key is omitted (primary agents). Subagents that need to write code must explicitly set `write: true, edit: true`. Read-only subagents set all three to `false`. Agents needing shell access add `bash: true`.
+- **Model naming**: all agents use the `opencode-go/` provider prefix — models include `opencode-go/mimo-v2.6-flash`, `opencode-go/mimo-v2.6-pro`, `opencode-go/deepseek-v4.1-flash`, `opencode-go/glm-5.2`, `opencode-go/kimi-k2.7-code`, `opencode-go/qwen3.8-flash`, `opencode-go/minimax-m3`, `opencode-go/longcat-2.5-preview-free`, `opencode-go/step-5-preview-free`.
+- **Tool access** defaults to all tools allowed when `permissions` key is omitted (primary agents). Subagents declare explicit `permissions` deny rules: agents that write code omit the `edit` deny (or allow specific paths such as `~/.opencode/plan/*`); read-only subagents deny both `edit` and `shell`; agents needing shell access omit the `shell` deny.
 
-## All 29 Agents
+## All 38 Agents
 
-### Primary (2)
-
-| File | Model | Role |
-|------|-------|------|
-| `Zero.md` | `opencode-go/mimo-v2.5` | Rapid prototyping, multimodal input, quick iteration |
-| `Erribaba.md` | `Xianyu/mimo-v2.5-pro` | Production code, complex algorithms, full-stack engineering |
-
-### Subagents — Read-only (10)
+### Primary (3)
 
 | File | Model | Role |
 |------|-------|------|
-| `architect.md` | `opencode-go/glm-5.1` | System architecture design |
-| `frontend-reviewer.md` | `opencode-go/mimo-v2.5` | Frontend code review |
-| `git-assistant.md` | `opencode-go/mimo-v2.5` | Git workflow assistance |
-| `research.md` | `opencode-go/qwen3.7-plus` | Technical research |
-| `reviewer.md` | `opencode-go/deepseek-v4-pro` | Code quality review (Stage 2) |
-| `security-auditor.md` | `opencode-go/deepseek-v4-pro` | Security audit |
-| `spec-reviewer.md` | `opencode-go/deepseek-v4-pro` | Spec compliance review (Stage 1) |
+| `smart-router.md` | `opencode-go/mimo-v2.6-flash` | Intelligent dispatching — routes tasks by complexity/domain/cost to the right subagent and model tier (recommended default) |
+| `Zero.md` | `opencode-go/mimo-v2.6-flash` | Rapid prototyping, multimodal input, quick iteration |
+| `Erribaba.md` | `opencode-go/mimo-v2.6-pro` | Production code, complex algorithms, full-stack engineering |
 
-Plus `perf-optimizer` and `validator` — read-only for file edits but have `bash: true` for running commands.
+### Subagents — Read-only (12)
 
-### Subagents — With write/edit (19)
+Denied both `edit` and `shell` in `permissions` frontmatter (equivalent to all tools `false`):
+
+| File | Model | Role |
+|------|-------|------|
+| `architect.md` | `opencode-go/glm-5.2` | System architecture design |
+| `frontend-reviewer.md` | `opencode-go/mimo-v2.6-flash` | Frontend code review |
+| `git-assistant.md` | `opencode-go/longcat-2.5-preview-free` | Git workflow assistance |
+| `plan-writer.md` | `opencode-go/mimo-v2.6-pro` | Implementation planning (edit allowed only under `~/.opencode/plan/*`) |
+| `project-manager.md` | `opencode-go/qwen3.8-flash` | Project management (edit allowed only under `~/.opencode/plan/*`) |
+| `research.md` | `opencode-go/qwen3.8-flash` | Technical research |
+| `research-lite.md` | `opencode-go/mimo-v2.6-flash` | Technical research (lite) |
+| `reviewer.md` | `opencode-go/deepseek-v4.1-flash` | Code quality review (Stage 2) |
+| `reviewer-lite.md` | `opencode-go/mimo-v2.6-flash` | Code quality review (lite) |
+| `security-auditor.md` | `opencode-go/deepseek-v4.1-flash` | Security audit |
+| `spec-reviewer.md` | `opencode-go/deepseek-v4.1-flash` | Spec compliance review (Stage 1) |
+| `workflow-orchestrator.md` | `opencode-go/mimo-v2.6-pro` | Workflow orchestration |
+
+Plus `perf-optimizer` (`opencode-go/mimo-v2.6-pro`) and `validator` (`opencode-go/step-5-preview-free`) — deny `edit` but allow `shell`: read-only for file edits, have bash for running commands.
+
+### Subagents — With write/edit (21)
+
+No `edit` deny (or only path-scoped denies) in `permissions` frontmatter:
 
 | File | Model | Has bash | Role |
 |------|-------|:--------:|------|
-| `api-designer.md` | `opencode-go/mimo-v2.5-pro` | ✗ | API endpoint design |
-| `code-generator.md` | `opencode-go/mimo-v2.5-pro` | ✗ | Code generation |
-| `db-engineer.md` | `opencode-go/deepseek-v4-pro` | ✓ | Database engineering |
-| `debugger.md` | `opencode-go/deepseek-v4-pro` | ✓ | Bug debugging |
-| `devops.md` | `opencode-go/mimo-v2.5-pro` | ✓ | DevOps/CI-CD |
-| `doc-writer.md` | `opencode-go/qwen3.7-plus` | ✗ | Documentation |
-| `e2e-tester.md` | `opencode-go/mimo-v2.5-pro` | ✗ | E2E testing |
-| `executor.md` | `opencode-go/minimax-m2.7` | ✓ | Command execution |
-| `frontend-dev.md` | `opencode-go/kimi-k2.6` | ✗ | Frontend development |
-| `migration.md` | `opencode-go/deepseek-v4-pro` | ✓ | System migration |
-| `plan-writer.md` | `opencode-go/mimo-v2.5-pro` | ✗ | Implementation planning |
-| `project-manager.md` | `opencode-go/qwen3.7-plus` | ✗ | Project management |
-| `refactorer.md` | `opencode-go/mimo-v2.5-pro` | ✗ | Code refactoring |
-| `software-engineer.md` | `opencode-go/mimo-v2.5` | ✓ | Full-stack implementation |
-| `test-writer.md` | `opencode-go/mimo-v2.5-pro` | ✗ | Test writing |
-| `ui-designer.md` | `opencode-go/kimi-k2.6` | ✗ | UI design |
-| `vision-dev.md` | `opencode-go/mimo-v2.5` | ✗ | Visual development |
-| `workflow-orchestrator.md` | `opencode-go/mimo-v2.5-pro` | ✓ | Workflow orchestration |
+| `api-designer.md` | `opencode-go/mimo-v2.6-pro` | ✗ | API endpoint design |
+| `code-generator.md` | `opencode-go/mimo-v2.6-pro` | ✗ | Code generation |
+| `code-generator-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Code generation (lite) |
+| `db-engineer.md` | `opencode-go/deepseek-v4.1-flash` | ✓ | Database engineering |
+| `debugger.md` | `opencode-go/deepseek-v4.1-flash` | ✓ | Bug debugging |
+| `debugger-lite.md` | `opencode-go/mimo-v2.6-flash` | ✓ | Bug debugging (lite) |
+| `devops.md` | `opencode-go/mimo-v2.6-flash` | ✓ | DevOps/CI-CD |
+| `doc-writer.md` | `opencode-go/qwen3.8-flash` | ✗ | Documentation |
+| `doc-writer-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Documentation (lite) |
+| `e2e-tester.md` | `opencode-go/mimo-v2.6-flash` | ✗ | E2E testing |
+| `executor.md` | `opencode-go/minimax-m3` | ✓ | Command execution |
+| `frontend-dev.md` | `opencode-go/kimi-k2.7-code` | ✗ | Frontend development |
+| `frontend-dev-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Frontend development (lite) |
+| `migration.md` | `opencode-go/deepseek-v4.1-flash` | ✓ | System migration |
+| `refactorer.md` | `opencode-go/mimo-v2.6-pro` | ✗ | Code refactoring |
+| `refactorer-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Code refactoring (lite) |
+| `software-engineer.md` | `opencode-go/mimo-v2.6-flash` | ✓ | Full-stack implementation |
+| `test-writer.md` | `opencode-go/mimo-v2.6-pro` | ✗ | Test writing |
+| `test-writer-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Test writing (lite) |
+| `ui-designer.md` | `opencode-go/kimi-k2.7-code` | ✗ | UI design |
+| `vision-dev.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Visual development |
+
+### Lite Agents (8)
+
+All eight `-lite` variants run on `opencode-go/mimo-v2.6-flash`. They are lightweight versions of their full counterparts, dispatched by `smart-router` when it judges task complexity as `simple` — fast and cheap, not suited for complex work:
+
+| Lite Agent | Full Counterpart |
+|------------|------------------|
+| `code-generator-lite` | `code-generator` |
+| `debugger-lite` | `debugger` |
+| `doc-writer-lite` | `doc-writer` |
+| `frontend-dev-lite` | `frontend-dev` |
+| `refactorer-lite` | `refactorer` |
+| `research-lite` | `research` |
+| `reviewer-lite` | `reviewer` |
+| `test-writer-lite` | `test-writer` |
+
+(Their rows also appear in the Read-only and With write/edit tables above, marked `(lite)`.)
 
 ## When Adding or Editing Agents
 
-1. Match the frontmatter field order: `description`, `mode`, `model`, `temperature`, then optional `tools`.
+1. Match the frontmatter field order: `description`, `mode`, `model`, then optional `permissions`.
 2. Write `description` in Chinese — start with the role name (e.g., "代码审查智能体"), then describe capabilities and trigger scenarios.
 3. Keep system prompts concise and structured with `##` sections.
-4. **Primary agents must list all available subagents in their body** — update both `Zero.md` and `Erribaba.md` if adding a new subagent.
+4. **Primary agents must list all available subagents in their body** — update all three primaries (`smart-router.md`, `Zero.md`, and `Erribaba.md`) if adding a new subagent.
 5. Do not add build/CI/tooling — this repo has none and needs none.
 6. After adding a new agent, update the tables in this file.
 
@@ -162,29 +193,9 @@ For complex tasks, use `@workflow-orchestrator` to manage the full workflow. It 
 | Review | `spec-reviewer`, `reviewer` | `security-auditor`, `frontend-reviewer` |
 | Merge | `validator` | `git-assistant`, `devops` |
 
-## Plugin: image-paste-saver
-
-Source: `plugins/image-paste-saver.js`
-Install target: `~/.config/opencode/plugins/` (handled by install scripts)
-
-Automatically detects pasted images in the TUI conversation, saves them to `{project}/.opencode/tmp/`, and injects file path references into the prompt. This enables text-only primary agents (Erribaba) to delegate image analysis to vision-dev.
-
-**How it works:**
-1. User pastes an image in the OpenCode TUI
-2. Plugin intercepts via `chat.message` hook
-3. Image is decoded from base64 and saved to `{project}/.opencode/tmp/`
-4. A text reference `[Image saved to: .opencode/tmp/opencode-img-xxx.png]` is injected into the prompt
-5. Primary agent sees the file path and delegates to `@vision-dev`
-
-**Cleanup:**
-- On plugin dispose (OpenCode exit): deletes all temp files created during the session
-- On startup: cleans up stale files older than 1 hour (crash recovery)
-
-**Supported formats:** PNG, JPEG, GIF, WebP, SVG, BMP (max 10MB)
-
 ## Parallel Task Management
 
-Both primary agents use an **async first-come-first-serve** pattern for parallel subagent delegation.
+All primary agents use an **async first-come-first-serve** pattern for parallel subagent delegation.
 
 ### 1. 配置（必须）
 
