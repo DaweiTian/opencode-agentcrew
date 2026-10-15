@@ -147,7 +147,7 @@ Below are the default models for each agent in the collection. Based on my exist
 | frontend-dev | opencode-go/kimi-k2.7-code | Frontend development |
 | frontend-dev-lite | opencode-go/mimo-v2.6-flash | Frontend development (lite) |
 | frontend-reviewer | opencode-go/mimo-v2.6-flash | Frontend review |
-| git-assistant | opencode-go/longcat-2.5-preview-free | Git workflow |
+| git-assistant | opencode-go/qwen3.8-flash | Git workflow |
 | migration | opencode-go/deepseek-v4.1-flash | Migration |
 | perf-optimizer | opencode-go/mimo-v2.6-pro | Performance optimization |
 | plan-writer | opencode-go/mimo-v2.6-pro | Implementation planning |
@@ -164,7 +164,7 @@ Below are the default models for each agent in the collection. Based on my exist
 | test-writer | opencode-go/mimo-v2.6-pro | Test writing |
 | test-writer-lite | opencode-go/mimo-v2.6-flash | Test writing (lite) |
 | ui-designer | opencode-go/kimi-k2.7-code | UI design |
-| validator | opencode-go/step-5-preview-free | Validation |
+| validator | opencode-go/deepseek-v4.1-flash | Validation |
 | vision-dev | opencode-go/mimo-v2.6-flash | Visual development |
 | workflow-orchestrator | opencode-go/mimo-v2.6-pro | Workflow orchestration |
 

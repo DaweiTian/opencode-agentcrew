@@ -1,7 +1,7 @@
 ---
 description: 结果验证子智能体。对代码变更进行最终验证：功能正确性、无回归、代码质量、类型安全和构建通过。输出验证报告。当完成开发任务后需要做最终检查时调用此代理。
 mode: subagent
-model: opencode-go/step-5-preview-free
+model: opencode-go/deepseek-v4.1-flash
 permissions:
   - action: edit
     resource: "*"

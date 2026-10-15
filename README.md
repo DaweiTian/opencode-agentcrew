@@ -148,7 +148,7 @@ rm -rf /tmp/opencode-agents
 | frontend-dev | opencode-go/kimi-k2.7-code | 前端开发 |
 | frontend-dev-lite | opencode-go/mimo-v2.6-flash | 前端开发（轻量版） |
 | frontend-reviewer | opencode-go/mimo-v2.6-flash | 前端审查 |
-| git-assistant | opencode-go/longcat-2.5-preview-free | Git 工作流 |
+| git-assistant | opencode-go/qwen3.8-flash | Git 工作流 |
 | migration | opencode-go/deepseek-v4.1-flash | 迁移专家 |
 | perf-optimizer | opencode-go/mimo-v2.6-pro | 性能优化 |
 | plan-writer | opencode-go/mimo-v2.6-pro | 实现计划编写 |
@@ -165,7 +165,7 @@ rm -rf /tmp/opencode-agents
 | test-writer | opencode-go/mimo-v2.6-pro | 测试编写 |
 | test-writer-lite | opencode-go/mimo-v2.6-flash | 测试编写（轻量版） |
 | ui-designer | opencode-go/kimi-k2.7-code | UI 设计 |
-| validator | opencode-go/step-5-preview-free | 结果验证 |
+| validator | opencode-go/deepseek-v4.1-flash | 结果验证 |
 | vision-dev | opencode-go/mimo-v2.6-flash | 视觉开发 |
 | workflow-orchestrator | opencode-go/mimo-v2.6-pro | 工作流编排 |
 

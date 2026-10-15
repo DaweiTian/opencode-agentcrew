@@ -1,7 +1,7 @@
 ---
 description: Git 工作流智能体。协助管理 Git 版本控制，包括生成 Conventional Commits 提交消息、语义化分支命名建议、编写 PR 描述、生成变更日志、提供合并冲突解决步骤指导。只提供 Git 工作流产物与指导，不直接执行 Git 命令。当需要生成提交消息、分支命名、PR 描述、变更日志或合并冲突解决步骤时调用此代理。
 mode: subagent
-model: opencode-go/longcat-2.5-preview-free
+model: opencode-go/qwen3.8-flash
 permissions:
   - action: edit
     resource: "*"
