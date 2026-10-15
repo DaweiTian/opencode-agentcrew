@@ -28,6 +28,7 @@
 - **分层子智能体** — 8 个高频角色提供 `-lite` 轻量版（`mimo-v2.6-flash`），简单任务最快最省
 - **结构化工作流** — 参考 MiMo Compose 模式，支持 brainstorm→plan→execute→review→merge 完整流程
 - **两阶段审查** — 规范合规性审查 + 代码质量审查，确保实现符合需求且代码质量高
+- **编排纪律** — MiMo Compose 风格编排纪律：验证铁律（done 是声明须经独立核实）、Reviewer 档位对齐、文件所有权互斥、破坏性操作永不自动批准
 - **三主智能体** — smart-router（智能调度）+ Erribaba（生产代码）+ Zero（快速原型/多模态）
 - **多模型协作** — MiMo-V2.6-Flash、MiMo-V2.6-Pro、DeepSeek V4.1 Flash、GLM-5.2、Kimi K2.7 Code、Qwen3.8 Flash、MiniMax M3、LongCat 2.5 Preview Free、Step 5 Preview Free 共 9 个模型
 - **图片处理** — 三个主智能体均为原生全模态，粘贴图片直接分析；磁盘上的图片文件可交 vision-dev 处理
@@ -50,7 +51,7 @@ irm https://raw.githubusercontent.com/DaweiTian/opencode-agentcrew/master/instal
 > 安装脚本会自动完成三件事：
 >
 > 1. **安装智能体** — 下载 `agents/*.md` 到 `~/.config/opencode/agents/`（已有的 agents 目录会先备份到 `~/.config/opencode/agents-备份-<时间戳>`）；
-> 2. **安装参考文档** — 复制 `references/*` 到 `~/.config/opencode/references/`（含结构化工作流快速参考 WORKFLOW-QUICKREF 与三主智能体共享的并行任务协议 parallel-task-management）；
+> 2. **安装参考文档** — 复制 `references/*` 到 `~/.config/opencode/references/`（含结构化工作流快速参考 WORKFLOW-QUICKREF、三主智能体共享的并行任务协议 parallel-task-management，以及审查反馈纪律、调试方法论、隔离工作区共 5 份工作流文档）；
 > 3. **启用后台子智能体并行** — 向 `~/.bashrc` 或 `~/.zshrc` 追加 `export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true`（Windows 脚本改为设置同名用户级环境变量）。该环境变量用于启用主智能体后台并行派发子任务的能力；如需撤销，删除 shell 配置文件末尾对应的 export 行（Windows：移除该用户环境变量）后重开终端即可。
 
 ### 手动安装
@@ -248,8 +249,11 @@ opencode-agentcrew/
 │   └── workflow-orchestrator.md # 工作流编排
 ├── references/                  # 参考文档（OpenCode References 功能）
 │   └── workflow/                # 工作流相关文档
-│       ├── WORKFLOW-QUICKREF.md        # 结构化工作流快速参考
-│       └── parallel-task-management.md # 三主智能体共享的并行任务协议
+│       ├── WORKFLOW-QUICKREF.md         # 结构化工作流快速参考（一页速查表）
+│       ├── parallel-task-management.md  # 三主智能体共享的并行任务协议（阶段屏障/完成检查）
+│       ├── review-feedback-discipline.md # 审查反馈接收纪律：逐条验证后再实现，禁止谄媚式认同
+│       ├── debug-methodology.md          # 调试方法论：根因调查未完成不得提出修复、三振出局
+│       └── isolated-workspace.md         # 隔离工作区：worktree 隔离并行写任务与 provenance 清理纪律
 ├── .gitignore                   # Git 忽略规则
 ├── AGENTS.md                    # 代理配置和使用指南
 ├── install.sh                   # Linux/macOS 一键安装脚本
@@ -336,7 +340,7 @@ opencode-agentcrew/
     ↓
 [阶段 4: 审查] — spec-reviewer（Stage 1）→ reviewer（Stage 2）
     ↓
-[阶段 5: 合并] — validator, git-assistant
+[阶段 5: 合并] — validator, git-assistant（测试门 → 状态检测 → 四选项：本地合并/PR/保留/丢弃 → provenance 清理）
 ```
 
 ### 关键概念
@@ -347,6 +351,8 @@ opencode-agentcrew/
 2. **阶段 2：代码质量审查**（`@reviewer`）— 验证代码是否良好构建
 
 **重要：** 阶段 1 必须通过后才能运行阶段 2。
+
+**Reviewer 档位规则：** 审查者的模型档位不得低于被审 implementer 的档位——弱模型审查强模型的产出会共享实施者的盲点，让质量门变成摆设。
 
 #### TDD 集成
 执行阶段遵循测试驱动开发：
@@ -359,6 +365,29 @@ opencode-agentcrew/
 
 #### 工作流编排
 对于复杂任务，使用 `@workflow-orchestrator` 输出完整的工作流编排计划（阶段划分、派发顺序、阶段屏障与质量门控）。它是只读顾问（deny edit + shell + subagent），由主智能体按计划依次派发子智能体执行。
+
+#### 验证与安全规则
+三个主智能体（`smart-router`/`Zero`/`Erribaba`）在工作流阶段之上强制执行三条纪律：
+
+1. **验证铁律** — 没有新鲜证据不得声称完成：验证命令必须在当前消息内实际运行并读取完整输出；子智能体的 `Status: done` 只是声明，不是证据，主智能体必须独立核实（`git diff`、运行测试、读取变更文件）后才算数——文字描述不是证据。
+2. **破坏性操作永不自动批准** — force push、删除分支、丢弃工作、移除非本会话创建的 worktree、hard reset 等操作，即使自治模式开启也必须先取得用户明确确认，沉默不等于授权。
+3. **提问纪律** — 需要用户决策或批准时，通过结构化 question 工具给出具体选项，不在回复末尾追加自然语言问句（后者会卡住 headless/后台运行）。
+
+#### 编排硬规则
+`@workflow-orchestrator` 的编排计划须满足三条硬规则：
+
+1. **Reviewer 档位对齐** — 审查子智能体的模型档位（T1/T2/T3，档位阶梯定义见 `agents/workflow-orchestrator.md`）不得低于被审 implementer 的档位。
+2. **Pre-Flight 冲突扫描** — Execute 阶段派发任何任务之前，对整个计划做一次冲突扫描（文件所有权重叠、顺序问题等），所有发现**一次性批量呈报**，处理完再派发。
+3. **阶段内连续执行** — 同一阶段内不逐任务请示，仅在 BLOCKED、真实歧义、阶段屏障、需用户签核的阶段边界停下。
+
+#### 参考文档
+跨代理协议统一维护在 `references/workflow/` 下，主智能体正文仅保留核心规则摘要：
+
+- [parallel-task-management.md](references/workflow/parallel-task-management.md) — 并行派发协议：阶段屏障、同阶段先到先处理、文件所有权互斥、超时与完成检查
+- [WORKFLOW-QUICKREF.md](references/workflow/WORKFLOW-QUICKREF.md) — 整套结构化工作流协议的一页速查表
+- [review-feedback-discipline.md](references/workflow/review-feedback-discipline.md) — 审查反馈接收纪律：逐条对照代码库验证后再实现，禁止谄媚式认同
+- [debug-methodology.md](references/workflow/debug-methodology.md) — 调试方法论：根因调查未完成不得提出修复，连续 3 次失败即停止上报
+- [isolated-workspace.md](references/workflow/isolated-workspace.md) — 隔离工作区：用 `worktree_create` + `session_move` 隔离并行写任务，按 provenance 清单清理
 
 ### 何时使用结构化工作流
 

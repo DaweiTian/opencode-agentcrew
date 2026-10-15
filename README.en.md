@@ -28,6 +28,7 @@
 - **Tiered Subagents** — 8 high-frequency roles have `-lite` variants (`mimo-v2.6-flash`) for fast, cheap simple tasks
 - **Structured Workflow** — Inspired by the MiMo Compose pattern, supports the full brainstorm→plan→execute→review→merge pipeline
 - **Two-Stage Review** — Spec compliance review + code quality review, ensuring the implementation matches requirements and the code is well built
+- **Orchestration Discipline** — MiMo Compose-style disciplines: Verification Iron Law (done is a claim, independently verified), reviewer tier parity, exclusive file ownership, destructive ops never auto-approved
 - **Triple Primary Agents** — smart-router (intelligent dispatch) + Erribaba (production code) + Zero (rapid prototyping/multimodal)
 - **Multi-Model Collaboration** — 9 models including MiMo-V2.6-Flash, MiMo-V2.6-Pro, DeepSeek V4.1 Flash, GLM-5.2, Kimi K2.7 Code, Qwen3.8 Flash, MiniMax M3, LongCat 2.5 Preview Free, Step 5 Preview Free
 - **Image Handling** — All three primaries are natively multimodal and analyze pasted images directly; on-disk image files can be delegated to vision-dev
@@ -50,7 +51,7 @@ irm https://raw.githubusercontent.com/DaweiTian/opencode-agentcrew/master/instal
 > The install script automatically does three things:
 >
 > 1. **Installs agents** — downloads `agents/*.md` to `~/.config/opencode/agents/` (an existing agents directory is first backed up to `~/.config/opencode/agents-备份-<timestamp>`);
-> 2. **Installs reference docs** — copies `references/*` to `~/.config/opencode/references/` (including the structured workflow quick reference WORKFLOW-QUICKREF and the parallel task protocol parallel-task-management shared by the 3 primary agents);
+> 2. **Installs reference docs** — copies `references/*` to `~/.config/opencode/references/` (5 workflow docs in total: the structured workflow quick reference WORKFLOW-QUICKREF, the parallel task protocol parallel-task-management shared by the 3 primary agents, plus the review feedback discipline, debug methodology, and isolated workspace docs);
 > 3. **Enables background subagent parallelism** — appends `export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true` to `~/.bashrc` or `~/.zshrc` (the Windows script sets a user-level environment variable with the same name instead). This variable enables the primary agents' background parallel subtask dispatch; to undo it, remove the corresponding export line at the end of your shell config file (Windows: delete the user environment variable) and reopen your terminal.
 
 ### Manual Install
@@ -247,8 +248,11 @@ opencode-agentcrew/
 │   └── workflow-orchestrator.md # Workflow orchestration
 ├── references/                  # Reference docs (OpenCode References feature)
 │   └── workflow/                # Workflow documentation
-│       ├── WORKFLOW-QUICKREF.md        # Structured workflow quick reference
-│       └── parallel-task-management.md # Parallel task protocol shared by the 3 primary agents
+│       ├── WORKFLOW-QUICKREF.md         # Structured workflow quick reference (one-page cheat sheet)
+│       ├── parallel-task-management.md  # Parallel task protocol shared by the 3 primary agents (phase barriers, completion check)
+│       ├── review-feedback-discipline.md # Review feedback discipline: verify each finding before implementing, no sycophancy
+│       ├── debug-methodology.md          # Debug methodology: no fix before root-cause investigation is done, three-strikes rule
+│       └── isolated-workspace.md         # Isolated workspace: worktree isolation for parallel writes, provenance-based cleanup
 ├── .gitignore                   # Git ignore rules
 ├── AGENTS.md                    # Agent configuration and usage guide
 ├── install.sh                   # Linux/macOS one-command install script
@@ -335,7 +339,7 @@ User Request
     ↓
 [Phase 4: Review] — spec-reviewer (Stage 1) → reviewer (Stage 2)
     ↓
-[Phase 5: Merge] — validator, git-assistant
+[Phase 5: Merge] — validator, git-assistant (test gate → state detection → 4 options: merge locally/open PR/keep as-is/discard → provenance cleanup)
 ```
 
 ### Key Concepts
@@ -346,6 +350,8 @@ The review phase uses a two-stage process:
 2. **Stage 2: Code Quality Review** (`@reviewer`) — Verifies the code is well built
 
 **Important:** Stage 1 must pass before Stage 2 runs.
+
+**Reviewer Tier Rule:** the reviewer's model tier must not be lower than the tier of the implementer under review — a weaker reviewer shares the implementer's blind spots and turns the quality gate into decoration.
 
 #### TDD Integration
 The execute phase follows Test-Driven Development:
@@ -358,6 +364,29 @@ The execute phase follows Test-Driven Development:
 
 #### Workflow Orchestration
 For complex tasks, use `@workflow-orchestrator` to produce a full workflow orchestration plan (phases, dispatch order, phase barriers, quality gates). It is a read-only advisor (deny edit + shell + subagent) — the primary agent executes the plan by dispatching subagents in the specified order.
+
+#### Verification & Safety Rules
+On top of the workflow phases, all three primary agents (`smart-router`/`Zero`/`Erribaba`) enforce three disciplines:
+
+1. **Verification Iron Law** — no completion claim without fresh evidence: the verification command must have been run within the current message and its full output read and checked. A subagent's `Status: done` is a claim, not evidence — the primary agent must independently verify the work (`git diff`, run the test, read the changed file) before anything counts as done. Prose is not evidence.
+2. **Destructive Operations are never auto-approved** — force push, deleting branches, discarding work, removing a worktree not created in this session, or a hard reset always require explicit user confirmation, even when autonomous mode is active. Silence ≠ approval.
+3. **Ask Discipline** — user decisions and approvals are requested through the structured question tool with concrete options, never a trailing natural-language question (which stalls headless and background runs).
+
+#### Orchestration Hard Rules
+Every `@workflow-orchestrator` plan enforces three hard rules:
+
+1. **Reviewer Tier Parity** — the review subagent's model tier (T1/T2/T3; the tier ladder is defined in `agents/workflow-orchestrator.md`) must never be lower than the tier of the implementer under review.
+2. **Pre-Flight Plan Review** — before any Execute-phase dispatch, scan the whole plan once for conflicts (overlapping file ownership, ordering issues) and report all findings **in one batch**; resolve them, then dispatch tasks.
+3. **Continuous Execution Within a Phase** — no per-task check-ins inside a phase; stop only at BLOCKED, genuine ambiguity, phase barriers, or phase boundaries that require user sign-off.
+
+#### Workflow Reference Documents
+Cross-agent protocols live in `references/workflow/`; the primary agents keep only core-rule summaries in their bodies:
+
+- [parallel-task-management.md](references/workflow/parallel-task-management.md) — Parallel dispatch protocol: phase barriers, first-come-first-serve within a phase, exclusive file ownership, timeout and completion checks
+- [WORKFLOW-QUICKREF.md](references/workflow/WORKFLOW-QUICKREF.md) — One-page cheat sheet of the whole protocol
+- [review-feedback-discipline.md](references/workflow/review-feedback-discipline.md) — Receiving review feedback: verify each finding against the codebase before implementing, no sycophantic agreement
+- [debug-methodology.md](references/workflow/debug-methodology.md) — Debug methodology: no fix proposal before root-cause investigation is complete; stop and escalate after three failed attempts
+- [isolated-workspace.md](references/workflow/isolated-workspace.md) — Isolated workspace: `worktree_create` + `session_move` to isolate parallel write tasks, provenance-based cleanup
 
 ### When to Use the Structured Workflow
 
