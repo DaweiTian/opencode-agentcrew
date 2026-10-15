@@ -30,7 +30,7 @@
 - **Two-Stage Review** — Spec compliance review + code quality review, ensuring the implementation matches requirements and the code is well built
 - **Orchestration Discipline** — MiMo Compose-style disciplines: Verification Iron Law (done is a claim, independently verified), reviewer tier parity, exclusive file ownership, destructive ops never auto-approved
 - **Triple Primary Agents** — smart-router (intelligent dispatch) + Erribaba (production code) + Zero (rapid prototyping/multimodal)
-- **Multi-Model Collaboration** — 9 models including MiMo-V2.6-Flash, MiMo-V2.6-Pro, DeepSeek V4.1 Flash, GLM-5.2, Kimi K2.7 Code, Qwen3.8 Flash, MiniMax M3, LongCat 2.5 Preview Free, Step 5 Preview Free
+- **Multi-Model Collaboration** — 7 paid models including MiMo-V2.6-Flash, MiMo-V2.6-Pro, DeepSeek V4.1 Flash, GLM-5.2, Kimi K2.7 Code, Qwen3.8 Flash, MiniMax M3
 - **Image Handling** — All three primaries are natively multimodal and analyze pasted images directly; on-disk image files can be delegated to vision-dev
 - **Ready to Use** — One-command installation, automatic configuration
 
@@ -96,11 +96,11 @@ Finally, add the `references` field to `~/.config/opencode/opencode.json` pointi
 This agent collection requires multiple models working together. We recommend the [OpenCode Go Plan](https://opencode.ai/go?ref=4BZQW1YPFK) — one subscription gives you access to every model in the plan (36 models officially) with no separate API key configuration needed.
 
 **Benefits:**
-- Rich model selection: the official plan covers 36 models, and all 9 models used by this collection are included in the Go Plan
+- Rich model selection: the official plan covers 36 models, and all 7 models used by this collection are included in the Go Plan
 - Cost-effective: cheaper than purchasing individual API access
 - Ready to use: no multi-provider setup — just use the `opencode-go/<model-id>` format
 
-> All 9 models used by the 38 agents in this collection (MiMo-V2.6-Flash, MiMo-V2.6-Pro, DeepSeek V4.1 Flash, GLM-5.2, Kimi K2.7 Code, Qwen3.8 Flash, MiniMax M3, LongCat 2.5 Preview Free, Step 5 Preview Free) are confirmed to be included in the Go Plan. Among them, LongCat 2.5 Preview Free and Step 5 Preview Free are **limited-time free** models (priced at $0 with unlimited usage; they will need to be replaced when the promotion ends).
+> All 7 models used by the 38 agents in this collection (MiMo-V2.6-Flash, MiMo-V2.6-Pro, DeepSeek V4.1 Flash, GLM-5.2, Kimi K2.7 Code, Qwen3.8 Flash, MiniMax M3) are confirmed to be included in the Go Plan.
 > All models chosen for this collection are **Chinese domestic models** that work directly in China — no foreign models such as GPT/Claude/Grok are required.
 >
 > Model quotas are maintained officially and change frequently, so this README keeps no local quota snapshot. Please refer to the official pages:

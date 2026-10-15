@@ -30,7 +30,7 @@
 - **两阶段审查** — 规范合规性审查 + 代码质量审查，确保实现符合需求且代码质量高
 - **编排纪律** — MiMo Compose 风格编排纪律：验证铁律（done 是声明须经独立核实）、Reviewer 档位对齐、文件所有权互斥、破坏性操作永不自动批准
 - **三主智能体** — smart-router（智能调度）+ Erribaba（生产代码）+ Zero（快速原型/多模态）
-- **多模型协作** — MiMo-V2.6-Flash、MiMo-V2.6-Pro、DeepSeek V4.1 Flash、GLM-5.2、Kimi K2.7 Code、Qwen3.8 Flash、MiniMax M3、LongCat 2.5 Preview Free、Step 5 Preview Free 共 9 个模型
+- **多模型协作** — MiMo-V2.6-Flash、MiMo-V2.6-Pro、DeepSeek V4.1 Flash、GLM-5.2、Kimi K2.7 Code、Qwen3.8 Flash、MiniMax M3 共 7 个付费模型
 - **图片处理** — 三个主智能体均为原生全模态，粘贴图片直接分析；磁盘上的图片文件可交 vision-dev 处理
 - **开箱即用** — 一条命令安装，自动配置
 
@@ -96,11 +96,11 @@ rm -rf /tmp/opencode-agents
 本智能体集合需要多个模型配合使用。推荐使用 [OpenCode Go 套餐](https://opencode.ai/go?ref=4BZQW1YPFK)，一次订阅即可使用套餐内全部模型（官方共 36 个模型），无需单独配置 API Key。
 
 **优势：**
-- 模型丰富：官方套餐覆盖 36 个模型，本集合使用的全部 9 个模型均包含于 Go 套餐
+- 模型丰富：官方套餐覆盖 36 个模型，本集合使用的全部 7 个模型均包含于 Go 套餐
 - 性价比高：相比单独购买 API，价格更优惠
 - 开箱即用：无需配置多个 provider，按 `opencode-go/<model-id>` 格式直接可用
 
-> 本集合 38 个智能体使用的 9 个模型（MiMo-V2.6-Flash、MiMo-V2.6-Pro、DeepSeek V4.1 Flash、GLM-5.2、Kimi K2.7 Code、Qwen3.8 Flash、MiniMax M3、LongCat 2.5 Preview Free、Step 5 Preview Free）已全部确认包含于 Go 套餐。其中 LongCat 2.5 Preview Free 与 Step 5 Preview Free 为**限时免费**模型（价格 $0、用量无限，活动结束后需更换）。
+> 本集合 38 个智能体使用的 7 个模型（MiMo-V2.6-Flash、MiMo-V2.6-Pro、DeepSeek V4.1 Flash、GLM-5.2、Kimi K2.7 Code、Qwen3.8 Flash、MiniMax M3）已全部确认包含于 Go 套餐。
 > 本集合选用的模型均为**国产模型**，国内可直接使用，无需 GPT/Claude/Grok 等国外模型。
 >
 > 各模型配额由官方维护且变动频繁，本 README 不保留本地配额快照，请以官方页面为准：
