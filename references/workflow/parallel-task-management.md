@@ -1,6 +1,6 @@
 # Parallel Task Management — Shared Protocol
 
-> This file is a shared reference used by the three primary agents (`smart-router`, `Zero`, `Erribaba`). It is the canonical home of the parallel task management protocol — phase barriers, within-phase parallelism, timeout recovery, and the task completion check. Each primary body keeps only a short core-rules summary; edit protocol text here, not in the agent bodies.
+> This file is a shared reference used by the three primary agents (`smart-router`, `Zero`, `Erribaba`). It is the canonical home of the parallel task management protocol — phase barriers, within-phase parallelism, the file-ownership mutex for parallel write tasks, timeout recovery, and the task completion check. Each primary body keeps only a short core-rules summary; edit protocol text here, not in the agent bodies.
 
 ## Phase Barriers (CRITICAL — MUST FOLLOW)
 
@@ -74,6 +74,48 @@ Step 4: ONLY after ALL phase tasks are processed:
         - Now you can launch next-phase tasks
 ```
 
+> **"Independent" includes file independence.** Before applying this pattern to write tasks, confirm their file sets are pairwise disjoint — see [Parallel Write Tasks: File Ownership Mutex](#parallel-write-tasks-file-ownership-mutex-critical--must-follow).
+
+## Parallel Write Tasks: File Ownership Mutex (CRITICAL — MUST FOLLOW)
+
+**Hard rule: parallel write tasks MUST have mutually exclusive file ownership.** A file (or a tightly-coupled group of files) may have **exactly one write-task owner at any given moment**.
+
+When you are about to dispatch multiple write tasks in the same phase, apply this decision:
+
+```
+Same-phase tasks all read-only (explore / research / review)?
+  └── YES → dispatch freely with background=true. No isolation needed.
+
+Any task writes files?
+  ├── Compute each task's candidate file set (a cheap read-only pass suffices)
+  ├── Are the file sets pairwise disjoint?
+  │     ├── YES → dispatch in parallel, but declare each task's file boundary
+  │     │         explicitly in its prompt. If a task crosses its boundary,
+  │     │         stop treating the set as disjoint.
+  │     └── NO (any overlap, or overlap merely *possible*) → choose ONE of:
+  │           (A) worktree isolation — one isolated workspace per write task
+  │               (see `references/workflow/isolated-workspace.md`, OpenCode native
+  │                `worktree_create` + `session_move`), merge sequentially afterwards; or
+  │           (B) serialize the tasks — dispatch one, verify, then dispatch the next.
+```
+
+⛔ **Never** dispatch overlapping write tasks against the same checkout and hope they don't collide. Shared index files, route tables, dependency manifests, lockfiles, barrel exports (`index.ts`), and i18n resources are collision magnets — assume overlap until proven otherwise.
+
+**Watch for false independence:** two tasks touching *different* files that both import or both register into a common file (e.g. `app/routes.ts`) are **not** file-disjoint. The coupling is on the shared file, not the visible ones.
+
+### Relationship to the Conflict Resolution clause
+
+This rule and the "higher domain authority wins" rule in [Result Merging & Conflict Resolution](#result-merging--conflict-resolution) address **two different kinds of conflict** and are complementary, not contradictory:
+
+| Conflict kind | What it is | Resolution mechanism |
+|---------------|-----------|----------------------|
+| **Review-opinion conflict** | Two completed subagents give contradictory *recommendations* about the same code | Authority ordering: `security-auditor` > `reviewer` > `validator` > others; `architect` > `code-generator` for architecture decisions |
+| **File-ownership conflict** | Two *in-flight* write tasks would edit the same file at the same time | Isolation (worktree) or serialization — **never** priority arbitration |
+
+Priority ordering cannot fix a file-ownership conflict: letting a "lower-priority" agent write the same file concurrently still corrupts the file, and a higher-priority agent's result can be silently overwritten by a lower-priority one that finishes later. Conversely, worktree isolation does not tell you whose *recommendation* to follow once both agents have reported. Use each mechanism for the conflict it addresses.
+
+**Sequence in practice:** prevent ownership collisions up front (this section) → let both tasks finish → then arbitrate any remaining *opinion* disagreements with the authority ordering (that section).
+
 ## No Polling (NEVER)
 
 **NEVER** poll for subagent task status. Completions arrive as notifications — do not proactively query task status; keep processing other work and handle each result as it arrives.
@@ -85,6 +127,7 @@ Before moving from one phase to the next, verify:
 - [ ] All tasks in current phase have completed (check background tasks)
 - [ ] All results have been verified and processed
 - [ ] Results have been synthesized into coherent understanding
+- [ ] Next-phase write tasks have been checked for file overlap (disjoint, worktree-isolated, or serialized — see [Parallel Write Tasks: File Ownership Mutex](#parallel-write-tasks-file-ownership-mutex-critical--must-follow))
 - [ ] Any blockers or issues have been resolved
 - [ ] Next phase tasks have clear requirements based on current phase output
 
@@ -96,6 +139,7 @@ When delegating to multiple subagents in parallel (independent tasks within the 
 2. **Check each metadata header** — if any subagent is `blocked` or `needs_input`, resolve that first.
 3. **Merge results by scope**: each subagent owns its domain.
 4. **When two subagents give conflicting suggestions**, prefer the one with higher domain authority: `security-auditor` > `reviewer` > `validator` > other subagents. **Architecture decisions** from `architect` take precedence over suggestions from `code-generator`. **Security findings** from `security-auditor` override convenience suggestions from other agents.
+   > This arbitration applies to **conflicting recommendations from completed tasks** only. It does **not** apply to concurrent write tasks targeting the same file — that is a file-ownership conflict, resolved by isolation or serialization up front (see [Parallel Write Tasks: File Ownership Mutex](#parallel-write-tasks-file-ownership-mutex-critical--must-follow)).
 5. **Synthesize before delegating next**: after parallel results are collected, combine relevant context from all subagents into a coherent prompt for the next phase / next sequential delegation.
 
 ## Subagent Timeout Detection & Recovery
@@ -140,18 +184,30 @@ Before outputting any summary, mentally list all subagent tasks you've dispatche
 - Which have returned results?
 - Which are still processing?
 
-**Step 2: Verify All Tasks Complete**
+**Step 2: Verify All Tasks Complete — and Independently**
 For each dispatched task, confirm:
 - Has the subagent returned a result with `Status: done`?
 - If `Status: partial` or `blocked`, the task is NOT complete
 - If no result received, the task is still processing
+- **A `Status: done` is a *claim*, not evidence.** Before counting a task as complete, independently verify the work: read the changed files / run `git diff`, execute the test or build command and read its **full** output (yourself or via `executor` / `validator`). Prose is not evidence. Only after verification does the task count as **verified done** — an unverified `Status: done` does NOT satisfy this protocol and must not be counted as "completed".
+  > Verification is **your own next action**, not a reason to keep waiting on the subagent. "Still processing" refers **only** to tasks that have not returned a result yet. A task that returned `Status: done` is *reported* — go verify it yourself instead of asking the subagent to re-report.
 
 **Step 3: Output Decision**
-- **If ALL tasks complete**: Proceed with completion summary
-- **If ANY tasks incomplete**: Output waiting message instead
+Classify each dispatched task into exactly one bucket, then decide:
+
+| Bucket | Meaning | Your action |
+|--------|---------|-------------|
+| **Verified done** | Result returned **and** you independently confirmed the work this message | Counts as complete |
+| **Reported, unverified** | `Status: done` received, not yet checked | **Verify now** (your own next step) — do NOT show it under "仍在处理", do NOT ask the subagent to re-report |
+| **Still processing** | No result received yet | Include in the waiting message |
+| **partial / blocked / needs_input** | Returned but not done | Resolve (re-dispatch, handle yourself, or ask the user) — never silently counted as complete |
+
+- **If ALL tasks are verified done**: proceed with the completion summary
+- **If ANY task is still processing** (no result yet): output the waiting message instead
+- **If any task is reported-but-unverified**: run the verification first, then re-evaluate
 
 ### Waiting Message Template
-When tasks are still pending, output:
+When tasks are still pending (no result received yet), output — list only tasks under "仍在处理" that genuinely have not returned; tasks that returned `Status: done` belong under "已完成" **only after you have verified them**:
 ```
 ⏳ 任务进行中：我已派出 {N} 个子智能体处理此任务。
 
@@ -167,12 +223,20 @@ When tasks are still pending, output:
 ```
 
 ### Common Scenarios
-1. **All 5 subagents dispatched, 3 returned**: Output waiting message for remaining 2
-2. **All tasks complete**: Output full completion summary
-3. **Some tasks failed**: Report failures, but still wait for remaining tasks
+1. **All 5 subagents dispatched, 3 returned**: verify the 3 returned claims, then output a waiting message for the remaining 2 (which have not returned at all)
+2. **All 5 returned `Status: done`**: do **not** summarize yet — verify each one (git diff / run tests / read files), then output the full completion summary
+3. **All tasks verified done**: output full completion summary
+4. **Some tasks failed**: report failures, but still wait for remaining tasks
+5. **A `Status: done` claim fails your verification**: treat the task as incomplete — re-dispatch with the specific gap, or handle it yourself; never report it as done
 
 ### Implementation Rules
 - **NEVER** output "task complete" or "all done" if any subagent is still processing
 - **NEVER** assume a task is complete just because you received some results
+- **NEVER** treat an unverified subagent `Status: done` as complete — the claim is not evidence
 - **ALWAYS** explicitly check for pending tasks before summarizing
+- **ALWAYS** independently verify each claimed-done task within the current message (`git diff` / run the test / read the changed files) and read its full output before declaring completion (Verification Iron Law)
 - **ALWAYS** use the waiting message template when tasks are pending
+
+## Related References
+
+- Worktree-based isolation for overlapping parallel write tasks (how to actually create, use, and clean up an isolated workspace): [`isolated-workspace.md`](isolated-workspace.md).

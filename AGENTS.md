@@ -182,6 +182,16 @@ The execute phase follows Test-Driven Development:
 #### Workflow Orchestration
 For complex tasks, use `@workflow-orchestrator` to produce a structured orchestration plan (phases, dispatch order, phase barriers, quality gates). It is a read-only advisor — it does not dispatch subagents itself; the primary agent executes the plan.
 
+#### Verification & Safety Rules
+All three primary agents (`smart-router`, `Zero`, `Erribaba`) enforce three disciplines on top of the workflow phases:
+
+1. **Verification Iron Law** — no completion claim without fresh evidence: the verification command must have been run within the current message and its full output read and checked before anything is called done, and a subagent's `Status: done` counts only after the primary independently verifies the work (`git diff`, run the test, read the changed file). Prose is not evidence.
+2. **Destructive Operations are never auto-approved** — force push, deleting branches, discarding work, removing a worktree not created in this session, or a hard reset always require explicit user confirmation, even when autonomous mode is active. Silence ≠ approval.
+3. **Ask Discipline** — user decisions and approvals are requested through the structured question tool with concrete options rather than a trailing natural-language question, which stalls headless and background runs. If no user can answer, prefer text output, non-interactive defaults, and the minimal scope; an autonomous ruling covers that single question only and never extends to a destructive operation.
+
+#### Workflow Reference Documents
+`references/workflow/` holds the shared protocol docs the primary agents point to: `parallel-task-management.md` (dispatch, phase barriers, completion check) and `WORKFLOW-QUICKREF.md` (one-page cheat sheet) plus `review-feedback-discipline.md` (how to receive and act on review findings), `debug-methodology.md` (root-cause discipline before claiming a fix), and `isolated-workspace.md` (working in a git worktree and cleaning it up safely).
+
 ### When to Use Structured Workflow
 
 | Task Type | Recommended Approach |
@@ -297,7 +307,7 @@ export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
 #### 解决方案
 主智能体必须遵循"任务完成检查协议"：
 1. **跟踪已派出任务**：记录所有派出的子智能体及其任务
-2. **验证完成状态**：检查每个任务是否收到`Status: done`的结果
+2. **验证完成状态（须经独立核实）**：检查每个任务是否收到`Status: done`的结果。子代理的 `done` 只是**声明**，不是证据：主智能体必须独立核实其工作（`git diff`、运行测试、读取变更文件——或派 `executor`/`validator` 执行后读取完整输出），核实通过才算 **verified done**。**未经核实的 `Status: done` 不满足本协议**：该任务不得计入"已完成"，而核实是主智能体自己的下一步动作——不是干等子代理再次汇报（"仍在处理"仅指尚未返回结果的任务）。
 3. **输出决策**：
    - 所有任务完成 → 输出完整总结
    - 有任务未完成 → 输出等待提示，列出已完成和仍在处理的任务
@@ -320,8 +330,10 @@ export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
 #### 实现要点
 - **绝不**在任何子代理仍在处理时输出"任务完成"
 - **绝不**仅因为收到部分结果就认为任务完成
+- **绝不**把未经核实的子代理 `Status: done` 当作完成——`done` 是声明，核实才是证据
 - **必须**在总结前显式检查所有任务状态
 - **必须**使用等待提示模板处理未完成任务
+- **必须**在当前消息内完成独立核实（`git diff`／运行测试／读取变更文件）并读取完整输出，再宣布完成——文字描述不是证据（验证铁律）
 
 ## Language
 

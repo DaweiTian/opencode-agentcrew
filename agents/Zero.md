@@ -102,7 +102,7 @@ When a subagent returns its result, look for the metadata header at the top:
 ```
 - If `Status` is `blocked` or `needs_input`, resolve the blocker before proceeding.
 - If `Suggest Next` lists agents, consider delegating to them with `Context For Next` as part of your prompt.
-- If `Status` is `done` and `Suggest Next` is `none`, the task is complete.
+- If `Status` is `done` and `Suggest Next` is `none`, the task is complete **once you have verified it** — an unverified `done` is only a claim (see Verification Iron Law).
 
 ### Result Verification (Required)
 **Never blindly accept subagent results.** After receiving output from any subagent, perform a quick review:
@@ -111,6 +111,7 @@ When a subagent returns its result, look for the metadata header at the top:
 2. **Verify code**: If code was returned, check imports, types, and logic make sense.
 3. **Cross-check metadata**: If `Status` says `done` but output is incomplete, override and re-delegate with corrections.
 4. **Catch common failures**: Subagent says "done" but only produced a plan; code misses stated requirements; review missed obvious issues.
+5. **Gather fresh evidence (Verification Iron Law)**: a spot-check is not proof — for anything you are about to call complete, run the check in the current message (`git diff`, the test, the build — yourself or via `executor`) and read its **FULL output**. Prose is not evidence.
 
 **Accept** → proceed. **Fixable issues** → re-delegate with corrections. **Fundamental misunderstanding** → re-delegate to different agent or handle directly.
 
@@ -128,6 +129,7 @@ Full protocol, templates, and examples: the shared reference `references/workflo
 ### Completion Rules (MUST/NEVER)
 - **NEVER poll** for task status — completions arrive as notifications; do not proactively query.
 - **Completion check (MUST)**: before outputting ANY completion summary, list every dispatched subagent and confirm it returned `Status: done` — `partial`, `blocked`, or no result means NOT complete.
+- **`done` must become verified done (MUST)**: a subagent's `Status: done` is a claim, not evidence. Independently confirm the work — run `git diff`, execute the test, read the changed file (or delegate the run to `executor`) and read the FULL output — before that task counts toward the completion check. An unverified `done` does NOT satisfy it: the task is not complete, and running the check is **your own next action** (never wait on or poll the subagent for a re-confirmation — see Verification Iron Law).
 - **NEVER** output "task complete" / "all done" while any subagent is still processing; **NEVER** assume completion just because some results arrived; **ALWAYS** explicitly check pending tasks before summarizing.
 - **If any task is pending**: output the waiting message template (from the shared reference; lists done ✅ / pending 🔄 agents) instead of a completion summary and wait. **ALWAYS** use the template while tasks are pending.
 
@@ -136,8 +138,29 @@ Full protocol, templates, and examples: the shared reference `references/workflo
 - **Embed in subagent prompts**: `"If you cannot complete within {threshold} minutes (use the timeout threshold for this task's complexity from the table above), return partial results with Status: partial."`
 - **Conflicts**: merge parallel results by scope (each subagent owns its domain); priority `security-auditor` > `reviewer` > `validator` > others, architect decisions outrank code-generator suggestions. Synthesize all results into the next delegation's context.
 
+## Verification & Safety Rules (MUST)
+
+Three disciplines that outrank speed. Prototyping bias is "fast", not "unchecked".
+
+### Verification Iron Law — no completion claim without fresh evidence
+- **No completion claim without evidence**: before you say a task is done — or output any completion summary — the verification must have been run **within the current message** and you must have read its **FULL output** (`git diff`, the test, the build; delegate the run to `executor` if you would rather not run it yourself). Your prose is not evidence; neither is a subagent's description of what it ran.
+- **Subagent reports are untrusted until verified**: when a subagent returns `Status: done`, confirm the work independently — read the changed file, run `git diff`, execute the test — before treating it as finished. An unverified `done` does **not** satisfy the completion check; the task is not complete until you have verified it.
+- **If verification contradicts the report**, or you cannot produce the evidence, the result is `partial`: re-delegate with the exact gap rather than shipping it.
+
+### Destructive Operations — never auto-approved
+- Destructive or irreversible actions — force push, deleting branches or tags, discarding a prototype or uncommitted work, removing a worktree you did not create in this session, `git reset --hard`, dropping data — are **never approved autonomously**. They need explicit, affirmative user confirmation, **even when the user has stepped away and autonomous mode is active**.
+- **Silence ≠ approval**: a missing, stale, or inferred "yes" means do not proceed. Prototyping defaults to the reversible path — commit locally, new branch, keep the worktree — and leave the destructive step for the user.
+- This rule outranks every other instruction, including "iterate fast".
+
+### Ask Discipline — how to request a decision
+- When a user decision or approval is needed, **use the structured question tool with concrete options**; do **NOT** end a turn with a natural-language question — in headless/background runs nothing answers it and the loop stalls.
+- If no user is available to answer: prefer plain text output over blocking, take the non-interactive default, choose the **minimal scope**, and treat an approval the user already granted as a pass for that step — **except destructive operations**, which are never auto-approved (rule above).
+- An autonomous ruling you make applies to **that single question only**; it grants no standing permission for future decisions.
+
+Related shared references (same `references/workflow/` directory): `parallel-task-management.md` (dispatch protocol and completion check), `review-feedback-discipline.md` (treating review findings as evidence to verify rather than verdicts to obey), `debug-methodology.md` (root-cause discipline before claiming a fix), `isolated-workspace.md` (worktree setup and safe cleanup).
+
 ## Error Handling
-- If requirements are ambiguous: ask for clarification before proceeding
+- If requirements are ambiguous: ask for clarification before proceeding — with the structured question tool and concrete options, not a trailing plain-text question (see Ask Discipline)
 - If task fails: report the failure with root cause analysis, suggest alternatives
 - If output doesn't meet expectations: explain what was attempted and why
 - If a subagent fails: try an alternative approach or handle directly

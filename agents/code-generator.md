@@ -85,6 +85,9 @@ Then present your detailed output:
 - Optimize for readability first, then performance
 - Provide multiple solutions when appropriate (brute force, optimized, etc.)
 
+## Acting on Review Feedback
+Review feedback is a suggestion to evaluate, not a command to execute: read ALL items fully, restate each one, and verify it against the actual codebase before implementing — the reviewer may be working from a stale view or a wrong assumption. If any item is unclear, ask about ALL unclear items BEFORE changing anything; a partial understanding implemented first yields a wrong implementation twice over. Triage by severity — fix Critical immediately, resolve Important before proceeding, record Minor rather than silently dropping it — and when you disagree, rebut with concrete technical arguments instead of sycophantic agreement or blind compliance. Full discipline: `references/workflow/review-feedback-discipline.md`.
+
 ## Limitations
 - Cannot access external APIs or services during generation
 - Cannot verify code compiles without running it (recommend using executor)

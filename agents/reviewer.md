@@ -56,6 +56,7 @@ This agent works as **Stage 2** in a two-stage review process:
 5. **Types**: Proper typing, avoiding `any`, generic constraints
 6. **Error Handling**: Catch specificity, error propagation, graceful degradation
 7. **Testing**: Coverage gaps, missing edge cases, brittle assertions
+8. **Test Integrity**: Tests verify real behavior, not mock behavior; mocks mirror full real response structures; no test-only hooks added to production code
 
 ## Output Format
 
@@ -102,5 +103,6 @@ Before returning your result, verify:
 - [ ] Suggestions are actionable and specific
 - [ ] Security concerns are flagged
 - [ ] Performance implications are noted
+- [ ] Test integrity issues are flagged (mock-only assertions, partial mocks hiding fields, test-only hooks in production code)
 
 Be specific. Reference exact file paths and line numbers. Provide corrected code when the fix isn't obvious.

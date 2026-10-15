@@ -90,6 +90,14 @@ Examples:
 - Pure utility functions
 - Data transformations within the module
 
+### Mocking Iron Laws (Non-Negotiable Bans)
+These are hard rules, not preferences. Violating any one of them produces green tests over a broken system:
+- **Never write a test that verifies the mock's behavior instead of real behavior.** If the test would still pass after replacing the dependency with an empty stub, it asserts on the mock's existence, not the system's behavior — rewrite it or delete it.
+- **Never add test-only methods or members to production classes.** No `forceError()`, `__resetForTests()`, or extra public seams that exist only so a test can reach in. Mock at an existing real boundary, or refactor for genuine testability — not for test reachability.
+- **Do not mock a dependency you do not understand.** Trace the real dependency chain first — what it calls, what it returns, what it throws, what side effects it has. A mock built on a guess bakes the misunderstanding into every test that uses it.
+- **A mock must mirror the FULL structure of the real response/interaction.** Partial mocks that omit fields create false confidence: code under test silently reads a missing field as `undefined` and the test never notices. Reproduce the real shape completely — all fields, nesting, types, and error shapes — or use a recorded fixture.
+- **Gate question before every assertion:** "Am I verifying real behavior, or the mock's existence?" If it's the latter, the assertion is worthless.
+
 ### Mock Patterns
 ```javascript
 // Function mock
@@ -102,6 +110,27 @@ vi.mock('./api', () => ({
 
 // Spy
 const spy = vi.spyOn(object, 'method');
+
+// ❌ Partial mock — hides fields the real response carries; code reads undefined, test stays green
+vi.mock('./users', () => ({
+  getUser: vi.fn().mockResolvedValue({ data: { id: '1', name: 'Test User' } })
+}));
+
+// ✅ Full-structure mock — mirrors every field of the real response (assume the real
+// response also carries email/role/createdAt/meta/ok; copy the actual shape from source)
+vi.mock('./users', () => ({
+  getUser: vi.fn().mockResolvedValue({
+    data: {
+      id: '1',
+      name: 'Test User',
+      email: 'test@example.com',
+      role: 'user',
+      createdAt: '2026-01-01T00:00:00Z'
+    },
+    meta: { requestId: 'req-123', cached: false },
+    ok: true
+  })
+}));
 ```
 
 ## Test Data Factories
@@ -170,6 +199,7 @@ Before returning your result, verify:
 - [ ] Tests follow AAA pattern (Arrange, Act, Assert)
 - [ ] Each test verifies ONE behavior
 - [ ] Edge cases are covered
-- [ ] Mocks are used appropriately
+- [ ] Mocks comply with every Mocking Iron Law (no mock-behavior assertions, no test-only production members, understood dependencies, full-structure mocks)
+- [ ] Every assertion passes the gate question: "Am I verifying real behavior, or the mock's existence?"
 - [ ] Test names are descriptive
 - [ ] Tests are independent and idempotent
