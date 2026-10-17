@@ -6,7 +6,7 @@
 
 </div>
 
-**A ready-to-use OpenCode agent team with 39 specialized roles covering the full-stack development workflow.**
+**A ready-to-use OpenCode agent team with 38 specialized roles covering the full-stack development workflow.**
 
 ## 📑 Table of Contents
 
@@ -23,7 +23,7 @@
 
 ## ✨ Features
 
-- **39 Specialized Agents** — Architecture design, code generation, debugging, testing, frontend development, security audit, and more
+- **38 Specialized Agents** — Architecture design, code generation, debugging, testing, frontend development, security audit, and more
 - **Smart Routing** — `smart-router` dispatches skills and models automatically based on task complexity, domain, and cost
 - **Tiered Subagents** — 8 high-frequency roles have `-lite` variants (`mimo-v2.6-flash`) for fast, cheap simple tasks
 - **Structured Workflow** — Inspired by the MiMo Compose pattern, supports the full brainstorm→plan→execute→review→merge pipeline
@@ -100,7 +100,7 @@ This agent collection requires multiple models working together. We recommend th
 - Cost-effective: cheaper than purchasing individual API access
 - Ready to use: no multi-provider setup — just use the `opencode-go/<model-id>` format
 
-> All 7 models used by the 39 agents in this collection (MiMo-V2.6-Flash, MiMo-V2.6-Pro, DeepSeek V4.1 Flash, GLM-5.2, Kimi K2.7 Code, Qwen3.8 Flash, MiniMax M3) are confirmed to be included in the Go Plan.
+> All 7 models used by the 38 agents in this collection (MiMo-V2.6-Flash, MiMo-V2.6-Pro, DeepSeek V4.1 Flash, GLM-5.2, Kimi K2.7 Code, Qwen3.8 Flash, MiniMax M3) are confirmed to be included in the Go Plan.
 > All models chosen for this collection are **Chinese domestic models** that work directly in China — no foreign models such as GPT/Claude/Grok are required.
 >
 > Model quotas are maintained officially and change frequently, so this README keeps no local quota snapshot. Please refer to the official pages:
@@ -135,7 +135,6 @@ Below are the default models for each agent in the collection. Based on my exist
 | Erribaba | opencode-go/mimo-v2.6-pro | Primary (production code, deep analysis) |
 | api-designer | opencode-go/mimo-v2.6-pro | API design |
 | architect | opencode-go/glm-5.2 | Architecture design |
-| browser-debugger | opencode-go/deepseek-v4.1-flash | Browser debugging |
 | code-generator | opencode-go/mimo-v2.6-pro | Code generation |
 | code-generator-lite | opencode-go/mimo-v2.6-flash | Code generation (lite) |
 | db-engineer | opencode-go/deepseek-v4.1-flash | Database engineering |
@@ -208,13 +207,12 @@ Verify that the references configuration is correct.
 
 ```
 opencode-agentcrew/
-├── agents/                      # Agent configuration files (39)
+├── agents/                      # Agent configuration files (38)
 │   ├── smart-router.md          # Primary agent (intelligent dispatch, recommended default)
 │   ├── Zero.md                  # Primary agent (rapid prototyping, multimodal)
 │   ├── Erribaba.md              # Primary agent (production code, deep analysis)
 │   ├── api-designer.md          # API design
 │   ├── architect.md             # Architecture design
-│   ├── browser-debugger.md      # Browser debugging
 │   ├── code-generator.md        # Code generation
 │   ├── code-generator-lite.md   # Code generation (lite)
 │   ├── db-engineer.md           # Database engineering
@@ -280,7 +278,6 @@ opencode-agentcrew/
 |------|---------------|:--------:|:----------:|:----------:|
 | `api-designer.md` | API endpoint design, OpenAPI specs | ✓ | ✗ | ✗ |
 | `architect.md` | System design, module planning, tech selection | ✗ | ✗ | ✗ |
-| `browser-debugger.md` | Browser-driven frontend debugging (drives real Firefox via ff_* tools) | ✗ | ✗ | ✗ |
 | `code-generator.md` | High-quality code generation, bug fixes | ✓ | ✗ | ✗ |
 | `db-engineer.md` | Database schema, migrations, SQL optimization | ✓ | ✓ | ✗ |
 | `debugger.md` | Systematic bug isolation and fixing | ✓ | ✓ | ✗ |
@@ -308,7 +305,7 @@ opencode-agentcrew/
 | `workflow-orchestrator.md` | Workflow orchestration plan output (read-only advisor, does not dispatch subagents) | ✗ | ✗ | ✗ |
 
 > \* **Partial write**: can only write under the `~/.opencode/plan/` directory (a directory-level allow exception placed after the wildcard denies); read-only everywhere else, and cannot run commands.
-> **Delegation**: all 36 subagents (lite variants included) deny `subagent` in their frontmatter — none can delegate further; only the 3 primary agents (smart-router, Zero, Erribaba) dispatch subagents.
+> **Delegation**: all 35 subagents (lite variants included) deny `subagent` in their frontmatter — none can delegate further; only the 3 primary agents (smart-router, Zero, Erribaba) dispatch subagents.
 
 ### Lite Subagents
 
@@ -471,7 +468,7 @@ permissions:        # primary agents may omit (all tools allowed); subagents mus
 <System prompt>
 ```
 
-> ℹ️ Since 2026-09 this repo has fully migrated from the V1 `tools:` field to the V2 `permissions:` list (the V1 `tools:` key is silently ignored by OpenCode V2). The `edit` action covers all three file-modification tools (edit/write/patch), the `shell` action covers command execution, the `subagent` action controls further delegation, and the last matching rule wins. All 36 subagents deny `subagent`; only the 3 primary agents dispatch subagents.
+> ℹ️ Since 2026-09 this repo has fully migrated from the V1 `tools:` field to the V2 `permissions:` list (the V1 `tools:` key is silently ignored by OpenCode V2). The `edit` action covers all three file-modification tools (edit/write/patch), the `shell` action covers command execution, the `subagent` action controls further delegation, and the last matching rule wins. All 35 subagents deny `subagent`; only the 3 primary agents dispatch subagents.
 
 ## Contributing
 

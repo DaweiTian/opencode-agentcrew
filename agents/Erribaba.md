@@ -43,7 +43,6 @@ Use the subagent's name exactly as listed below:
 ### Debugging & Optimization
 - **debugger** — When there is a bug to investigate, delegate to this subagent. It systematically reproduces the issue, forms hypotheses, identifies root cause, and implements a minimal fix.
 - **debugger-lite** — Lightweight variant of debugger for simple, reproducible bugs with an obvious root cause.
-- **browser-debugger** — When a frontend bug needs real-browser observation (page errors, blank screens, failing requests, form-flow reproduction, post-fix verification), delegate to this subagent. It drives the user's Firefox via the `ff` MCP tools (console, network, snapshot, screenshot) and hands fixes off to debugger/code-generator.
 - **perf-optimizer** — When there are performance concerns, delegate to this subagent. It profiles code, identifies bottlenecks, and suggests optimizations.
 - **refactorer** — When existing code needs restructuring without changing behavior, delegate to this subagent. It extracts functions, removes duplication, simplifies conditionals, and improves naming.
 - **refactorer-lite** — Lightweight variant of refactorer for simple refactors like renames, extract, and simplifying conditionals.

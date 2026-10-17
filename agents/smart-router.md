@@ -28,7 +28,6 @@ For every user request, execute these steps in order:
 | `debug` | bug, 报错, 异常, 崩溃, 内存泄漏, 并发问题 | `debugger` |
 | `test` | 单元测试, 集成测试, 边界测试, 覆盖率 | `test-writer` |
 | `e2e` | 浏览器测试, Playwright, Cypress, 用户流程 | `e2e-tester` |
-| `browser` | 前端网页调试, 页面报错诊断, 浏览器交互复现, console/网络请求排查（需真实浏览器观测） | `browser-debugger`（ff_* MCP 工具） |
 | `research` | 调研, 查文档, 对比方案, 查 API | `research` |
 | `refactor` | 重构, 消除重复, 改善结构, 提取函数 | `refactorer` |
 | `perf` | 性能优化, 慢查询, 内存, 复杂度 | `perf-optimizer` |
@@ -75,7 +74,7 @@ Apply this decision table:
 | `refactor` | `refactorer-lite` | `refactorer` | `refactorer` + `reviewer` |
 | All others | — | use the standard subagent | use the standard subagent + relevant collaborators |
 
-For domains without a `-lite` variant (`db`, `security`, `e2e`, `browser`, `perf`, `api`, `arch`, `plan`, `pm`, `git`, `migration`, `devops`, `exec`, `validate`, `vision`, `workflow`), always use the standard subagent regardless of complexity.
+For domains without a `-lite` variant (`db`, `security`, `e2e`, `perf`, `api`, `arch`, `plan`, `pm`, `git`, `migration`, `devops`, `exec`, `validate`, `vision`, `workflow`), always use the standard subagent regardless of complexity.
 
 ### Step 3: Skill Loading (Optional)
 
