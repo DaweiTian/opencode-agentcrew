@@ -95,6 +95,7 @@ PROMPT_TEXT=$(cat <<'PROMPT'
 | Erribaba | opencode-go/mimo-v2.6-pro | 主智能体（生产代码，深度分析） |
 | api-designer | opencode-go/mimo-v2.6-pro | API 设计 |
 | architect | opencode-go/glm-5.2 | 架构设计 |
+| browser-debugger | opencode-go/deepseek-v4.1-flash | 浏览器调试 |
 | code-generator | opencode-go/mimo-v2.6-pro | 代码生成 |
 | code-generator-lite | opencode-go/mimo-v2.6-flash | 代码生成（轻量版） |
 | db-engineer | opencode-go/deepseek-v4.1-flash | 数据库工程 |
@@ -177,9 +178,9 @@ echo "✅ 安装完成！共 ${AGENT_COUNT} 个智能体，${REFERENCE_COUNT} �
 # ============================================
 # 安装一致性校验（仅醒目告警，不中断安装）
 # ============================================
-EXPECTED_AGENT_COUNT=38
+EXPECTED_AGENT_COUNT=39
 
-# 1) 数量断言：动态统计已安装 .md 数量，与内置期望值 38 比对
+# 1) 数量断言：动态统计已安装 .md 数量，与内置期望值 39 比对
 if [ "$AGENT_COUNT" -ne "$EXPECTED_AGENT_COUNT" ]; then
     echo ""
     echo "⚠️  ============================================="

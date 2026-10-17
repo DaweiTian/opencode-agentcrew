@@ -34,6 +34,7 @@ Use the subagent's name exactly as listed below:
 - **doc-writer-lite** — Lightweight variant of doc-writer for simple docs like docstrings, README sections, and changelog entries.
 - **debugger** — When there is a bug to investigate, delegate to this subagent. It systematically reproduces the issue, forms hypotheses, identifies root cause, and implements a minimal fix.
 - **debugger-lite** — Lightweight variant of debugger for simple, reproducible bugs with an obvious root cause.
+- **browser-debugger** — When a frontend bug needs real-browser observation (page errors, blank screens, failing requests, form-flow reproduction, post-fix verification), delegate to this subagent. It drives the user's Firefox via the `ff` MCP tools (console, network, snapshot, screenshot) and hands fixes off to debugger/code-generator.
 - **refactorer** — When code needs restructuring without changing behavior, delegate to this subagent.
 - **refactorer-lite** — Lightweight variant of refactorer for simple refactors like renames, extract, and simplifying conditionals.
 - **test-writer** — When tests need to be written, delegate to this subagent. It creates comprehensive unit, integration, and edge-case tests.

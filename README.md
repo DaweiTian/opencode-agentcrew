@@ -6,7 +6,7 @@
 
 </div>
 
-**开箱即用的 OpenCode 智能体团队，38 个专业角色覆盖全栈开发流程。**
+**开箱即用的 OpenCode 智能体团队，39 个专业角色覆盖全栈开发流程。**
 
 ## 📑 目录
 
@@ -23,7 +23,7 @@
 
 ## ✨ 特点
 
-- **38 个专业智能体** — 架构设计、代码生成、调试诊断、测试编写、前端开发、安全审计等
+- **39 个专业智能体** — 架构设计、代码生成、调试诊断、测试编写、前端开发、安全审计等
 - **智能调度** — `smart-router` 根据任务复杂度、领域、成本自动调度 skill 与模型
 - **分层子智能体** — 8 个高频角色提供 `-lite` 轻量版（`mimo-v2.6-flash`），简单任务最快最省
 - **结构化工作流** — 参考 MiMo Compose 模式，支持 brainstorm→plan→execute→review→merge 完整流程
@@ -100,7 +100,7 @@ rm -rf /tmp/opencode-agents
 - 性价比高：相比单独购买 API，价格更优惠
 - 开箱即用：无需配置多个 provider，按 `opencode-go/<model-id>` 格式直接可用
 
-> 本集合 38 个智能体使用的 7 个模型（MiMo-V2.6-Flash、MiMo-V2.6-Pro、DeepSeek V4.1 Flash、GLM-5.2、Kimi K2.7 Code、Qwen3.8 Flash、MiniMax M3）已全部确认包含于 Go 套餐。
+> 本集合 39 个智能体使用的 7 个模型（MiMo-V2.6-Flash、MiMo-V2.6-Pro、DeepSeek V4.1 Flash、GLM-5.2、Kimi K2.7 Code、Qwen3.8 Flash、MiniMax M3）已全部确认包含于 Go 套餐。
 > 本集合选用的模型均为**国产模型**，国内可直接使用，无需 GPT/Claude/Grok 等国外模型。
 >
 > 各模型配额由官方维护且变动频繁，本 README 不保留本地配额快照，请以官方页面为准：
@@ -136,6 +136,7 @@ rm -rf /tmp/opencode-agents
 | Erribaba | opencode-go/mimo-v2.6-pro | 主智能体（生产代码，深度分析） |
 | api-designer | opencode-go/mimo-v2.6-pro | API 设计 |
 | architect | opencode-go/glm-5.2 | 架构设计 |
+| browser-debugger | opencode-go/deepseek-v4.1-flash | 浏览器调试 |
 | code-generator | opencode-go/mimo-v2.6-pro | 代码生成 |
 | code-generator-lite | opencode-go/mimo-v2.6-flash | 代码生成（轻量版） |
 | db-engineer | opencode-go/deepseek-v4.1-flash | 数据库工程 |
@@ -208,12 +209,13 @@ rm -rf /tmp/opencode-agents
 
 ```
 opencode-agentcrew/
-├── agents/                      # 智能体配置文件（38 个）
+├── agents/                      # 智能体配置文件（39 个）
 │   ├── smart-router.md          # 主智能体（智能调度，推荐默认）
 │   ├── Zero.md                  # 主智能体（快速原型，多模态）
 │   ├── Erribaba.md              # 主智能体（生产代码，深度分析）
 │   ├── api-designer.md          # API 设计
 │   ├── architect.md             # 架构设计
+│   ├── browser-debugger.md      # 浏览器调试
 │   ├── code-generator.md        # 代码生成
 │   ├── code-generator-lite.md   # 代码生成（轻量版）
 │   ├── db-engineer.md           # 数据库工程
@@ -279,6 +281,7 @@ opencode-agentcrew/
 |------|------|:----:|:------:|:------:|
 | `api-designer.md` | API 端点设计、OpenAPI 规范 | ✓ | ✗ | ✗ |
 | `architect.md` | 系统设计、模块划分、技术选型 | ✗ | ✗ | ✗ |
+| `browser-debugger.md` | 浏览器调试（ff_* 工具驱动真实 Firefox 观测） | ✗ | ✗ | ✗ |
 | `code-generator.md` | 高质量代码生成、bug 修复 | ✓ | ✗ | ✗ |
 | `db-engineer.md` | 数据库 Schema、Migration、SQL 优化 | ✓ | ✓ | ✗ |
 | `debugger.md` | 系统化定位和修复代码缺陷 | ✓ | ✓ | ✗ |
@@ -306,7 +309,7 @@ opencode-agentcrew/
 | `workflow-orchestrator.md` | 工作流编排计划输出（只读顾问，不直接派发子智能体） | ✗ | ✗ | ✗ |
 
 > \* **部分可写**：仅可写入 `~/.opencode/plan/` 目录（目录级 allow 例外，置于通配 deny 之后生效）；其余路径只读，且不可执行命令。
-> **可派发**：全部 35 个子智能体（含 Lite 版）均在 frontmatter 中 deny `subagent`，即不可再向下派发；只有 3 个主智能体（smart-router、Zero、Erribaba）可派发子智能体。
+> **可派发**：全部 36 个子智能体（含 Lite 版）均在 frontmatter 中 deny `subagent`，即不可再向下派发；只有 3 个主智能体（smart-router、Zero、Erribaba）可派发子智能体。
 
 ### 子智能体（Lite 轻量版）
 
@@ -469,7 +472,7 @@ permissions:        # 主智能体可省略（省略则允许所有工具）；�
 <系统提示词>
 ```
 
-> ℹ️ 2026-09 起本仓库已从 V1 的 `tools:` 字段全面迁移到 V2 的 `permissions:` 列表（V1 `tools:` 在 OpenCode V2 中会被静默忽略）。`edit` 动作覆盖 edit/write/patch 三种文件修改工具，`shell` 动作覆盖命令执行，`subagent` 动作控制能否再向下派发子智能体；多条规则同时命中时以最后一条为准。35 个子智能体全部 deny `subagent`，只有 3 个主智能体可派发。
+> ℹ️ 2026-09 起本仓库已从 V1 的 `tools:` 字段全面迁移到 V2 的 `permissions:` 列表（V1 `tools:` 在 OpenCode V2 中会被静默忽略）。`edit` 动作覆盖 edit/write/patch 三种文件修改工具，`shell` 动作覆盖命令执行，`subagent` 动作控制能否再向下派发子智能体；多条规则同时命中时以最后一条为准。36 个子智能体全部 deny `subagent`，只有 3 个主智能体可派发。
 
 ## 参与贡献
 

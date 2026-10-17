@@ -8,11 +8,11 @@ A collection of OpenCode agent configuration files. No code, no build, no tests 
 
 ```
 agents/
-  *.md          # 38 agent definitions (3 primary + 35 subagent)
+  *.md          # 39 agent definitions (3 primary + 36 subagent)
 references/
   workflow/     # workflow docs and quick reference (OpenCode references)
 AGENTS.md       # repo conventions and agent tables (this file)
-README.md       # Chinese (38 agents, model table included)
+README.md       # Chinese (39 agents, model table included)
 README.en.md    # English (same)
 install.sh      # Linux/macOS one-shot install script
 install.ps1     # Windows one-shot install script
@@ -56,7 +56,7 @@ permissions:      # primary agents may omit (all tools allowed); every subagent 
 - **Model naming**: all agents use the `opencode-go/` provider prefix — models include `opencode-go/mimo-v2.6-flash`, `opencode-go/mimo-v2.6-pro`, `opencode-go/deepseek-v4.1-flash`, `opencode-go/glm-5.2`, `opencode-go/kimi-k2.7-code`, `opencode-go/qwen3.8-flash`, `opencode-go/minimax-m3`.
 - **Tool access** defaults to all tools allowed when the `permissions` key is omitted — only the three primary agents omit it. Every subagent declares an explicit `permissions` block that ends with a `subagent` deny (only primary agents may delegate). Beyond that deny: read-only subagents deny both `edit` and `shell`; code-writing subagents deny `shell` and omit the `edit` deny; `perf-optimizer` and `validator` deny `edit` but keep `shell`; agents needing full tool access (edit and shell) declare only the `subagent` deny (e.g. `db-engineer`, `executor`); `plan-writer` and `project-manager` additionally allow `edit` under `~/.opencode/plan/*` (the allow is placed after the wildcard denies so it wins for that path).
 
-## All 38 Agents
+## All 39 Agents
 
 ### Primary (3)
 
@@ -66,13 +66,14 @@ permissions:      # primary agents may omit (all tools allowed); every subagent 
 | `Zero.md` | `opencode-go/mimo-v2.6-flash` | Rapid prototyping, multimodal input, quick iteration |
 | `Erribaba.md` | `opencode-go/mimo-v2.6-pro` | Production code, complex algorithms, full-stack engineering |
 
-### Subagents — Read-only (12)
+### Subagents — Read-only (13)
 
 Denied `edit`, `shell`, and `subagent` in `permissions` frontmatter (except `plan-writer`/`project-manager`, which allow `edit` under `~/.opencode/plan/*`; other actions remain available via the allow-all base):
 
 | File | Model | Role |
 |------|-------|------|
 | `architect.md` | `opencode-go/glm-5.2` | System architecture design |
+| `browser-debugger.md` | `opencode-go/deepseek-v4.1-flash` | Browser-driven frontend debugging (ff_* MCP tools) |
 | `frontend-reviewer.md` | `opencode-go/mimo-v2.6-flash` | Frontend code review |
 | `git-assistant.md` | `opencode-go/qwen3.8-flash` | Git workflow assistance |
 | `plan-writer.md` | `opencode-go/mimo-v2.6-pro` | Implementation planning (edit allowed only under `~/.opencode/plan/*`) |
