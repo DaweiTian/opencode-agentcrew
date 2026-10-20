@@ -49,10 +49,10 @@ Phase 3: Execute Fixes
 When multiple independent tasks are launched in the same phase (e.g., multiple explore tasks, or multiple independent fix tasks):
 
 When any task completes, **immediately**:
-1. **Verify** the result
+1. **Sanity-check** the result (does it address the task?) — command-level verification is **batched per phase**, not run per arrival (see [Task Completion Check](#task-completion-check-critical))
 2. **Process** the result — record findings, update state
 3. **Wait for remaining tasks** — do NOT launch next-phase tasks yet
-4. **Only after ALL phase tasks complete** — synthesize results and proceed to next phase
+4. **Only after ALL phase tasks complete** — run the ONE batched verification pass over the phase's changes, synthesize results, and proceed to next phase
 
 **Implementation Pattern:**
 ```
@@ -61,7 +61,7 @@ Step 1: Launch multiple independent tasks in single message
         @explore (module A, background=true), @explore (module B, background=true)
 
 Step 2: As soon as ANY task completes (first-come-first-serve):
-        - Immediately verify the result
+        - Sanity-check the result (command verification is batched per phase)
         - Process the result (record findings, update state)
         - Continue waiting for remaining phase tasks
         - ⛔ DO NOT launch next-phase tasks yet
@@ -69,6 +69,7 @@ Step 2: As soon as ANY task completes (first-come-first-serve):
 Step 3: Repeat Step 2 for each subsequent completion
 
 Step 4: ONLY after ALL phase tasks are processed:
+        - Run ONE batched verification pass over the phase's changes
         - Synthesize all results
         - Proceed to next phase
         - Now you can launch next-phase tasks
@@ -125,7 +126,7 @@ Priority ordering cannot fix a file-ownership conflict: letting a "lower-priorit
 Before moving from one phase to the next, verify:
 
 - [ ] All tasks in current phase have completed (check background tasks)
-- [ ] All results have been verified and processed
+- [ ] All results have been processed and the phase's ONE batched verification pass has run (full output read)
 - [ ] Results have been synthesized into coherent understanding
 - [ ] Next-phase write tasks have been checked for file overlap (disjoint, worktree-isolated, or serialized — see [Parallel Write Tasks: File Ownership Mutex](#parallel-write-tasks-file-ownership-mutex-critical--must-follow))
 - [ ] Any blockers or issues have been resolved
@@ -152,15 +153,15 @@ bash: date +%s  →  record as TASK_START_{agent_name}
 ```
 
 **Timeout thresholds:**
-- Simple tasks (review, lint): 10 minutes
-- Medium tasks (code generation, single feature): 20 minutes
-- Complex tasks (full-stack implementation, architecture): 30 minutes
+- Simple tasks (review, lint): 5 minutes
+- Medium tasks (code generation, single feature): 10 minutes
+- Complex tasks (full-stack implementation, architecture): 15 minutes
 
 **When a task exceeds its threshold:**
 1. Log the timeout: `bash: echo "TIMEOUT: {agent_name} exceeded {threshold} minutes"`
 2. Abandon the stuck sub-session and re-dispatch: the `subagent` tool has no cancellation parameter, so a stuck task cannot be stopped — give up on that sub-session and launch a fresh one
 3. Retry with a simplified prompt (reduce scope, add explicit time constraint)
-4. Include in retry: `"Complete within 10 minutes. If you cannot finish, return partial results with Status: partial."`
+4. Include in retry: `"Complete within {threshold} minutes (5 simple / 10 medium / 15 complex). If you cannot finish, return partial results with Status: partial."`
 5. If retry also fails: escalate — try a different subagent or handle the task yourself
 
 **Embed timeout instructions in subagent prompts:**
@@ -184,27 +185,27 @@ Before outputting any summary, mentally list all subagent tasks you've dispatche
 - Which have returned results?
 - Which are still processing?
 
-**Step 2: Verify All Tasks Complete — and Independently**
+**Step 2: Verify All Completed Tasks in ONE Batched Pass**
 For each dispatched task, confirm:
 - Has the subagent returned a result with `Status: done`?
 - If `Status: partial` or `blocked`, the task is NOT complete
 - If no result received, the task is still processing
-- **A `Status: done` is a *claim*, not evidence.** Before counting a task as complete, independently verify the work: read the changed files / run `git diff`, execute the test or build command and read its **full** output (yourself or via `executor` / `validator`). Prose is not evidence. Only after verification does the task count as **verified done** — an unverified `Status: done` does NOT satisfy this protocol and must not be counted as "completed".
-  > Verification is **your own next action**, not a reason to keep waiting on the subagent. "Still processing" refers **only** to tasks that have not returned a result yet. A task that returned `Status: done` is *reported* — go verify it yourself instead of asking the subagent to re-report.
+- **A `Status: done` is a *claim*, not evidence** — but verification is **batched per phase, not per task**. Before the completion summary, verify the phase's completed tasks together in ONE pass: a single `git diff` covering all changes plus one test/build run (yourself or a single `executor` / `validator` dispatch covering all tasks), and read its **full** output. Do not dispatch a serial verification round-trip per `done`. Prose is not evidence. Only after the batch passes do the tasks count as **verified done** — an unverified `Status: done` does NOT satisfy this protocol and must not be counted as "completed".
+  > Verification is **your own next action**, not a reason to keep waiting on the subagent. "Still processing" refers **only** to tasks that have not returned a result yet. A task that returned `Status: done` is *reported* — fold it into the batched verification pass instead of asking the subagent to re-report.
 
 **Step 3: Output Decision**
 Classify each dispatched task into exactly one bucket, then decide:
 
 | Bucket | Meaning | Your action |
 |--------|---------|-------------|
-| **Verified done** | Result returned **and** you independently confirmed the work this message | Counts as complete |
-| **Reported, unverified** | `Status: done` received, not yet checked | **Verify now** (your own next step) — do NOT show it under "仍在处理", do NOT ask the subagent to re-report |
+| **Verified done** | Result returned **and** confirmed in the phase's batched verification pass this message | Counts as complete |
+| **Reported, unverified** | `Status: done` received, not yet checked | **Fold into the phase's batched verification pass now** (your own next step) — do NOT show it under "仍在处理", do NOT ask the subagent to re-report |
 | **Still processing** | No result received yet | Include in the waiting message |
 | **partial / blocked / needs_input** | Returned but not done | Resolve (re-dispatch, handle yourself, or ask the user) — never silently counted as complete |
 
 - **If ALL tasks are verified done**: proceed with the completion summary
 - **If ANY task is still processing** (no result yet): output the waiting message instead
-- **If any task is reported-but-unverified**: run the verification first, then re-evaluate
+- **If any task is reported-but-unverified**: run the batched verification first, then re-evaluate
 
 ### Waiting Message Template
 When tasks are still pending (no result received yet), output — list only tasks under "仍在处理" that genuinely have not returned; tasks that returned `Status: done` belong under "已完成" **only after you have verified them**:
@@ -223,8 +224,8 @@ When tasks are still pending (no result received yet), output — list only task
 ```
 
 ### Common Scenarios
-1. **All 5 subagents dispatched, 3 returned**: verify the 3 returned claims, then output a waiting message for the remaining 2 (which have not returned at all)
-2. **All 5 returned `Status: done`**: do **not** summarize yet — verify each one (git diff / run tests / read files), then output the full completion summary
+1. **All 5 subagents dispatched, 3 returned**: verify the 3 returned claims in ONE batched pass, then output a waiting message for the remaining 2 (which have not returned at all)
+2. **All 5 returned `Status: done`**: do **not** summarize yet — verify them in ONE batched pass (a single `git diff` + test run covering all changes, or one `executor` dispatch), then output the full completion summary
 3. **All tasks verified done**: output full completion summary
 4. **Some tasks failed**: report failures, but still wait for remaining tasks
 5. **A `Status: done` claim fails your verification**: treat the task as incomplete — re-dispatch with the specific gap, or handle it yourself; never report it as done
@@ -234,7 +235,7 @@ When tasks are still pending (no result received yet), output — list only task
 - **NEVER** assume a task is complete just because you received some results
 - **NEVER** treat an unverified subagent `Status: done` as complete — the claim is not evidence
 - **ALWAYS** explicitly check for pending tasks before summarizing
-- **ALWAYS** independently verify each claimed-done task within the current message (`git diff` / run the test / read the changed files) and read its full output before declaring completion (Verification Iron Law)
+- **ALWAYS** independently verify the phase's claimed-done tasks in ONE batched check within the current message (one `git diff` + test run covering all changes, or a single `executor` dispatch) and read its full output before declaring completion (Verification Iron Law)
 - **ALWAYS** use the waiting message template when tasks are pending
 
 ## Related References

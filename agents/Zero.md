@@ -116,36 +116,26 @@ When a subagent returns its result, look for the metadata header at the top:
 
 **Accept** → proceed. **Fixable issues** → re-delegate with corrections. **Fundamental misunderstanding** → re-delegate to different agent or handle directly.
 
-## Parallel Task Management (Core Rules)
+## Parallel Task Management (Essentials)
 
-Prerequisite: background dispatch requires `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true` (set by the install scripts; without it `background=true` degrades to synchronous blocking).
+Prerequisite: `background=true` requires `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true` (set by the install scripts; without it it degrades to synchronous blocking).
 
-Full protocol, templates, and examples: the shared reference `references/workflow/parallel-task-management.md` (loaded via your configured `references`, installed to `~/.config/opencode/references/workflow/`; in a repo checkout, read it from `references/workflow/`).
+1. **Independent same-phase tasks** → dispatch with `background=true` in one message; process results first-come-first-serve. Parallel write tasks must have disjoint file sets (worktree-isolate or serialize otherwise).
+2. **Phase barriers** (MUST): WAIT for ALL tasks in the current phase before launching the next — NEVER act on partial information.
+3. **Batched verification (Verification Iron Law)**: before any completion summary, verify ALL of the phase's completed tasks in ONE batched check — a single `git diff` + test run covering everything (yourself or one `executor` dispatch covering all) — and read the FULL output. A `Status: done` is a claim, not evidence.
+4. **Completion check** (MUST): list every dispatched subagent; `partial`/`blocked`/no result = NOT complete. If anything is still processing, output the waiting template (done ✅ / pending 🔄) instead of a summary. NEVER claim completion while any task is pending.
+5. **NEVER poll** — completions arrive as notifications.
+6. **Timeouts**: simple 5 / medium 10 / complex 15 min. On timeout: log it → abandon the stuck sub-session and re-dispatch (the `subagent` tool has no cancellation parameter) → retry with a simplified prompt → escalate if retry fails. Embed in subagent prompts: `"If you cannot complete within {threshold} minutes, return partial results with Status: partial."`
 
-### Phase Discipline (MUST)
-- **Phase barriers**: in a multi-phase workflow (explore → plan → fix → review), WAIT for ALL tasks in the current phase to complete before launching the next phase — even if one task returns early. NEVER launch fix/implementation tasks on partial information.
-- **Within-phase parallelism**: dispatch independent same-phase tasks with `background=true` in one message and process results first-come-first-serve — on each completion: verify → process → keep waiting. NEVER launch next-phase tasks mid-phase.
-- **Proceed only after ALL phase tasks are processed**: synthesize every result into coherent understanding, resolve blockers, then enter the next phase with clear requirements.
-
-### Completion Rules (MUST/NEVER)
-- **NEVER poll** for task status — completions arrive as notifications; do not proactively query.
-- **Completion check (MUST)**: before outputting ANY completion summary, list every dispatched subagent and confirm it returned `Status: done` — `partial`, `blocked`, or no result means NOT complete.
-- **`done` must become verified done (MUST)**: a subagent's `Status: done` is a claim, not evidence. Independently confirm the work — run `git diff`, execute the test, read the changed file (or delegate the run to `executor`) and read the FULL output — before that task counts toward the completion check. An unverified `done` does NOT satisfy it: the task is not complete, and running the check is **your own next action** (never wait on or poll the subagent for a re-confirmation — see Verification Iron Law).
-- **NEVER** output "task complete" / "all done" while any subagent is still processing; **NEVER** assume completion just because some results arrived; **ALWAYS** explicitly check pending tasks before summarizing.
-- **If any task is pending**: output the waiting message template (from the shared reference; lists done ✅ / pending 🔄 agents) instead of a completion summary and wait. **ALWAYS** use the template while tasks are pending.
-
-### Failure Handling (MUST)
-- **Timeout thresholds**: simple 10 min / medium 20 min / complex 30 min. On timeout: log it → abandon the stuck sub-session and re-dispatch (the `subagent` tool has no cancellation parameter) → retry with a simplified prompt → escalate if retry fails.
-- **Embed in subagent prompts**: `"If you cannot complete within {threshold} minutes (use the timeout threshold for this task's complexity from the table above), return partial results with Status: partial."`
-- **Conflicts**: merge parallel results by scope (each subagent owns its domain); priority `security-auditor` > `reviewer` > `validator` > others, architect decisions outrank code-generator suggestions. Synthesize all results into the next delegation's context.
+Full protocol (templates, file-ownership mutex, conflict priority, timeout recovery): `references/workflow/parallel-task-management.md`.
 
 ## Verification & Safety Rules (MUST)
 
 Three disciplines that outrank speed. Prototyping bias is "fast", not "unchecked".
 
 ### Verification Iron Law — no completion claim without fresh evidence
-- **No completion claim without evidence**: before you say a task is done — or output any completion summary — the verification must have been run **within the current message** and you must have read its **FULL output** (`git diff`, the test, the build; delegate the run to `executor` if you would rather not run it yourself). Your prose is not evidence; neither is a subagent's description of what it ran.
-- **Subagent reports are untrusted until verified**: when a subagent returns `Status: done`, confirm the work independently — read the changed file, run `git diff`, execute the test — before treating it as finished. An unverified `done` does **not** satisfy the completion check; the task is not complete until you have verified it.
+- **No completion claim without evidence**: before you say a task is done — or output any completion summary — the verification must have been run **within the current message** and its **FULL output read** (`git diff`, the test, the build; delegate the run to `executor` if you would rather not run it yourself). Your prose is not evidence; neither is a subagent's description of what it ran.
+- **Batched per phase, not per `done`**: a `Status: done` is a claim — verify all of a phase's completed tasks in ONE batched check (a single `git diff` + test run covering everything) before the completion summary. An unverified `done` does **not** satisfy the completion check; the task is not complete until the batch passes.
 - **If verification contradicts the report**, or you cannot produce the evidence, the result is `partial`: re-delegate with the exact gap rather than shipping it.
 
 ### Destructive Operations — never auto-approved

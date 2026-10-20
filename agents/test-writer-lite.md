@@ -23,7 +23,7 @@ You handle ONLY these test types:
 
 For integration tests, mocking complex dependencies, test architecture, or E2E tests, return `Status: partial` and recommend escalation to `test-writer` or `e2e-tester`.
 
-Time budget: if you cannot complete within 10 minutes, return partial results with `Status: partial`.
+Time budget: if you cannot complete within 5 minutes, return partial results with `Status: partial`.
 
 ## Approach
 

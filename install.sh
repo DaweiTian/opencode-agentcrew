@@ -93,7 +93,7 @@ PROMPT_TEXT=$(cat <<'PROMPT'
 | smart-router | opencode-go/mimo-v2.6-flash | 主智能体（智能调度，推荐默认） |
 | Zero | opencode-go/mimo-v2.6-flash | 主智能体（快速原型，多模态） |
 | Erribaba | opencode-go/mimo-v2.6-pro | 主智能体（生产代码，深度分析） |
-| api-designer | opencode-go/mimo-v2.6-pro | API 设计 |
+| api-designer | opencode-go/qwen3.7-plus | API 设计 |
 | architect | opencode-go/glm-5.2 | 架构设计 |
 | code-generator | opencode-go/mimo-v2.6-pro | 代码生成 |
 | code-generator-lite | opencode-go/mimo-v2.6-flash | 代码生成（轻量版） |
@@ -104,14 +104,14 @@ PROMPT_TEXT=$(cat <<'PROMPT'
 | doc-writer | opencode-go/qwen3.8-flash | 文档编写 |
 | doc-writer-lite | opencode-go/mimo-v2.6-flash | 文档编写（轻量版） |
 | e2e-tester | opencode-go/mimo-v2.6-flash | 端到端测试 |
-| executor | opencode-go/minimax-m3 | 命令执行 |
+| executor | opencode-go/mimo-v2.6-flash | 命令执行 |
 | frontend-dev | opencode-go/kimi-k2.7-code | 前端开发 |
 | frontend-dev-lite | opencode-go/mimo-v2.6-flash | 前端开发（轻量版） |
 | frontend-reviewer | opencode-go/mimo-v2.6-flash | 前端审查 |
 | git-assistant | opencode-go/qwen3.8-flash | Git 工作流 |
 | migration | opencode-go/deepseek-v4.1-flash | 迁移专家 |
-| perf-optimizer | opencode-go/mimo-v2.6-pro | 性能优化 |
-| plan-writer | opencode-go/mimo-v2.6-pro | 实现计划编写 |
+| perf-optimizer | opencode-go/qwen3.7-plus | 性能优化 |
+| plan-writer | opencode-go/qwen3.7-plus | 实现计划编写 |
 | project-manager | opencode-go/qwen3.8-flash | 项目管理 |
 | refactorer | opencode-go/mimo-v2.6-pro | 代码重构 |
 | refactorer-lite | opencode-go/mimo-v2.6-flash | 代码重构（轻量版） |
@@ -122,12 +122,12 @@ PROMPT_TEXT=$(cat <<'PROMPT'
 | security-auditor | opencode-go/deepseek-v4.1-flash | 安全审计 |
 | software-engineer | opencode-go/mimo-v2.6-flash | 全栈实现 |
 | spec-reviewer | opencode-go/deepseek-v4.1-flash | 规范合规性审查（Stage 1） |
-| test-writer | opencode-go/mimo-v2.6-pro | 测试编写 |
+| test-writer | opencode-go/kimi-k2.7-code | 测试编写 |
 | test-writer-lite | opencode-go/mimo-v2.6-flash | 测试编写（轻量版） |
-| ui-designer | opencode-go/kimi-k2.7-code | UI 设计 |
+| ui-designer | opencode-go/glm-5.3-flash | UI 设计 |
 | validator | opencode-go/deepseek-v4.1-flash | 结果验证 |
 | vision-dev | opencode-go/mimo-v2.6-flash | 视觉开发 |
-| workflow-orchestrator | opencode-go/mimo-v2.6-pro | 工作流编排 |
+| workflow-orchestrator | opencode-go/glm-5.3-flash | 工作流编排 |
 
 如果我没有某个 provider，告诉我哪些模型需要额外配置。
 如果我已有对应的模型，直接进入第三步。

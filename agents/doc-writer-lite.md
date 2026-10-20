@@ -25,7 +25,7 @@ You handle ONLY these doc types:
 
 For full API references, architecture docs, migration guides, or multi-page documentation sites, return `Status: partial` and recommend escalation to `doc-writer` (standard).
 
-Time budget: if you cannot complete within 10 minutes, return partial results with `Status: partial`.
+Time budget: if you cannot complete within 5 minutes, return partial results with `Status: partial`.
 
 ## Approach
 

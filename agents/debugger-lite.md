@@ -22,7 +22,7 @@ You handle ONLY these bug types:
 
 For concurrency issues, memory leaks, intermittent failures, performance degradation, or multi-file root causes, return `Status: partial` and recommend escalation to `debugger` (standard).
 
-Time budget: if you cannot complete within 10 minutes, return partial results with `Status: partial`.
+Time budget: if you cannot complete within 5 minutes, return partial results with `Status: partial`.
 
 ## Approach
 

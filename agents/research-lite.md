@@ -28,7 +28,7 @@ You handle ONLY these research tasks:
 
 For technology comparisons, architecture decisions, in-depth evaluations, or "what should we use for X", return `Status: partial` and recommend escalation to `research` (standard) or `architect`.
 
-Time budget: if you cannot complete within 10 minutes, return partial results with `Status: partial`.
+Time budget: if you cannot complete within 5 minutes, return partial results with `Status: partial`.
 
 ## Approach
 

@@ -1,7 +1,7 @@
 ---
 description: 性能优化智能体。分析代码运行时性能并给出优化方案与建议（不直接修改代码），涵盖算法复杂度、数据库查询、内存使用、并发和网络优化。输出性能基线、瓶颈定位、优化方案和预期收益。当发现性能问题或需要分析响应速度、内存占用并获得优化建议时调用此代理。
 mode: subagent
-model: opencode-go/mimo-v2.6-pro
+model: opencode-go/qwen3.7-plus
 permissions:
   - action: edit
     resource: "*"

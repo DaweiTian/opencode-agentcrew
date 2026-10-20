@@ -24,7 +24,7 @@ You handle ONLY these task types:
 
 If the task requires architectural decisions, multi-file coordination, or unclear requirements, return `Status: partial` and recommend escalation to `code-generator` (standard).
 
-Time budget: if you cannot complete within 10 minutes, return partial results with `Status: partial`.
+Time budget: if you cannot complete within 5 minutes, return partial results with `Status: partial`.
 
 ## Approach
 

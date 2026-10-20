@@ -53,7 +53,7 @@ permissions:      # primary agents may omit (all tools allowed); every subagent 
   - **Erribaba.md** (`opencode-go/mimo-v2.6-pro`) — production code, complex algorithms, deep analysis, multimodal (image input)
 - **`mode: subagent`** means the agent is only invoked via delegation from a primary agent.
 - **Filename = agent name** used in delegation (e.g., `reviewer.md` → delegate as `reviewer`).
-- **Model naming**: all agents use the `opencode-go/` provider prefix — models include `opencode-go/mimo-v2.6-flash`, `opencode-go/mimo-v2.6-pro`, `opencode-go/deepseek-v4.1-flash`, `opencode-go/glm-5.2`, `opencode-go/kimi-k2.7-code`, `opencode-go/qwen3.8-flash`, `opencode-go/minimax-m3`.
+- **Model naming**: all agents use the `opencode-go/` provider prefix — models include `opencode-go/mimo-v2.6-flash`, `opencode-go/mimo-v2.6-pro`, `opencode-go/deepseek-v4.1-flash`, `opencode-go/glm-5.2`, `opencode-go/glm-5.3-flash`, `opencode-go/kimi-k2.7-code`, `opencode-go/qwen3.7-plus`, `opencode-go/qwen3.8-flash`.
 - **Tool access** defaults to all tools allowed when the `permissions` key is omitted — only the three primary agents omit it. Every subagent declares an explicit `permissions` block that ends with a `subagent` deny (only primary agents may delegate). Beyond that deny: read-only subagents deny both `edit` and `shell`; code-writing subagents deny `shell` and omit the `edit` deny; `perf-optimizer` and `validator` deny `edit` but keep `shell`; agents needing full tool access (edit and shell) declare only the `subagent` deny (e.g. `db-engineer`, `executor`); `plan-writer` and `project-manager` additionally allow `edit` under `~/.opencode/plan/*` (the allow is placed after the wildcard denies so it wins for that path).
 
 ## All 38 Agents
@@ -75,7 +75,7 @@ Denied `edit`, `shell`, and `subagent` in `permissions` frontmatter (except `pla
 | `architect.md` | `opencode-go/glm-5.2` | System architecture design |
 | `frontend-reviewer.md` | `opencode-go/mimo-v2.6-flash` | Frontend code review |
 | `git-assistant.md` | `opencode-go/qwen3.8-flash` | Git workflow assistance |
-| `plan-writer.md` | `opencode-go/mimo-v2.6-pro` | Implementation planning (edit allowed only under `~/.opencode/plan/*`) |
+| `plan-writer.md` | `opencode-go/qwen3.7-plus` | Implementation planning (edit allowed only under `~/.opencode/plan/*`) |
 | `project-manager.md` | `opencode-go/qwen3.8-flash` | Project management (edit allowed only under `~/.opencode/plan/*`) |
 | `research.md` | `opencode-go/qwen3.8-flash` | Technical research |
 | `research-lite.md` | `opencode-go/mimo-v2.6-flash` | Technical research (lite) |
@@ -83,9 +83,9 @@ Denied `edit`, `shell`, and `subagent` in `permissions` frontmatter (except `pla
 | `reviewer-lite.md` | `opencode-go/mimo-v2.6-flash` | Code quality review (lite) |
 | `security-auditor.md` | `opencode-go/deepseek-v4.1-flash` | Security audit |
 | `spec-reviewer.md` | `opencode-go/deepseek-v4.1-flash` | Spec compliance review (Stage 1) |
-| `workflow-orchestrator.md` | `opencode-go/mimo-v2.6-pro` | Workflow orchestration |
+| `workflow-orchestrator.md` | `opencode-go/glm-5.3-flash` | Workflow orchestration |
 
-Plus `perf-optimizer` (`opencode-go/mimo-v2.6-pro`) and `validator` (`opencode-go/deepseek-v4.1-flash`) — deny `edit` and `subagent` but allow `shell`: read-only for file edits, have bash for running commands.
+Plus `perf-optimizer` (`opencode-go/qwen3.7-plus`) and `validator` (`opencode-go/deepseek-v4.1-flash`) — deny `edit` and `subagent` but allow `shell`: read-only for file edits, have bash for running commands.
 
 ### Subagents — With write/edit (21)
 
@@ -93,7 +93,7 @@ No `edit` deny (or only path-scoped denies) in `permissions` frontmatter. Every 
 
 | File | Model | Has bash | Role |
 |------|-------|:--------:|------|
-| `api-designer.md` | `opencode-go/mimo-v2.6-pro` | ✗ | API endpoint design |
+| `api-designer.md` | `opencode-go/qwen3.7-plus` | ✗ | API endpoint design |
 | `code-generator.md` | `opencode-go/mimo-v2.6-pro` | ✗ | Code generation |
 | `code-generator-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Code generation (lite) |
 | `db-engineer.md` | `opencode-go/deepseek-v4.1-flash` | ✓ | Database engineering |
@@ -103,16 +103,16 @@ No `edit` deny (or only path-scoped denies) in `permissions` frontmatter. Every 
 | `doc-writer.md` | `opencode-go/qwen3.8-flash` | ✗ | Documentation |
 | `doc-writer-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Documentation (lite) |
 | `e2e-tester.md` | `opencode-go/mimo-v2.6-flash` | ✗ | E2E testing |
-| `executor.md` | `opencode-go/minimax-m3` | ✓ | Command execution |
+| `executor.md` | `opencode-go/mimo-v2.6-flash` | ✓ | Command execution |
 | `frontend-dev.md` | `opencode-go/kimi-k2.7-code` | ✗ | Frontend development |
 | `frontend-dev-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Frontend development (lite) |
 | `migration.md` | `opencode-go/deepseek-v4.1-flash` | ✓ | System migration |
 | `refactorer.md` | `opencode-go/mimo-v2.6-pro` | ✗ | Code refactoring |
 | `refactorer-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Code refactoring (lite) |
 | `software-engineer.md` | `opencode-go/mimo-v2.6-flash` | ✓ | Full-stack implementation |
-| `test-writer.md` | `opencode-go/mimo-v2.6-pro` | ✗ | Test writing |
+| `test-writer.md` | `opencode-go/kimi-k2.7-code` | ✗ | Test writing |
 | `test-writer-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Test writing (lite) |
-| `ui-designer.md` | `opencode-go/kimi-k2.7-code` | ✗ | UI design |
+| `ui-designer.md` | `opencode-go/glm-5.3-flash` | ✗ | UI design |
 | `vision-dev.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Visual development |
 
 ### Lite Agents (8)
@@ -290,7 +290,7 @@ export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
 
 - **独立任务才用 background=true**：有依赖关系的任务不要并行
 - **不要轮询**：系统会自动通知完成，不要主动查询状态
-- **超时处理**：复杂任务超过 30 分钟应考虑取消重试
+- **超时处理**：复杂任务超过 15 分钟应考虑取消重试（简单/中等/复杂阈值为 5/10/15 分钟）
 - **冲突解决**：多个子代理修改同一文件时，以高优先级为准（security-auditor > reviewer > validator > others）
 - **⚠️ 阶段屏障**：多阶段工作流必须等待当前阶段所有任务完成才能进入下一阶段
 

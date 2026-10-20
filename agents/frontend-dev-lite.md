@@ -24,7 +24,7 @@ You handle ONLY these frontend tasks:
 
 For state management, complex data fetching, large component trees, SSR/SSG setup, or performance optimization, return `Status: partial` and recommend escalation to `frontend-dev` (standard); for design-system work or non-trivial styling, recommend `ui-designer`.
 
-Time budget: if you cannot complete within 10 minutes, return partial results with `Status: partial`.
+Time budget: if you cannot complete within 5 minutes, return partial results with `Status: partial`.
 
 ## Approach
 

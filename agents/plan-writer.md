@@ -1,7 +1,7 @@
 ---
 description: 实现计划编写智能体。将需求分解为咬合大小的、可执行的任务步骤，每个步骤都遵循 TDD 原则。当需要为复杂功能创建结构化实现计划时调用此代理。
 mode: subagent
-model: opencode-go/mimo-v2.6-pro
+model: opencode-go/qwen3.7-plus
 permissions:
   - action: edit
     resource: "*"

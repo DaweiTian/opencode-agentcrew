@@ -1,7 +1,7 @@
 ---
 description: 测试编写智能体。为代码生成全面的自动化测试套件，覆盖单元测试、集成测试和边界条件测试。遵循 AAA 模式，使用项目已有的测试框架。当需要编写测试、增加测试覆盖率或验证功能正确性时调用此代理。
 mode: subagent
-model: opencode-go/mimo-v2.6-pro
+model: opencode-go/kimi-k2.7-code
 permissions:
   - action: shell
     resource: "*"

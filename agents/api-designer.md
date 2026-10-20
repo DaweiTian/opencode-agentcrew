@@ -1,7 +1,7 @@
 ---
 description: API 设计师智能体。负责具体 API 端点设计、OpenAPI/Swagger 规范编写、请求/响应格式定义、错误码体系设计和 API 版本管理。确保 API 的一致性、可发现性和开发者体验。当需要设计具体 API 端点、编写接口规范或定义错误码时调用此代理。注意：高层服务间通信架构请使用 architect。
 mode: subagent
-model: opencode-go/mimo-v2.6-pro
+model: opencode-go/qwen3.7-plus
 permissions:
   - action: shell
     resource: "*"

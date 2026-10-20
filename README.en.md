@@ -133,7 +133,7 @@ Below are the default models for each agent in the collection. Based on my exist
 | smart-router | opencode-go/mimo-v2.6-flash | Primary (intelligent dispatch, recommended default) |
 | Zero | opencode-go/mimo-v2.6-flash | Primary (rapid prototyping, multimodal) |
 | Erribaba | opencode-go/mimo-v2.6-pro | Primary (production code, deep analysis) |
-| api-designer | opencode-go/mimo-v2.6-pro | API design |
+| api-designer | opencode-go/qwen3.7-plus | API design |
 | architect | opencode-go/glm-5.2 | Architecture design |
 | code-generator | opencode-go/mimo-v2.6-pro | Code generation |
 | code-generator-lite | opencode-go/mimo-v2.6-flash | Code generation (lite) |
@@ -144,14 +144,14 @@ Below are the default models for each agent in the collection. Based on my exist
 | doc-writer | opencode-go/qwen3.8-flash | Documentation |
 | doc-writer-lite | opencode-go/mimo-v2.6-flash | Documentation (lite) |
 | e2e-tester | opencode-go/mimo-v2.6-flash | End-to-end testing |
-| executor | opencode-go/minimax-m3 | Command execution |
+| executor | opencode-go/mimo-v2.6-flash | Command execution |
 | frontend-dev | opencode-go/kimi-k2.7-code | Frontend development |
 | frontend-dev-lite | opencode-go/mimo-v2.6-flash | Frontend development (lite) |
 | frontend-reviewer | opencode-go/mimo-v2.6-flash | Frontend review |
 | git-assistant | opencode-go/qwen3.8-flash | Git workflow |
 | migration | opencode-go/deepseek-v4.1-flash | Migration |
-| perf-optimizer | opencode-go/mimo-v2.6-pro | Performance optimization |
-| plan-writer | opencode-go/mimo-v2.6-pro | Implementation planning |
+| perf-optimizer | opencode-go/qwen3.7-plus | Performance optimization |
+| plan-writer | opencode-go/qwen3.7-plus | Implementation planning |
 | project-manager | opencode-go/qwen3.8-flash | Project management |
 | refactorer | opencode-go/mimo-v2.6-pro | Code refactoring |
 | refactorer-lite | opencode-go/mimo-v2.6-flash | Code refactoring (lite) |
@@ -162,12 +162,12 @@ Below are the default models for each agent in the collection. Based on my exist
 | security-auditor | opencode-go/deepseek-v4.1-flash | Security audit |
 | software-engineer | opencode-go/mimo-v2.6-flash | Full-stack implementation |
 | spec-reviewer | opencode-go/deepseek-v4.1-flash | Spec compliance review (Stage 1) |
-| test-writer | opencode-go/mimo-v2.6-pro | Test writing |
+| test-writer | opencode-go/kimi-k2.7-code | Test writing |
 | test-writer-lite | opencode-go/mimo-v2.6-flash | Test writing (lite) |
-| ui-designer | opencode-go/kimi-k2.7-code | UI design |
+| ui-designer | opencode-go/glm-5.3-flash | UI design |
 | validator | opencode-go/deepseek-v4.1-flash | Validation |
 | vision-dev | opencode-go/mimo-v2.6-flash | Visual development |
-| workflow-orchestrator | opencode-go/mimo-v2.6-pro | Workflow orchestration |
+| workflow-orchestrator | opencode-go/glm-5.3-flash | Workflow orchestration |
 
 If I'm missing a provider, tell me which models need additional configuration.
 If I already have the corresponding models, proceed to Step 3.

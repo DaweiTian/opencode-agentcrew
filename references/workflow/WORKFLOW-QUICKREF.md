@@ -32,7 +32,7 @@
     ↓
 [阶段 3: 执行] — @test-writer → @code-generator → @executor
     ↓
-[阶段 4: 审查] — @spec-reviewer (Stage 1) → @reviewer (Stage 2)
+[阶段 4: 审查] — 分级审查（见下）：复杂/安全敏感 → @spec-reviewer (Stage 1) → @reviewer (Stage 2)；中等 → 单轮 @reviewer；简单 → 单轮 @reviewer-lite
     ↓
 [阶段 5: 合并] — @validator, @git-assistant
 ```
@@ -69,6 +69,7 @@ Phase 3: Execute
 @executor: 运行测试验证
 
 Phase 4: Review
+（任务触及认证 → 复杂/安全敏感，强制两阶段）
 @spec-reviewer: 验证实现符合需求 (Stage 1)
 @reviewer: 代码质量审查 (Stage 2)
 
@@ -125,16 +126,22 @@ Phase 5: Merge
 - **必须**使用等待提示模板处理未完成任务
 - **必须**在当前消息内完成独立核实（`git diff`／运行测试／读取变更文件）并读取完整输出，再宣布完成——文字描述不是证据（验证铁律）
 
-## 两阶段审查
+## 分级审查（两阶段仅限复杂/安全敏感任务）
 
-### Stage 1: 规范合规性审查 (@spec-reviewer)
+| 任务档位 | 审查方式 |
+|---------|---------|
+| **复杂**，或触及 auth/安全/支付/迁移/公共 API 契约/数据完整性 | **两阶段（强制）**：@spec-reviewer (Stage 1) → @reviewer (Stage 2) |
+| 中等、非高风险 | 单轮 @reviewer |
+| 简单 | 单轮 @reviewer-lite |
+
+### Stage 1: 规范合规性审查 (@spec-reviewer)（两阶段时）
 - 验证实现是否符合原始需求
 - 使用规范锚定（[Sn] 引用）
 - 证据优先原则
 
 ### Stage 2: 代码质量审查 (@reviewer)
 - 检查代码质量、性能、安全性
-- 在 Stage 1 通过后才能运行
+- 两阶段时在 Stage 1 通过后运行（Stage 1 永远先于 Stage 2）；作为单轮审查时独立运行，无需 Stage 1
 - 输出结构化审查报告
 
 > **接收审查意见的一侧**（实现者）须遵循 [`review-feedback-discipline.md`](review-feedback-discipline.md)：完整读懂 → 复述 → 对照代码库逐条验证 → 分级处理（Critical 立即修／Important 修完才继续／Minor 记录）→ 回应 → 才开始实现。外部反馈是待评估的建议，不是命令。
