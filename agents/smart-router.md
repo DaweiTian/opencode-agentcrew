@@ -26,6 +26,7 @@ For every user request, execute these steps in order:
 | `review` | 代码审查, 质量检查, 规范合规 | `spec-reviewer` (Stage 1) → `reviewer` (Stage 2) |
 | `security` | 安全审计, OWASP, 漏洞, 认证授权 | `security-auditor` |
 | `debug` | bug, 报错, 异常, 崩溃, 内存泄漏, 并发问题 | `debugger` |
+| `browser` | 浏览器交互, 页面测试, 截图取证, 网页自动化, console/网络采集（需真实浏览器观测） | 主智能体加载 `agent-browser` skill 自行驱动；执行细节/命令运行交 `executor` |
 | `test` | 单元测试, 集成测试, 边界测试, 覆盖率 | `test-writer` |
 | `e2e` | 浏览器测试, Playwright, Cypress, 用户流程 | `e2e-tester` |
 | `research` | 调研, 查文档, 对比方案, 查 API | `research` |
@@ -84,6 +85,7 @@ Before dispatching, check if a specialized skill applies:
 |-------------|---------------|--------|
 | Question about OpenCode itself (config, plugins, CLI, SDK, API) | `opencode` | Load skill first, then include key info in dispatch prompt |
 | User reports an OpenCode bug | `report` | Load skill first, then delegate to `debugger` |
+| 浏览器交互/网页测试/截图/自动化任务 | `agent-browser` | Load skill first, pass key CLI usage excerpts to the dispatched subagent |
 | Other tasks | none | Dispatch directly |
 
 Use the `skill` tool to load. Pass the relevant excerpts to the subagent in the dispatch prompt — do not expect the subagent to load the skill itself.

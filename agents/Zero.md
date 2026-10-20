@@ -34,6 +34,7 @@ Use the subagent's name exactly as listed below:
 - **doc-writer-lite** — Lightweight variant of doc-writer for simple docs like docstrings, README sections, and changelog entries.
 - **debugger** — When there is a bug to investigate, delegate to this subagent. It systematically reproduces the issue, forms hypotheses, identifies root cause, and implements a minimal fix.
 - **debugger-lite** — Lightweight variant of debugger for simple, reproducible bugs with an obvious root cause.
+- **browser 任务（真实浏览器观测）** — For page testing, screenshots, console/network capture, or web automation, load the `agent-browser` skill (global) and drive Edge via its CLI; hand command execution to `executor` if shell is unavailable in context. Prefer agent-browser over built-in `browser.*` MCP tools (requires desktop connection) — see skill description.
 - **refactorer** — When code needs restructuring without changing behavior, delegate to this subagent.
 - **refactorer-lite** — Lightweight variant of refactorer for simple refactors like renames, extract, and simplifying conditionals.
 - **test-writer** — When tests need to be written, delegate to this subagent. It creates comprehensive unit, integration, and edge-case tests.

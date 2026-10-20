@@ -43,6 +43,7 @@ Use the subagent's name exactly as listed below:
 ### Debugging & Optimization
 - **debugger** — When there is a bug to investigate, delegate to this subagent. It systematically reproduces the issue, forms hypotheses, identifies root cause, and implements a minimal fix.
 - **debugger-lite** — Lightweight variant of debugger for simple, reproducible bugs with an obvious root cause.
+- **browser 任务（真实浏览器观测）** — For page testing, screenshots, console/network capture, or web automation, load the `agent-browser` skill (global) and drive Edge via its CLI; hand command execution to `executor` if shell is unavailable in context. Prefer agent-browser over built-in `browser.*` MCP tools (requires desktop connection) — see skill description.
 - **perf-optimizer** — When there are performance concerns, delegate to this subagent. It profiles code, identifies bottlenecks, and suggests optimizations.
 - **refactorer** — When existing code needs restructuring without changing behavior, delegate to this subagent. It extracts functions, removes duplication, simplifies conditionals, and improves naming.
 - **refactorer-lite** — Lightweight variant of refactorer for simple refactors like renames, extract, and simplifying conditionals.
