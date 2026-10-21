@@ -6,7 +6,7 @@
 
 </div>
 
-**开箱即用的 OpenCode 智能体团队，38 个专业角色覆盖全栈开发流程。**
+**开箱即用的 OpenCode 智能体团队，39 个专业角色覆盖全栈开发流程。**
 
 ## 📑 目录
 
@@ -23,14 +23,14 @@
 
 ## ✨ 特点
 
-- **38 个专业智能体** — 架构设计、代码生成、调试诊断、测试编写、前端开发、安全审计等
+- **39 个专业智能体** — 架构设计、代码生成、调试诊断、测试编写、前端开发、安全审计等
 - **智能调度** — `smart-router` 根据任务复杂度、领域、成本自动调度 skill 与模型
-- **分层子智能体** — 8 个高频角色提供 `-lite` 轻量版（`mimo-v2.6-flash`），简单任务最快最省
+- **分层子智能体** — 9 个高频角色提供 `-lite` 轻量版（`mimo-v2.6-flash`），简单任务最快最省
 - **结构化工作流** — 参考 MiMo Compose 模式，支持 brainstorm→plan→execute→review→merge 完整流程
 - **两阶段审查** — 规范合规性审查 + 代码质量审查，确保实现符合需求且代码质量高
 - **编排纪律** — MiMo Compose 风格编排纪律：验证铁律（done 是声明须经独立核实）、Reviewer 档位对齐、文件所有权互斥、破坏性操作永不自动批准
 - **三主智能体** — smart-router（智能调度）+ Erribaba（生产代码）+ Zero（快速原型/多模态）
-- **多模型协作** — MiMo-V2.6-Flash、MiMo-V2.6-Pro、DeepSeek V4.1 Flash、GLM-5.2、Kimi K2.7 Code、Qwen3.8 Flash、MiniMax M3 共 7 个付费模型
+- **多模型协作** — 8 个 opencode-go 模型（mimo-v2.6-flash、mimo-v2.6-pro、deepseek-v4.1-flash、glm-5.2、glm-5.3-flash、kimi-k2.7-code、qwen3.7-plus、qwen3.8-flash）；smart-router 走 Xiaomi Token Plan 计费通道（`console-xiaomi-token-plan/mimo-v2.6-flash`）
 - **图片处理** — 三个主智能体均为原生全模态，粘贴图片直接分析；磁盘上的图片文件可交 vision-dev 处理
 - **开箱即用** — 一条命令安装，自动配置
 
@@ -96,11 +96,11 @@ rm -rf /tmp/opencode-agents
 本智能体集合需要多个模型配合使用。推荐使用 [OpenCode Go 套餐](https://opencode.ai/go?ref=4BZQW1YPFK)，一次订阅即可使用套餐内全部模型（官方共 36 个模型），无需单独配置 API Key。
 
 **优势：**
-- 模型丰富：官方套餐覆盖 36 个模型，本集合使用的全部 7 个模型均包含于 Go 套餐
+- 模型丰富：官方套餐覆盖 36 个模型，本集合使用的全部 8 个 opencode-go 模型均包含于 Go 套餐
 - 性价比高：相比单独购买 API，价格更优惠
 - 开箱即用：无需配置多个 provider，按 `opencode-go/<model-id>` 格式直接可用
 
-> 本集合 38 个智能体使用的 7 个模型（MiMo-V2.6-Flash、MiMo-V2.6-Pro、DeepSeek V4.1 Flash、GLM-5.2、Kimi K2.7 Code、Qwen3.8 Flash、MiniMax M3）已全部确认包含于 Go 套餐。
+> 本集合 39 个智能体使用的 8 个 opencode-go 模型（mimo-v2.6-flash、mimo-v2.6-pro、deepseek-v4.1-flash、glm-5.2、glm-5.3-flash、kimi-k2.7-code、qwen3.7-plus、qwen3.8-flash）已全部确认包含于 Go 套餐；其中 smart-router 走 Xiaomi Token Plan 计费通道（`console-xiaomi-token-plan/mimo-v2.6-flash`）。
 > 本集合选用的模型均为**国产模型**，国内可直接使用，无需 GPT/Claude/Grok 等国外模型。
 >
 > 各模型配额由官方维护且变动频繁，本 README 不保留本地配额快照，请以官方页面为准：
@@ -131,44 +131,45 @@ rm -rf /tmp/opencode-agents
 
 | 智能体 | 默认模型 | 角色 |
 |--------|----------|------|
-| smart-router | opencode-go/mimo-v2.6-flash | 主智能体（智能调度，推荐默认） |
-| Zero | opencode-go/mimo-v2.6-flash | 主智能体（快速原型，多模态） |
-| Erribaba | opencode-go/mimo-v2.6-pro | 主智能体（生产代码，深度分析） |
-| api-designer | opencode-go/qwen3.7-plus | API 设计 |
-| architect | opencode-go/glm-5.2 | 架构设计 |
-| code-generator | opencode-go/mimo-v2.6-pro | 代码生成 |
-| code-generator-lite | opencode-go/mimo-v2.6-flash | 代码生成（轻量版） |
-| db-engineer | opencode-go/deepseek-v4.1-flash | 数据库工程 |
-| debugger | opencode-go/deepseek-v4.1-flash | 调试诊断 |
-| debugger-lite | opencode-go/mimo-v2.6-flash | 调试诊断（轻量版） |
-| devops | opencode-go/mimo-v2.6-flash | DevOps/CI-CD |
-| doc-writer | opencode-go/qwen3.8-flash | 文档编写 |
-| doc-writer-lite | opencode-go/mimo-v2.6-flash | 文档编写（轻量版） |
-| e2e-tester | opencode-go/mimo-v2.6-flash | 端到端测试 |
-| executor | opencode-go/mimo-v2.6-flash | 命令执行 |
-| frontend-dev | opencode-go/kimi-k2.7-code | 前端开发 |
-| frontend-dev-lite | opencode-go/mimo-v2.6-flash | 前端开发（轻量版） |
-| frontend-reviewer | opencode-go/mimo-v2.6-flash | 前端审查 |
-| git-assistant | opencode-go/qwen3.8-flash | Git 工作流 |
-| migration | opencode-go/deepseek-v4.1-flash | 迁移专家 |
-| perf-optimizer | opencode-go/qwen3.7-plus | 性能优化 |
-| plan-writer | opencode-go/qwen3.7-plus | 实现计划编写 |
-| project-manager | opencode-go/qwen3.8-flash | 项目管理 |
-| refactorer | opencode-go/mimo-v2.6-pro | 代码重构 |
-| refactorer-lite | opencode-go/mimo-v2.6-flash | 代码重构（轻量版） |
-| research | opencode-go/qwen3.8-flash | 信息研究 |
-| research-lite | opencode-go/mimo-v2.6-flash | 信息研究（轻量版） |
-| reviewer | opencode-go/deepseek-v4.1-flash | 代码审查（Stage 2） |
-| reviewer-lite | opencode-go/mimo-v2.6-flash | 代码审查（轻量版） |
-| security-auditor | opencode-go/deepseek-v4.1-flash | 安全审计 |
-| software-engineer | opencode-go/mimo-v2.6-flash | 全栈实现 |
-| spec-reviewer | opencode-go/deepseek-v4.1-flash | 规范合规性审查（Stage 1） |
-| test-writer | opencode-go/kimi-k2.7-code | 测试编写 |
-| test-writer-lite | opencode-go/mimo-v2.6-flash | 测试编写（轻量版） |
-| ui-designer | opencode-go/glm-5.3-flash | UI 设计 |
-| validator | opencode-go/deepseek-v4.1-flash | 结果验证 |
-| vision-dev | opencode-go/mimo-v2.6-flash | 视觉开发 |
-| workflow-orchestrator | opencode-go/glm-5.3-flash | 工作流编排 |
+| 🎯 smart-router | console-xiaomi-token-plan/mimo-v2.6-flash | 主智能体（智能调度，推荐默认） |
+| 🌱 Zero | opencode-go/mimo-v2.6-flash | 主智能体（快速原型，多模态） |
+| 🛠️ Erribaba | opencode-go/mimo-v2.6-pro | 主智能体（生产代码，深度分析） |
+| 🏗️ api-designer | opencode-go/qwen3.7-plus | API 设计 |
+| 🏗️ api-designer-lite | opencode-go/mimo-v2.6-flash | API 设计（轻量版） |
+| 🏗️ architect | opencode-go/glm-5.2 | 架构设计 |
+| ⚙️ code-generator | opencode-go/mimo-v2.6-pro | 代码生成 |
+| ⚙️ code-generator-lite | opencode-go/mimo-v2.6-flash | 代码生成（轻量版） |
+| 🗄️ db-engineer | opencode-go/deepseek-v4.1-flash | 数据库工程 |
+| 🐛 debugger | opencode-go/deepseek-v4.1-flash | 调试诊断 |
+| 🐛 debugger-lite | opencode-go/mimo-v2.6-flash | 调试诊断（轻量版） |
+| 🚀 devops | opencode-go/mimo-v2.6-flash | DevOps/CI-CD |
+| 📚 doc-writer | opencode-go/qwen3.8-flash | 文档编写 |
+| 📚 doc-writer-lite | opencode-go/mimo-v2.6-flash | 文档编写（轻量版） |
+| 🎭 e2e-tester | opencode-go/mimo-v2.6-flash | 端到端测试 |
+| 🖥️ executor | opencode-go/mimo-v2.6-flash | 命令执行 |
+| 🖌️ frontend-dev | opencode-go/kimi-k2.7-code | 前端开发 |
+| 🖌️ frontend-dev-lite | opencode-go/mimo-v2.6-flash | 前端开发（轻量版） |
+| ⚖️ frontend-reviewer | opencode-go/mimo-v2.6-flash | 前端审查 |
+| 🌿 git-assistant | opencode-go/qwen3.8-flash | Git 工作流 |
+| 🔄 migration | opencode-go/deepseek-v4.1-flash | 迁移专家 |
+| ⚡ perf-optimizer | opencode-go/qwen3.7-plus | 性能优化 |
+| 🗺️ plan-writer | opencode-go/qwen3.7-plus | 实现计划编写 |
+| 🗺️ project-manager | opencode-go/qwen3.8-flash | 项目管理 |
+| 🧹 refactorer | opencode-go/mimo-v2.6-pro | 代码重构 |
+| 🧹 refactorer-lite | opencode-go/mimo-v2.6-flash | 代码重构（轻量版） |
+| 🔎 research | opencode-go/qwen3.8-flash | 信息研究 |
+| 🔎 research-lite | opencode-go/mimo-v2.6-flash | 信息研究（轻量版） |
+| ⚖️ reviewer | opencode-go/deepseek-v4.1-flash | 代码审查（Stage 2） |
+| ⚖️ reviewer-lite | opencode-go/mimo-v2.6-flash | 代码审查（轻量版） |
+| 🛡️ security-auditor | opencode-go/deepseek-v4.1-flash | 安全审计 |
+| ⚙️ software-engineer | opencode-go/mimo-v2.6-pro | 全栈实现 |
+| 🔍 spec-reviewer | opencode-go/deepseek-v4.1-flash | 规范合规性审查（Stage 1） |
+| 🧪 test-writer | opencode-go/kimi-k2.7-code | 测试编写 |
+| 🧪 test-writer-lite | opencode-go/mimo-v2.6-flash | 测试编写（轻量版） |
+| 🎨 ui-designer | opencode-go/glm-5.3-flash | UI 设计 |
+| ✅ validator | opencode-go/deepseek-v4.1-flash | 结果验证 |
+| 👁️ vision-dev | opencode-go/mimo-v2.6-flash | 视觉开发 |
+| 🧭 workflow-orchestrator | opencode-go/glm-5.3-flash | 工作流编排 |
 
 如果我没有某个 provider，告诉我哪些模型需要额外配置。
 如果我已有对应的模型，直接进入第三步。
@@ -208,11 +209,12 @@ rm -rf /tmp/opencode-agents
 
 ```
 opencode-agentcrew/
-├── agents/                      # 智能体配置文件（38 个）
+├── agents/                      # 智能体配置文件（39 个）
 │   ├── smart-router.md          # 主智能体（智能调度，推荐默认）
 │   ├── Zero.md                  # 主智能体（快速原型，多模态）
 │   ├── Erribaba.md              # 主智能体（生产代码，深度分析）
 │   ├── api-designer.md          # API 设计
+│   ├── api-designer-lite.md     # API 设计（轻量版）
 │   ├── architect.md             # 架构设计
 │   ├── code-generator.md        # 代码生成
 │   ├── code-generator-lite.md   # 代码生成（轻量版）
@@ -269,44 +271,44 @@ opencode-agentcrew/
 
 | 文件 | 模型 | 说明 |
 |------|------|------|
-| `smart-router.md` | mimo-v2.6-flash | 智能调度（复杂度 + 领域 + 成本路由），推荐默认 |
-| `Zero.md` | mimo-v2.6-flash | 快速原型、多模态输入、轻量级任务 |
-| `Erribaba.md` | mimo-v2.6-pro | 生产代码、复杂算法、深度分析 |
+| 🎯 `smart-router.md` | console-xiaomi-token-plan/mimo-v2.6-flash | 智能调度（复杂度 + 领域 + 成本路由），推荐默认 |
+| 🌱 `Zero.md` | opencode-go/mimo-v2.6-flash | 快速原型、多模态输入、轻量级任务 |
+| 🛠️ `Erribaba.md` | opencode-go/mimo-v2.6-pro | 生产代码、复杂算法、深度分析 |
 
 ### 子智能体（Subagent）
 
 | 文件 | 职责 | 可写 | 可执行 | 可派发 |
 |------|------|:----:|:------:|:------:|
-| `api-designer.md` | API 端点设计、OpenAPI 规范 | ✓ | ✗ | ✗ |
-| `architect.md` | 系统设计、模块划分、技术选型 | ✗ | ✗ | ✗ |
-| `code-generator.md` | 高质量代码生成、bug 修复 | ✓ | ✗ | ✗ |
-| `db-engineer.md` | 数据库 Schema、Migration、SQL 优化 | ✓ | ✓ | ✗ |
-| `debugger.md` | 系统化定位和修复代码缺陷 | ✓ | ✓ | ✗ |
-| `devops.md` | Docker、CI/CD、Kubernetes、部署 | ✓ | ✓ | ✗ |
-| `doc-writer.md` | 技术文档、API 参考、README | ✓ | ✗ | ✗ |
-| `e2e-tester.md` | Playwright/Cypress 端到端测试 | ✓ | ✗ | ✗ |
-| `executor.md` | 运行命令、执行测试、构建项目 | ✓ | ✓ | ✗ |
-| `frontend-dev.md` | React/Vue/Svelte 组件开发 | ✓ | ✗ | ✗ |
-| `frontend-reviewer.md` | 前端审查、无障碍合规、性能 | ✗ | ✗ | ✗ |
-| `git-assistant.md` | 提交消息、分支命名、PR 描述 | ✗ | ✗ | ✗ |
-| `migration.md` | 框架升级、数据库迁移、技术栈切换 | ✓ | ✓ | ✗ |
-| `perf-optimizer.md` | 性能分析与优化 | ✗ | ✓ | ✗ |
-| `plan-writer.md` | 实现计划编写、TDD 任务分解 | 部分* | ✗ | ✗ |
-| `project-manager.md` | 需求分析、任务拆解、Sprint 规划 | 部分* | ✗ | ✗ |
-| `refactorer.md` | 代码重构、消除重复、改善结构 | ✓ | ✗ | ✗ |
-| `research.md` | 查找文档、调研技术方案 | ✗ | ✗ | ✗ |
-| `reviewer.md` | 代码审查（Stage 2：代码质量） | ✗ | ✗ | ✗ |
-| `security-auditor.md` | OWASP Top 10 安全审计 | ✗ | ✗ | ✗ |
-| `software-engineer.md` | 全栈功能端到端实现 | ✓ | ✓ | ✗ |
-| `spec-reviewer.md` | 规范合规性审查（Stage 1） | ✗ | ✗ | ✗ |
-| `test-writer.md` | 单元/集成/边界测试 | ✓ | ✗ | ✗ |
-| `ui-designer.md` | CSS/Tailwind/响应式布局/动画 | ✓ | ✗ | ✗ |
-| `validator.md` | 最终验证（构建/测试/类型检查） | ✗ | ✓ | ✗ |
-| `vision-dev.md` | 设计稿分析、截图还原、视觉开发 | ✓ | ✗ | ✗ |
-| `workflow-orchestrator.md` | 工作流编排计划输出（只读顾问，不直接派发子智能体） | ✗ | ✗ | ✗ |
+| 🏗️ `api-designer.md` | API 端点设计、OpenAPI 规范 | ✓ | ✗ | ✗ |
+| 🏗️ `architect.md` | 系统设计、模块划分、技术选型 | ✗ | ✗ | ✗ |
+| ⚙️ `code-generator.md` | 高质量代码生成、bug 修复 | ✓ | ✗ | ✗ |
+| 🗄️ `db-engineer.md` | 数据库 Schema、Migration、SQL 优化 | ✓ | ✓ | ✗ |
+| 🐛 `debugger.md` | 系统化定位和修复代码缺陷 | ✓ | ✓ | ✗ |
+| 🚀 `devops.md` | Docker、CI/CD、Kubernetes、部署 | ✓ | ✓ | ✗ |
+| 📚 `doc-writer.md` | 技术文档、API 参考、README | ✓ | ✗ | ✗ |
+| 🎭 `e2e-tester.md` | Playwright/Cypress 端到端测试 | ✓ | ✗ | ✗ |
+| 🖥️ `executor.md` | 运行命令、执行测试、构建项目 | ✓ | ✓ | ✗ |
+| 🖌️ `frontend-dev.md` | React/Vue/Svelte 组件开发 | ✓ | ✗ | ✗ |
+| ⚖️ `frontend-reviewer.md` | 前端审查、无障碍合规、性能 | ✗ | ✗ | ✗ |
+| 🌿 `git-assistant.md` | 提交消息、分支命名、PR 描述 | ✗ | ✗ | ✗ |
+| 🔄 `migration.md` | 框架升级、数据库迁移、技术栈切换 | ✓ | ✓ | ✗ |
+| ⚡ `perf-optimizer.md` | 性能分析与优化 | ✗ | ✓ | ✗ |
+| 🗺️ `plan-writer.md` | 实现计划编写、TDD 任务分解 | 部分* | ✗ | ✗ |
+| 🗺️ `project-manager.md` | 需求分析、任务拆解、Sprint 规划 | 部分* | ✗ | ✗ |
+| 🧹 `refactorer.md` | 代码重构、消除重复、改善结构 | ✓ | ✗ | ✗ |
+| 🔎 `research.md` | 查找文档、调研技术方案 | ✗ | ✗ | ✗ |
+| ⚖️ `reviewer.md` | 代码审查（Stage 2：代码质量） | ✗ | ✗ | ✗ |
+| 🛡️ `security-auditor.md` | OWASP Top 10 安全审计 | ✓ | ✓ | ✗ |
+| ⚙️ `software-engineer.md` | 全栈功能端到端实现 | ✓ | ✓ | ✗ |
+| 🔍 `spec-reviewer.md` | 规范合规性审查（Stage 1） | ✗ | ✗ | ✗ |
+| 🧪 `test-writer.md` | 单元/集成/边界测试 | ✓ | ✗ | ✗ |
+| 🎨 `ui-designer.md` | CSS/Tailwind/响应式布局/动画 | ✓ | ✗ | ✗ |
+| ✅ `validator.md` | 最终验证（构建/测试/类型检查） | ✗ | ✓ | ✗ |
+| 👁️ `vision-dev.md` | 设计稿分析、截图还原、视觉开发 | ✓ | ✗ | ✗ |
+| 🧭 `workflow-orchestrator.md` | 工作流编排计划输出（只读顾问，不直接派发子智能体） | ✗ | ✗ | ✗ |
 
 > \* **部分可写**：仅可写入 `~/.opencode/plan/` 目录（目录级 allow 例外，置于通配 deny 之后生效）；其余路径只读，且不可执行命令。
-> **可派发**：全部 35 个子智能体（含 Lite 版）均在 frontmatter 中 deny `subagent`，即不可再向下派发；只有 3 个主智能体（smart-router、Zero、Erribaba）可派发子智能体。
+> **可派发**：全部 36 个子智能体（含 Lite 版）均在 frontmatter 中 deny `subagent`，即不可再向下派发；只有 3 个主智能体（smart-router、Zero、Erribaba）可派发子智能体。
 
 ### 子智能体（Lite 轻量版）
 
@@ -314,14 +316,15 @@ opencode-agentcrew/
 
 | 文件 | 标准版 | 职责 |
 |------|--------|------|
-| `code-generator-lite.md` | `code-generator` | 简单代码生成、样板代码 |
-| `reviewer-lite.md` | `reviewer` | 快速 diff 审查（明显问题） |
-| `debugger-lite.md` | `debugger` | 简单可复现 bug |
-| `test-writer-lite.md` | `test-writer` | 单函数单元测试 |
-| `doc-writer-lite.md` | `doc-writer` | Docstring、README 段落、changelog |
-| `frontend-dev-lite.md` | `frontend-dev` | 简单展示型组件 |
-| `research-lite.md` | `research` | 事实查证（API、语法） |
-| `refactorer-lite.md` | `refactorer` | 重命名、提取、条件简化 |
+| ⚙️ `code-generator-lite.md` | `code-generator` | 简单代码生成、样板代码 |
+| ⚖️ `reviewer-lite.md` | `reviewer` | 快速 diff 审查（明显问题） |
+| 🐛 `debugger-lite.md` | `debugger` | 简单可复现 bug |
+| 🧪 `test-writer-lite.md` | `test-writer` | 单函数单元测试 |
+| 📚 `doc-writer-lite.md` | `doc-writer` | Docstring、README 段落、changelog |
+| 🖌️ `frontend-dev-lite.md` | `frontend-dev` | 简单展示型组件 |
+| 🔎 `research-lite.md` | `research` | 事实查证（API、语法） |
+| 🧹 `refactorer-lite.md` | `refactorer` | 重命名、提取、条件简化 |
+| 🏗️ `api-designer-lite.md` | `api-designer` | 简单 API 端点设计、OpenAPI 草稿 |
 
 ## 结构化工作流
 
@@ -469,7 +472,7 @@ permissions:        # 主智能体可省略（省略则允许所有工具）；�
 <系统提示词>
 ```
 
-> ℹ️ 2026-09 起本仓库已从 V1 的 `tools:` 字段全面迁移到 V2 的 `permissions:` 列表（V1 `tools:` 在 OpenCode V2 中会被静默忽略）。`edit` 动作覆盖 edit/write/patch 三种文件修改工具，`shell` 动作覆盖命令执行，`subagent` 动作控制能否再向下派发子智能体；多条规则同时命中时以最后一条为准。35 个子智能体全部 deny `subagent`，只有 3 个主智能体可派发。
+> ℹ️ 2026-09 起本仓库已从 V1 的 `tools:` 字段全面迁移到 V2 的 `permissions:` 列表（V1 `tools:` 在 OpenCode V2 中会被静默忽略）。`edit` 动作覆盖 edit/write/patch 三种文件修改工具，`shell` 动作覆盖命令执行，`subagent` 动作控制能否再向下派发子智能体；多条规则同时命中时以最后一条为准。36 个子智能体全部 deny `subagent`，只有 3 个主智能体可派发。
 
 ## 参与贡献
 

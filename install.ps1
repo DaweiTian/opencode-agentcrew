@@ -83,10 +83,11 @@ $Prompt = @"
 
 | 智能体 | 默认模型 | 角色 |
 |--------|----------|------|
-| smart-router | opencode-go/mimo-v2.6-flash | 主智能体（智能调度，推荐默认） |
+| smart-router | console-xiaomi-token-plan/mimo-v2.6-flash | 主智能体（智能调度，推荐默认） |
 | Zero | opencode-go/mimo-v2.6-flash | 主智能体（快速原型，多模态） |
 | Erribaba | opencode-go/mimo-v2.6-pro | 主智能体（生产代码，深度分析） |
 | api-designer | opencode-go/qwen3.7-plus | API 设计 |
+| api-designer-lite | opencode-go/mimo-v2.6-flash | API 设计（轻量版） |
 | architect | opencode-go/glm-5.2 | 架构设计 |
 | code-generator | opencode-go/mimo-v2.6-pro | 代码生成 |
 | code-generator-lite | opencode-go/mimo-v2.6-flash | 代码生成（轻量版） |
@@ -113,7 +114,7 @@ $Prompt = @"
 | reviewer | opencode-go/deepseek-v4.1-flash | 代码审查（Stage 2） |
 | reviewer-lite | opencode-go/mimo-v2.6-flash | 代码审查（轻量版） |
 | security-auditor | opencode-go/deepseek-v4.1-flash | 安全审计 |
-| software-engineer | opencode-go/mimo-v2.6-flash | 全栈实现 |
+| software-engineer | opencode-go/mimo-v2.6-pro | 全栈实现 |
 | spec-reviewer | opencode-go/deepseek-v4.1-flash | 规范合规性审查（Stage 1） |
 | test-writer | opencode-go/kimi-k2.7-code | 测试编写 |
 | test-writer-lite | opencode-go/mimo-v2.6-flash | 测试编写（轻量版） |
@@ -163,9 +164,9 @@ Write-Host "✅ 安装完成！共 $AgentCount 个智能体，$ReferenceCount �
 # ============================================
 # 安装一致性校验（仅醒目告警，不中断安装）
 # ============================================
-$ExpectedAgentCount = 38
+$ExpectedAgentCount = 39
 
-# 1) 数量断言：动态统计已安装 .md 数量，与内置期望值 38 比对
+# 1) 数量断言：动态统计已安装 .md 数量，与内置期望值 39 比对
 if ($AgentCount -ne $ExpectedAgentCount) {
     Write-Host ""
     Write-Host "⚠️  =============================================" -ForegroundColor Yellow

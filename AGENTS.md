@@ -8,11 +8,11 @@ A collection of OpenCode agent configuration files. No code, no build, no tests 
 
 ```
 agents/
-  *.md          # 38 agent definitions (3 primary + 35 subagent)
+  *.md          # 39 agent definitions (3 primary + 36 subagent)
 references/
   workflow/     # workflow docs and quick reference (OpenCode references)
 AGENTS.md       # repo conventions and agent tables (this file)
-README.md       # Chinese (38 agents, model table included)
+README.md       # Chinese (39 agents, model table included)
 README.en.md    # English (same)
 install.sh      # Linux/macOS one-shot install script
 install.ps1     # Windows one-shot install script
@@ -48,87 +48,96 @@ permissions:      # primary agents may omit (all tools allowed); every subagent 
 
 - **`description` is always in Chinese** — this is the trigger text OpenCode matches against. Match the style: role name + capabilities + trigger scenarios.
 - **`mode: primary`** means the agent can be a top-level session. Three files are primary agents: `smart-router.md`, `Zero.md`, and `Erribaba.md`.
-  - **smart-router.md** (`opencode-go/mimo-v2.6-flash`) — intelligent dispatching, multimodal (image input): routes tasks by complexity/domain/cost to the right subagent and model tier (recommended default entry point)
+  - **smart-router.md** (`console-xiaomi-token-plan/mimo-v2.6-flash`) — intelligent dispatching, multimodal (image input): routes tasks by complexity/domain/cost to the right subagent and model tier (recommended default entry point)
   - **Zero.md** (`opencode-go/mimo-v2.6-flash`) — rapid prototyping, multimodal (image input), lightweight tasks
   - **Erribaba.md** (`opencode-go/mimo-v2.6-pro`) — production code, complex algorithms, deep analysis, multimodal (image input)
 - **`mode: subagent`** means the agent is only invoked via delegation from a primary agent.
 - **Filename = agent name** used in delegation (e.g., `reviewer.md` → delegate as `reviewer`).
-- **Model naming**: all agents use the `opencode-go/` provider prefix — models include `opencode-go/mimo-v2.6-flash`, `opencode-go/mimo-v2.6-pro`, `opencode-go/deepseek-v4.1-flash`, `opencode-go/glm-5.2`, `opencode-go/glm-5.3-flash`, `opencode-go/kimi-k2.7-code`, `opencode-go/qwen3.7-plus`, `opencode-go/qwen3.8-flash`.
-- **Tool access** defaults to all tools allowed when the `permissions` key is omitted — only the three primary agents omit it. Every subagent declares an explicit `permissions` block that ends with a `subagent` deny (only primary agents may delegate). Beyond that deny: read-only subagents deny both `edit` and `shell`; code-writing subagents deny `shell` and omit the `edit` deny; `perf-optimizer` and `validator` deny `edit` but keep `shell`; agents needing full tool access (edit and shell) declare only the `subagent` deny (e.g. `db-engineer`, `executor`); `plan-writer` and `project-manager` additionally allow `edit` under `~/.opencode/plan/*` (the allow is placed after the wildcard denies so it wins for that path).
+- **Model naming**: all agents use the `opencode-go/` provider prefix except smart-router, which uses `console-xiaomi-token-plan/mimo-v2.6-flash` (Xiaomi Token Plan billing) — models include `opencode-go/mimo-v2.6-flash`, `opencode-go/mimo-v2.6-pro`, `opencode-go/deepseek-v4.1-flash`, `opencode-go/glm-5.2`, `opencode-go/glm-5.3-flash`, `opencode-go/kimi-k2.7-code`, `opencode-go/qwen3.7-plus`, `opencode-go/qwen3.8-flash`.
+- **Tool access** defaults to all tools allowed when the `permissions` key is omitted — only the three primary agents omit it. Every subagent declares an explicit `permissions` block that ends with a `subagent` deny (only primary agents may delegate). Beyond that deny: read-only subagents deny both `edit` and `shell`; code-writing subagents deny `shell` and omit the `edit` deny; `perf-optimizer` and `validator` deny `edit` but keep `shell`; agents needing full tool access (edit and shell) declare only the `subagent` deny (e.g. `db-engineer`, `executor`, `security-auditor`); `plan-writer` and `project-manager` additionally allow `edit` under `~/.opencode/plan/*` (the allow is placed after the wildcard denies so it wins for that path).
 
-## All 38 Agents
+## All 39 Agents
 
 ### Primary (3)
 
 | File | Model | Role |
 |------|-------|------|
-| `smart-router.md` | `opencode-go/mimo-v2.6-flash` | Intelligent dispatching — routes tasks by complexity/domain/cost to the right subagent and model tier (recommended default) |
-| `Zero.md` | `opencode-go/mimo-v2.6-flash` | Rapid prototyping, multimodal input, quick iteration |
-| `Erribaba.md` | `opencode-go/mimo-v2.6-pro` | Production code, complex algorithms, full-stack engineering |
+| 🎯 `smart-router.md` | `console-xiaomi-token-plan/mimo-v2.6-flash` | Intelligent dispatching — routes tasks by complexity/domain/cost to the right subagent and model tier (recommended default) |
+| 🌱 `Zero.md` | `opencode-go/mimo-v2.6-flash` | Rapid prototyping, multimodal input, quick iteration |
+| 🛠️ `Erribaba.md` | `opencode-go/mimo-v2.6-pro` | Production code, complex algorithms, full-stack engineering |
 
-### Subagents — Read-only (12)
+### Subagents — Read-only (11)
 
 Denied `edit`, `shell`, and `subagent` in `permissions` frontmatter (except `plan-writer`/`project-manager`, which allow `edit` under `~/.opencode/plan/*`; other actions remain available via the allow-all base):
 
 | File | Model | Role |
 |------|-------|------|
-| `architect.md` | `opencode-go/glm-5.2` | System architecture design |
-| `frontend-reviewer.md` | `opencode-go/mimo-v2.6-flash` | Frontend code review |
-| `git-assistant.md` | `opencode-go/qwen3.8-flash` | Git workflow assistance |
-| `plan-writer.md` | `opencode-go/qwen3.7-plus` | Implementation planning (edit allowed only under `~/.opencode/plan/*`) |
-| `project-manager.md` | `opencode-go/qwen3.8-flash` | Project management (edit allowed only under `~/.opencode/plan/*`) |
-| `research.md` | `opencode-go/qwen3.8-flash` | Technical research |
-| `research-lite.md` | `opencode-go/mimo-v2.6-flash` | Technical research (lite) |
-| `reviewer.md` | `opencode-go/deepseek-v4.1-flash` | Code quality review (Stage 2) |
-| `reviewer-lite.md` | `opencode-go/mimo-v2.6-flash` | Code quality review (lite) |
-| `security-auditor.md` | `opencode-go/deepseek-v4.1-flash` | Security audit |
-| `spec-reviewer.md` | `opencode-go/deepseek-v4.1-flash` | Spec compliance review (Stage 1) |
-| `workflow-orchestrator.md` | `opencode-go/glm-5.3-flash` | Workflow orchestration |
+| 🏗️ `architect.md` | `opencode-go/glm-5.2` | System architecture design |
+| ⚖️ `frontend-reviewer.md` | `opencode-go/mimo-v2.6-flash` | Frontend code review |
+| 🌿 `git-assistant.md` | `opencode-go/qwen3.8-flash` | Git workflow assistance |
+| 🗺️ `plan-writer.md` | `opencode-go/qwen3.7-plus` | Implementation planning (edit allowed only under `~/.opencode/plan/*`) |
+| 🗺️ `project-manager.md` | `opencode-go/qwen3.8-flash` | Project management (edit allowed only under `~/.opencode/plan/*`) |
+| 🔎 `research.md` | `opencode-go/qwen3.8-flash` | Technical research |
+| 🔎 `research-lite.md` | `opencode-go/mimo-v2.6-flash` | Technical research (lite) |
+| ⚖️ `reviewer.md` | `opencode-go/deepseek-v4.1-flash` | Code quality review (Stage 2) |
+| ⚖️ `reviewer-lite.md` | `opencode-go/mimo-v2.6-flash` | Code quality review (lite) |
+| 🔍 `spec-reviewer.md` | `opencode-go/deepseek-v4.1-flash` | Spec compliance review (Stage 1) |
+| 🧭 `workflow-orchestrator.md` | `opencode-go/glm-5.3-flash` | Workflow orchestration |
 
-Plus `perf-optimizer` (`opencode-go/qwen3.7-plus`) and `validator` (`opencode-go/deepseek-v4.1-flash`) — deny `edit` and `subagent` but allow `shell`: read-only for file edits, have bash for running commands.
+### Subagents — Shell-capable read-only (2)
 
-### Subagents — With write/edit (21)
+Denied `edit` and `subagent` but keep `shell`: read-only for file edits, have bash for running commands:
 
-No `edit` deny (or only path-scoped denies) in `permissions` frontmatter. Every row also carries the mandatory `subagent` deny; the bash ✗ rows additionally deny `shell`, while the bash ✓ rows (db-engineer, debugger, debugger-lite, devops, executor, migration, software-engineer) declare only the `subagent` deny:
+| File | Model | Role |
+|------|-------|------|
+| ⚡ `perf-optimizer.md` | `opencode-go/qwen3.7-plus` | Performance analysis (baselines, bottleneck, proposals) |
+| ✅ `validator.md` | `opencode-go/deepseek-v4.1-flash` | Final verification (build/type/test gates) |
+
+### Subagents — With write/edit (23)
+
+No `edit` deny (or only path-scoped denies) in `permissions` frontmatter. Every row also carries the mandatory `subagent` deny; the bash ✗ rows additionally deny `shell`, while the bash ✓ rows (db-engineer, debugger, debugger-lite, devops, executor, migration, security-auditor, software-engineer) declare only the `subagent` deny:
 
 | File | Model | Has bash | Role |
 |------|-------|:--------:|------|
-| `api-designer.md` | `opencode-go/qwen3.7-plus` | ✗ | API endpoint design |
-| `code-generator.md` | `opencode-go/mimo-v2.6-pro` | ✗ | Code generation |
-| `code-generator-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Code generation (lite) |
-| `db-engineer.md` | `opencode-go/deepseek-v4.1-flash` | ✓ | Database engineering |
-| `debugger.md` | `opencode-go/deepseek-v4.1-flash` | ✓ | Bug debugging |
-| `debugger-lite.md` | `opencode-go/mimo-v2.6-flash` | ✓ | Bug debugging (lite) |
-| `devops.md` | `opencode-go/mimo-v2.6-flash` | ✓ | DevOps/CI-CD |
-| `doc-writer.md` | `opencode-go/qwen3.8-flash` | ✗ | Documentation |
-| `doc-writer-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Documentation (lite) |
-| `e2e-tester.md` | `opencode-go/mimo-v2.6-flash` | ✗ | E2E testing |
-| `executor.md` | `opencode-go/mimo-v2.6-flash` | ✓ | Command execution |
-| `frontend-dev.md` | `opencode-go/kimi-k2.7-code` | ✗ | Frontend development |
-| `frontend-dev-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Frontend development (lite) |
-| `migration.md` | `opencode-go/deepseek-v4.1-flash` | ✓ | System migration |
-| `refactorer.md` | `opencode-go/mimo-v2.6-pro` | ✗ | Code refactoring |
-| `refactorer-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Code refactoring (lite) |
-| `software-engineer.md` | `opencode-go/mimo-v2.6-flash` | ✓ | Full-stack implementation |
-| `test-writer.md` | `opencode-go/kimi-k2.7-code` | ✗ | Test writing |
-| `test-writer-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Test writing (lite) |
-| `ui-designer.md` | `opencode-go/glm-5.3-flash` | ✗ | UI design |
-| `vision-dev.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Visual development |
+| 🏗️ `api-designer.md` | `opencode-go/qwen3.7-plus` | ✗ | API endpoint design |
+| 🏗️ `api-designer-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | API design (lite) |
+| ⚙️ `code-generator.md` | `opencode-go/mimo-v2.6-pro` | ✗ | Code generation |
+| ⚙️ `code-generator-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Code generation (lite) |
+| 🗄️ `db-engineer.md` | `opencode-go/deepseek-v4.1-flash` | ✓ | Database engineering |
+| 🐛 `debugger.md` | `opencode-go/deepseek-v4.1-flash` | ✓ | Bug debugging |
+| 🐛 `debugger-lite.md` | `opencode-go/mimo-v2.6-flash` | ✓ | Bug debugging (lite) |
+| 🚀 `devops.md` | `opencode-go/mimo-v2.6-flash` | ✓ | DevOps/CI-CD |
+| 📚 `doc-writer.md` | `opencode-go/qwen3.8-flash` | ✗ | Documentation |
+| 📚 `doc-writer-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Documentation (lite) |
+| 🎭 `e2e-tester.md` | `opencode-go/mimo-v2.6-flash` | ✗ | E2E testing |
+| 🖥️ `executor.md` | `opencode-go/mimo-v2.6-flash` | ✓ | Command execution |
+| 🖌️ `frontend-dev.md` | `opencode-go/kimi-k2.7-code` | ✗ | Frontend development |
+| 🖌️ `frontend-dev-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Frontend development (lite) |
+| 🔄 `migration.md` | `opencode-go/deepseek-v4.1-flash` | ✓ | System migration |
+| 🧹 `refactorer.md` | `opencode-go/mimo-v2.6-pro` | ✗ | Code refactoring |
+| 🧹 `refactorer-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Code refactoring (lite) |
+| 🛡️ `security-auditor.md` | `opencode-go/deepseek-v4.1-flash` | ✓ | Security audit (SAST/scanners) |
+| ⚙️ `software-engineer.md` | `opencode-go/mimo-v2.6-pro` | ✓ | Full-stack implementation |
+| 🧪 `test-writer.md` | `opencode-go/kimi-k2.7-code` | ✗ | Test writing |
+| 🧪 `test-writer-lite.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Test writing (lite) |
+| 🎨 `ui-designer.md` | `opencode-go/glm-5.3-flash` | ✗ | UI design |
+| 👁️ `vision-dev.md` | `opencode-go/mimo-v2.6-flash` | ✗ | Visual development |
 
-### Lite Agents (8)
+### Lite Agents (9)
 
-All eight `-lite` variants run on `opencode-go/mimo-v2.6-flash`. They are lightweight versions of their full counterparts, dispatched by `smart-router` when it judges task complexity as `simple` — fast and cheap, not suited for complex work:
+All nine `-lite` variants run on `opencode-go/mimo-v2.6-flash`. They are lightweight versions of their full counterparts, dispatched by `smart-router` when it judges task complexity as `simple` — fast and cheap, not suited for complex work:
 
 | Lite Agent | Full Counterpart |
 |------------|------------------|
-| `code-generator-lite` | `code-generator` |
-| `debugger-lite` | `debugger` |
-| `doc-writer-lite` | `doc-writer` |
-| `frontend-dev-lite` | `frontend-dev` |
-| `refactorer-lite` | `refactorer` |
-| `research-lite` | `research` |
-| `reviewer-lite` | `reviewer` |
-| `test-writer-lite` | `test-writer` |
+| 🏗️ `api-designer-lite` | `api-designer` |
+| ⚙️ `code-generator-lite` | `code-generator` |
+| 🐛 `debugger-lite` | `debugger` |
+| 📚 `doc-writer-lite` | `doc-writer` |
+| 🖌️ `frontend-dev-lite` | `frontend-dev` |
+| 🧹 `refactorer-lite` | `refactorer` |
+| 🔎 `research-lite` | `research` |
+| ⚖️ `reviewer-lite` | `reviewer` |
+| 🧪 `test-writer-lite` | `test-writer` |
 
 (Their rows also appear in the Read-only and With write/edit tables above, marked `(lite)`.)
 
@@ -140,6 +149,39 @@ All eight `-lite` variants run on `opencode-go/mimo-v2.6-flash`. They are lightw
 4. **Primary agents must list all available subagents in their body** — update all three primaries (`smart-router.md`, `Zero.md`, and `Erribaba.md`) if adding a new subagent.
 5. Do not add build/CI/tooling — this repo has none and needs none.
 6. After adding a new agent, update the tables in this file.
+
+### New Agent Checklist
+
+When adding the next agent, all four must be updated in one change:
+
+1. **Routing reachability** — the agent appears in `smart-router.md` Dimension A and/or Step 2 decision table; update the hardcoded "domains without a -lite variant" list if applicable
+2. **Rosters ×3** — add to the subagent lists in `smart-router.md`, `Zero.md`, and `Erribaba.md`
+3. **Badge family** — assign an emoji per the family map below; prepend it to `description` and add it to every table row in AGENTS.md + README.md + README.en.md
+4. **Handoff contract** — include the 4-field metadata header + Status semantics block (copy from any existing subagent)
+
+| Family | Badge | Members |
+|--------|-------|---------|
+| 调度/编排 | 🎯 / 🧭 | smart-router / workflow-orchestrator |
+| 主智能体 | 🛠️ / 🌱 | Erribaba / Zero |
+| 代码构建 | ⚙️ | code-generator(-lite), software-engineer |
+| 前端/视觉 | 🖌️ / 🎨 / 👁️ | frontend-dev(-lite) / ui-designer / vision-dev |
+| 设计蓝图 | 🏗️ | architect, api-designer(-lite) |
+| 信息侦察 | 🔎 | research(-lite) |
+| 审查 | ⚖️ / 🔍 / 🛡️ | reviewer(-lite), frontend-reviewer / spec-reviewer / security-auditor |
+| 质量保障 | 🧪 / 🎭 / ✅ / ⚡ / 🐛 | test-writer(-lite) / e2e-tester / validator / perf-optimizer / debugger(-lite) |
+| 工具 | 🖥️ / 🧹 / 🌿 / 🗺️ | executor / refactorer(-lite) / git-assistant / plan-writer, project-manager |
+| 运维 | 🚀 / 🗄️ / 🔄 | devops / db-engineer / migration |
+| 文档 | 📚 | doc-writer(-lite) |
+
+### Consistency Tooling (recorded exception to "no tooling")
+
+This repo now runs a lightweight consistency gate (doc-integrity checks only, no build):
+
+- `scripts/check-agents.ps1` — one-command audit: roster coverage ×3, byte-identical handoff-contract copies, badge family map, model whitelist, table↔directory reconciliation, stale-claim scan
+- `.githooks/pre-commit` — enable locally with `git config core.hooksPath .githooks`
+- `.github/workflows/consistency.yml` — runs the same script on push/PR
+
+**Handoff contract is single-sourced**: `references/workflow/handoff-contract.md` is the authority. To change the contract, edit THERE first, then propagate the exact block to every subagent; the script fails on any drift.
 
 ## Structured Development Workflow
 
