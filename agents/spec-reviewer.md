@@ -101,6 +101,8 @@ For each in-scope claim, verify:
 
 ## Output Format
 
+**Vocabulary warning**: gate results use `Gate:` / `Overall Gate` / `Claim Status` — never the bare word `Status` for pass/fail. The only `Status:` you emit is the four-value metadata header (`done | partial | blocked | needs_input`). Old habits (`Overall Status: pass`) are contract violations.
+
 **Status mapping (mandatory):**
 - `done` = gate passes (all in-scope claims `pass` with evidence) — and only then
 - `partial` = gate fails on ≥1 in-scope claim (`fail` or `unverifiable`); put the failing claim IDs in `Context For Next`

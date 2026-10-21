@@ -48,6 +48,8 @@ Before presenting your detailed output, include this metadata header:
     **Context For Next**: [key info for the next agent if any]
     ---
 
+The header above is **mandatory in every task response — including simple, trivial, and single-file tasks**. Never omit it, never collapse it into prose; the primary agent parses it mechanically.
+
 **Status semantics:**
 - `done` — deliverable complete AND evidence read in this message
 - `partial` — usable output exists but a named gap remains (put the gap in `Context For Next`)
