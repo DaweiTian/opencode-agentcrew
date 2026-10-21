@@ -51,7 +51,7 @@ irm https://raw.githubusercontent.com/DaweiTian/opencode-agentcrew/master/instal
 > 安装脚本会自动完成三件事：
 >
 > 1. **安装智能体** — 下载 `agents/*.md` 到 `~/.config/opencode/agents/`（已有的 agents 目录会先备份到 `~/.config/opencode/agents-备份-<时间戳>`）；
-> 2. **安装参考文档** — 复制 `references/*` 到 `~/.config/opencode/references/`（含结构化工作流快速参考 WORKFLOW-QUICKREF、三主智能体共享的并行任务协议 parallel-task-management，以及审查反馈纪律、调试方法论、隔离工作区共 5 份工作流文档）；
+> 2. **安装参考文档** — 复制 `references/*` 到 `~/.config/opencode/references/`（含结构化工作流快速参考 WORKFLOW-QUICKREF、三主智能体共享的并行任务协议 parallel-task-management，以及审查反馈纪律、调试方法论、隔离工作区、行为演习手册共 6 份工作流文档）；
 > 3. **启用后台子智能体并行** — 向 `~/.bashrc` 或 `~/.zshrc` 追加 `export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true`（Windows 脚本改为设置同名用户级环境变量）。该环境变量用于启用主智能体后台并行派发子任务的能力；如需撤销，删除 shell 配置文件末尾对应的 export 行（Windows：移除该用户环境变量）后重开终端即可。
 
 ### 手动安装
@@ -250,11 +250,13 @@ opencode-agentcrew/
 │   ├── vision-dev.md            # 视觉开发
 │   └── workflow-orchestrator.md # 工作流编排
 ├── references/                  # 参考文档（OpenCode References 功能）
+│   ├── lessons.md               # 经验库：环境陷阱、模型合规发现等现场经验
 │   └── workflow/                # 工作流相关文档
 │       ├── WORKFLOW-QUICKREF.md         # 结构化工作流快速参考（一页速查表）
 │       ├── parallel-task-management.md  # 三主智能体共享的并行任务协议（阶段屏障/完成检查）
 │       ├── review-feedback-discipline.md # 审查反馈接收纪律：逐条验证后再实现，禁止谄媚式认同
 │       ├── debug-methodology.md          # 调试方法论：根因调查未完成不得提出修复、三振出局
+│       ├── drill-playbook.md             # 行为演习手册：契约/提示词变更后的行为回归演习
 │       └── isolated-workspace.md         # 隔离工作区：worktree 隔离并行写任务与 provenance 清理纪律
 ├── .gitignore                   # Git 忽略规则
 ├── AGENTS.md                    # 代理配置和使用指南
@@ -391,6 +393,8 @@ opencode-agentcrew/
 - [review-feedback-discipline.md](references/workflow/review-feedback-discipline.md) — 审查反馈接收纪律：逐条对照代码库验证后再实现，禁止谄媚式认同
 - [debug-methodology.md](references/workflow/debug-methodology.md) — 调试方法论：根因调查未完成不得提出修复，连续 3 次失败即停止上报
 - [isolated-workspace.md](references/workflow/isolated-workspace.md) — 隔离工作区：用 `worktree_create` + `session_move` 隔离并行写任务，按 provenance 清单清理
+
+契约、契约副本或提示词批量变更后，按 [drill-playbook.md](references/workflow/drill-playbook.md) 跑行为演习——一致性工具校验的是文件，演习验证的是模型运行时是否真正遵守契约；子智能体回执可用 `scripts/check-receipt.ps1` 机械抽检，现场经验沉淀在 [lessons.md](references/lessons.md)。
 
 ### 何时使用结构化工作流
 

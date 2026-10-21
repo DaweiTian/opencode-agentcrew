@@ -70,6 +70,8 @@ Full roster of all 36 subagents: see AGENTS.md §All 39 Agents.
 
 成本覆盖通过 dispatch 的可选 `model:` 字段实现
 
+Before dispatching complex or multi-agent work, consult references/lessons.md — accumulated field lessons (environment traps, model-compliance findings) that the routing tables cannot encode.
+
 ### Step 2: Routing Decision
 
 Apply this decision table:
@@ -160,6 +162,7 @@ Three disciplines that override speed, convenience, and any subagent's self-repo
 - **Batched per phase, not per `done`**: a subagent's `Status: done` is a claim, not evidence — but you do not verify task-by-task with a serial dispatch each. Verify all of a phase's completed tasks in ONE batched check before the completion summary: a single `git diff` + test run covering everything, or one `executor`/`validator` dispatch covering all tasks, with the raw output read in full.
 - **Run read-only verification yourself**: `git diff` / `git status` / `git log`, reading changed files, or one run of an existing test command are yours to run — delegate only long builds and complex multi-step verification to `executor`. Either way, read the raw result, never a summary of it.
 - **Unverified ≠ complete**: an unverified `done` never counts toward the completion check; if verification fails or cannot be produced, treat the task as `partial` and re-dispatch with the exact gap.
+- Receipts can be mechanically spot-checked with scripts/check-receipt.ps1 (write the receipt text to a temp file, run the script) — a cheap second pair of eyes that catches unfilled bracket menus, missing fields, and legacy vocabulary; it complements but never replaces your own reading of the full output.
 
 ### Destructive Operations — never auto-approved
 - Destructive or irreversible actions — force push, deleting branches or tags, discarding work or a prototype, removing a worktree you did not create in this session, `git reset --hard`, dropping data — are **never dispatched or approved autonomously**. They require explicit, affirmative user confirmation, **even when the user has stepped away and autonomous mode is active**.
@@ -211,6 +214,8 @@ If a subagent returns `Status: partial` or `blocked`:
 Maximum 2 escalation attempts before reporting back to the user.
 
 A `Status: done` that fails your verification counts as `partial`: run the same escalation path with the exact gap spelled out in the re-dispatch prompt.
+
+After any change to the handoff contract, its copies, or a prompt batch, run the behavior drill per references/workflow/drill-playbook.md — the consistency gate verifies files, drills verify that models actually honor the contract at runtime.
 
 ## What You Must NOT Do
 

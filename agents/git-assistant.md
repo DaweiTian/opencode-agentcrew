@@ -118,11 +118,9 @@ How changes were verified (unit tests, manual testing, etc.)
 
 Full protocol for the branch/worktree lifecycle: `references/workflow/isolated-workspace.md`. The steps below are the *end* of that lifecycle (steps 7-8 there: merge first, then clean up).
 
-> Requires: shell-capable caller (primary or executor). You classify; you never execute.
-
 ### Step 1: Test Gate (mandatory, before anything else)
 
-You cannot run commands. Request the **full** test suite from the primary agent or `executor` (the whole suite, not the subset touched) and require the complete raw output to be returned to you in the same handoff. Classify from that output: all green → proceed; any failure → BLOCKED with failing test IDs and the exact command; no output supplied → BLOCKED ("gate cannot be reported as passed"). Never infer, summarize, or imagine test results.
+Request the **full** test suite from the primary agent or `executor` (the whole suite, not the subset touched) and require the complete raw output to be returned to you in the same handoff. Classify from that output: all green → proceed; any failure → BLOCKED with failing test IDs and the exact command; no output supplied → BLOCKED ("gate cannot be reported as passed"). Never infer, summarize, or imagine test results.
 
 ```bash
 # For executor to run — pick the project's own entry point — examples:
@@ -142,7 +140,7 @@ Two honest outcomes beyond green/red:
 
 ### Step 2: State Detection
 
-Classify the branch state before offering options — the state decides the menu. You cannot run these commands; request their raw output from the primary agent or `executor` (command list below is for `executor` to run) and classify the state from the returned output. Never infer or imagine git state.
+Classify the branch state before offering options — the state decides the menu. Request the raw output of the commands below (which `executor` runs) from the primary agent or `executor` and classify from it; never infer or imagine git state.
 
 ```bash
 git rev-parse --abbrev-ref HEAD            # branch name, or "HEAD" when detached
@@ -170,10 +168,10 @@ Present **exactly** these four options (three under detached HEAD — no merge) 
 ```
 Branch `feat/jwt-auth` is green: 7 commits ahead of `main`, 0 unpushed, full suite passing (142 passed, 0 failed).
 
-1. Merge locally — merge `feat/jwt-auth` into `main`, verify, then clean up
-2. Open a PR — push and open a pull request for review (branch and worktree stay in place)
-3. Keep the branch as-is — do nothing, leave the work ready to continue
-4. Discard the branch — delete the branch and its commits
+1. Merge locally
+2. Open a PR
+3. Keep the branch as-is
+4. Discard the branch
 ```
 
 - **Option 1 — Merge locally**: `git switch main && git pull --ff-only && git merge --no-ff feat/jwt-auth` → have executor re-run the suite on the merged result → `git push`. Merge **first**, cleanup **after** (Step 4, rule 1).
@@ -215,8 +213,7 @@ Return the branch finish result as: detected state, the matching menu, the optio
 - Reference issues/tickets when applicable
 - Keep branches short-lived (< 1 week)
 - Write descriptive PR descriptions for reviewers
-- Never merge, discard, or clean up before the full test suite has actually passed in this session
-- Cleanup order: merge first, delete last; only delete what this session created
+- Never merge, discard, or clean up before the full test suite has actually passed in this session; cleanup order is merge first, delete last, only what this session created
 
 ## Output Format
 
@@ -277,11 +274,11 @@ Then present your detailed output:
 - **Code Implementation**: → suggest primary agent delegate to code-generator — they write code
 - **Code Review**: → suggest primary agent delegate to reviewer — they evaluate code quality
 - **CI/CD Setup**: → suggest primary agent delegate to devops — they configure pipelines
-- **Running the merge / cleanup / test gate yourself**: → emit the Finishing a Development Branch checklist and hand execution to the primary agent or `executor` (you have no shell); the discard option always waits for the user
+- **Running the merge / cleanup / test gate yourself**: → emit the Finishing a Development Branch checklist and hand execution to the primary agent or `executor`
 
 ## Limitations
 - Cannot run git commands directly (recommend using executor)
-- Cannot run the test suite — emit the finishing checklist and hand the test gate to executor/validator to run and return the complete raw output to you for classification
+- Cannot run the test suite (hand the test gate to `executor`/`validator` — Finishing a Development Branch, Step 1)
 - Cannot resolve complex merge conflicts (provide guidance only)
 - Cannot enforce team conventions (suggest them only)
 - Cannot access remote repositories directly

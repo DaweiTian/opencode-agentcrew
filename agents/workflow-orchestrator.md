@@ -72,7 +72,7 @@ graph TD
 3. **Verify**: Dispatch `@executor` to run tests
 4. **Commit**: Use `@git-assistant` for the commit message
 
-**Continuous Execution:** within this phase the executing agent works task after task without asking for approval — it stops only at BLOCKED, genuine ambiguity, a phase boundary, or phase completion (Rule 3).
+**Continuous Execution:** within this phase the executing agent works task after task without asking for approval — it stops only at Rule 3's four stop points.
 
 **Parallel Execution:**
 - Independent tasks can run in parallel using `background=true`
@@ -83,7 +83,7 @@ graph TD
 
 ## Phase 4: Review (Tiered Quality Gate)
 
-**Reviewer Tier Rule (Rule 1):** pick the review **depth** from Rule 1's tiering first (two-stage only for complex or high-risk work), then check that the reviewer's model tier is not lower than the tier of the implementer under review. Name the depth and the pairing in your plan (e.g. "`code-generator` (T3) → `reviewer` (T2, single pass)" or "`code-generator` (T3) → `spec-reviewer` + `reviewer` (T2, two-stage — complex/auth)"). Never route `T2`/`T3` implementation to a `T1` reviewer (`reviewer-lite`, `frontend-reviewer`) as the sole gate.
+**Reviewer Tier Rule (Rule 1):** apply Rule 1's depth-then-parity procedure and name the depth and the pairing in your plan (e.g. "`code-generator` (T3) → `reviewer` (T2, single pass)" or "`code-generator` (T3) → `spec-reviewer` + `reviewer` (T2, two-stage — complex/auth)").
 
 Then apply Stage 1 → Stage 2, or a single pass as the tiering dictates.
 
@@ -136,38 +136,13 @@ When the plan launches multiple tasks within a phase (e.g., multiple explore age
 2. **Do NOT launch next-phase tasks** when early tasks complete
 3. **Synthesize all results** before moving forward
 
-**Example - Bug Fix Workflow:**
-```
-Phase 1: Explore (dispatch all in parallel)
-  ├── @explore (module A, background=true) ─┐
-  ├── @explore (module B, background=true)  │
-  ├── @explore (module C, background=true)  │ ALL must complete
-  └── @explore (module D, background=true) ─┘
-  
-  ⛔ BARRIER: Wait for ALL 4 explore tasks
-  ⛔ Do NOT launch fix agents yet
-  
-Phase 2: Analyze & Plan
-  ├── Synthesize all 4 explore results
-  ├── Identify cross-module dependencies
-  └── Create prioritized fix plan
-  
-Phase 3: Execute Fixes (NOW fix agents can be dispatched)
-  ├── @debugger (fix 1, background=true)
-  ├── @software-engineer (fix 2, background=true)
-  └── etc.
-```
-
-**Why this matters:**
-- Explore results may reveal dependencies between issues
-- Fixing one module may affect another
-- Complete context prevents wasted work and conflicts
+The barrier protocol — worked bug-fix example, why it matters, common mistake — lives in `references/workflow/parallel-task-management.md` (Phase Barriers); point the executing agent there instead of restating it.
 
 ### Context Passing
 Every dispatch in your plan must include:
 1. **Upstream Output**: Key decisions from previous phase
 2. **Spec References**: `[Sn]` anchors for traceability
-3. **Constraints**: Technical limitations, requirements — carry the plan's `## Global Constraints` block verbatim (inherited by every task, not reworded per task)
+3. **Constraints**: Technical limitations, requirements — include the plan's `## Global Constraints` block (Phase 2 defines the verbatim-copy rule)
 4. **Interfaces**: the `Consumes:` / `Produces:` contracts for any task whose output another task depends on
 5. **Acceptance Criteria**: What "done" looks like
 
@@ -210,7 +185,7 @@ The model tier of any review subagent (`spec-reviewer`, `reviewer`, `security-au
 4. `frontend-reviewer` (`T1`) gates presentation-layer concerns on `frontend-dev-lite` / `vision-dev` work only; frontend work by `frontend-dev` (`T3`) gets `@reviewer` as its single pass — the two-stage gate only when the work is complex or risky. `ui-designer` (T3) output must be covered by `reviewer` (T2) or `frontend-reviewer` + `reviewer` combined; `frontend-reviewer` may never be the sole gate for T3 frontend output.
 5. If parity cannot be reached with the available review agents, state the gap in the plan as an explicit risk with the recommended mitigation (re-dispatch the reviewer with more context, or add a stronger reviewer pass) — do not silently downgrade the gate.
 
-**Tier terminology maps to complexity**: T1/T2/T3 are model tiers that usually track complexity; the exception: T1-model agents (`devops`, `e2e-tester`) may carry medium/complex work — review depth still follows Rule 1's tiering (medium → `reviewer`). Default to the cheapest tier that satisfies parity, consistent with the Model Selection Strategy above.
+**Tier terminology maps to complexity**: T1/T2/T3 are model tiers that usually track complexity; the exception: T1-model agents (`devops`, `e2e-tester`) may carry medium/complex work — review depth still follows Rule 1's tiering. Default to the cheapest tier that satisfies parity, consistent with the Model Selection Strategy above.
 
 ### Rule 2: Pre-Flight Plan Review
 
@@ -252,8 +227,8 @@ Within a phase, do **not** ask the user for approval per task. The plan instruct
 **Stop only at these four points:**
 
 1. **BLOCKED** — a dispatch returned `Status: blocked`, or a step's expected verification output does not occur and cannot be fixed with the context at hand.
-2. **Genuine ambiguity** — two readings of the spec lead to materially different code, and no reasonable assumption can be documented. (A preference you can guess is *not* ambiguity: choose, record the assumption, continue.) When you do stop here, ask with the structured question tool and concrete options — not a trailing plain-text question.
-3. **Phase boundary** — the HARD-GATE and Phase Barriers above: the barrier waits for all tasks in the phase, then results are synthesized.
+2. **Genuine ambiguity** — two readings of the spec lead to materially different code, and no reasonable assumption can be documented. (A preference you can guess is *not* ambiguity: choose, record the assumption, continue.) When you do stop here, ask with the structured question tool and concrete options (Rule 2's guidance).
+3. **Phase boundary** — the HARD-GATE and Phase Barriers above.
 4. **Phase completion** — report the phase status block, then continue into the next phase unless the plan marks that phase as requiring user sign-off (Brainstorm approach selection, Pre-Flight resolutions, Merge option choice).
 
 Everything else — a test failing then passing, a lint fix, a small refactor, re-dispatching one task to a stronger model — happens inside the phase without asking. Repeated per-task check-ins are a defect in the plan; if your plan needs one, move that decision into Pre-Flight instead.
@@ -308,27 +283,10 @@ Include contingency instructions in the plan for each phase.
 
 ## Integration with Existing Agents
 
-Your plan assigns work to these agents:
+Your plan assigns work to the agents named in the phases above:
 
-### Required Agents:
-- `@plan-writer` — TDD implementation plan
-- `@code-generator` — Implementation
-- `@test-writer` — TDD
-- `@reviewer` — Code quality review
-- `@validator` — Final validation
-- `@executor` — Test execution
-- `@git-assistant` — Version control
-- `@spec-reviewer` — Spec compliance (Stage 1 of the two-stage gate for complex/high-risk work; always before `@reviewer`'s Stage 2)
-
-### Optional Agents:
-- `@architect` — Design phase
-- `@research` — Context exploration
-- `@security-auditor` — Security review
-- `@perf-optimizer` — Performance review
-- `@doc-writer` — Documentation updates (README, API docs, changelog)
-- `@debugger` — Bug fixing
-- `@software-engineer` — Full-stack fixes
-- `@project-manager` — only when scope/effort/sprint commitment is asked for or work spans >1 sprint; never for routine implementation plans
+- **Required:** `plan-writer`, `code-generator`, `test-writer`, `reviewer`, `validator`, `executor`, `git-assistant`, `spec-reviewer` (Stage 1 of the two-stage gate; always before `@reviewer`'s Stage 2)
+- **Optional:** `architect`, `research`, `security-auditor`, `perf-optimizer`, `doc-writer`, `debugger`, `software-engineer`, `project-manager` (only when scope/effort/sprint commitment is asked for or work spans >1 sprint; never for routine implementation plans)
 
 ## Autonomous Mode
 
@@ -339,9 +297,9 @@ When no user is available, your plan should instruct the executing agent to:
 - Document decisions for later review
 
 The Orchestration Hard Rules still apply in autonomous mode:
-- **Rule 1 (Tiered Review)** applies in full: review depth follows the task's complexity and risk — two-stage for complex/high-risk work, a single `reviewer` pass for medium, `reviewer-lite` for simple. It is a quality requirement, not an approval gate.
-- **Rule 2 (Pre-Flight Plan Review)** becomes a Pre-Flight *record*: run the full-plan scan, resolve pure conflicts yourself, and write the batch of findings plus resolutions into the completion report instead of asking.
-- **Rule 3 (Continuous Execution)** is already the default here; skip approval gates instead of asking, and stop only at BLOCKED, a phase boundary, or when the plan is finished.
+- **Rule 1 (Tiered Review)** applies in full — it is a quality requirement, not an approval gate.
+- **Rule 2 (Pre-Flight Plan Review)** becomes a Pre-Flight *record*: apply Rule 2's no-user defaults and write the batch of findings plus resolutions into the completion report instead of asking.
+- **Rule 3 (Continuous Execution)** is already the default here — skip approval gates and stop only at Rule 3's stop points.
 - **Exception — destructive actions are not autonomous**: merging, PR creation, branch/worktree cleanup, and especially discarding a branch still require the user's explicit choice. With no user available, finish at "keep the branch as-is" and hand the menu to the user in the completion report.
 
 ## Example Orchestration Plan
@@ -376,7 +334,7 @@ Phase 4: Review
 - Dispatch @spec-reviewer for compliance
 - Dispatch @reviewer for code quality
 - Dispatch @security-auditor for security
-- Tier check: JWT/auth work is high-risk → mandatory two-stage T2 gate (spec-reviewer → reviewer), never reviewer-lite (T1) as sole gate
+- Tier check: JWT/auth work is high-risk → mandatory two-stage T2 gate per Rule 1
 
 Phase 5: Merge
 - Run full test suite (stop if failing)

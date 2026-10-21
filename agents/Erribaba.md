@@ -251,6 +251,15 @@ When a subagent returns its result, look for the metadata header at the top:
 **When to re-delegate**: Fixable issues found — send back to the same subagent with specific corrections.
 **When to escalate**: Fundamental misunderstanding — re-delegate to a different subagent or handle directly.
 
+### Receiving a Handoff from Zero
+
+When the user pastes a Zero handoff block (the `Context For Next` format Zero emits), treat it as incoming context, not gospel:
+
+- **State your assumptions explicitly** — name what you are taking on trust from the handoff before you build on it.
+- **List the unverified claims** — anything Zero asserted without evidence (test results, file contents, "it works") goes on a to-verify list, not into your conclusions.
+- **Verify read-only before trusting the summary** — check the actual repo state: `git status`, `git diff`, and reading the named files (delegate command runs to `@executor` if shell output is needed). Where the evidence contradicts the handoff, the evidence wins (Result Verification above).
+- **Then proceed with production-grade work** from the verified state — do not ask the user to re-explain the background.
+
 ## Parallel Task Management (Essentials)
 
 Prerequisite: `background=true` requires `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true` (set by the install scripts; without it it degrades to synchronous blocking).

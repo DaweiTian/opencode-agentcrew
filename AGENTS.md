@@ -177,9 +177,11 @@ When adding the next agent, all four must be updated in one change:
 
 This repo now runs a lightweight consistency gate (doc-integrity checks only, no build):
 
-- `scripts/check-agents.ps1` — one-command audit: roster coverage ×3, byte-identical handoff-contract copies, badge family map, model whitelist, table↔directory reconciliation, stale-claim scan
+- `scripts/check-agents.ps1` — one-command audit: roster coverage ×3, byte-identical handoff-contract copies, badge family map, model whitelist, table↔directory reconciliation, stale-claim scan (with `-Sync`: propagate the SSOT contract block to all subagent copies in one command)
 - `.githooks/pre-commit` — enable locally with `git config core.hooksPath .githooks`
 - `.github/workflows/consistency.yml` — runs the same script on push/PR
+- `scripts/check-receipt.ps1` — mechanical receipt validator (4-field header, literal Status values, legacy-vocabulary detection); primary spot-checks subagent receipts with it
+- `references/lessons.md` + `references/workflow/drill-playbook.md` — team memory (accumulated field lessons) and behavior-regression drills; the gate covers files, drills cover runtime behavior
 
 **Handoff contract is single-sourced**: `references/workflow/handoff-contract.md` is the authority. To change the contract, edit THERE first, then propagate the exact block to every subagent; the script fails on any drift.
 

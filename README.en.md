@@ -51,7 +51,7 @@ irm https://raw.githubusercontent.com/DaweiTian/opencode-agentcrew/master/instal
 > The install script automatically does three things:
 >
 > 1. **Installs agents** — downloads `agents/*.md` to `~/.config/opencode/agents/` (an existing agents directory is first backed up to `~/.config/opencode/agents-备份-<timestamp>`);
-> 2. **Installs reference docs** — copies `references/*` to `~/.config/opencode/references/` (5 workflow docs in total: the structured workflow quick reference WORKFLOW-QUICKREF, the parallel task protocol parallel-task-management shared by the 3 primary agents, plus the review feedback discipline, debug methodology, and isolated workspace docs);
+> 2. **Installs reference docs** — copies `references/*` to `~/.config/opencode/references/` (6 workflow docs in total: the structured workflow quick reference WORKFLOW-QUICKREF, the parallel task protocol parallel-task-management shared by the 3 primary agents, plus the review feedback discipline, debug methodology, isolated workspace, and behavior drill playbook docs);
 > 3. **Enables background subagent parallelism** — appends `export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true` to `~/.bashrc` or `~/.zshrc` (the Windows script sets a user-level environment variable with the same name instead). This variable enables the primary agents' background parallel subtask dispatch; to undo it, remove the corresponding export line at the end of your shell config file (Windows: delete the user environment variable) and reopen your terminal.
 
 ### Manual Install
@@ -249,11 +249,13 @@ opencode-agentcrew/
 │   ├── vision-dev.md            # Visual development
 │   └── workflow-orchestrator.md # Workflow orchestration
 ├── references/                  # Reference docs (OpenCode References feature)
+│   ├── lessons.md               # Team memory: field lessons (environment traps, model-compliance findings)
 │   └── workflow/                # Workflow documentation
 │       ├── WORKFLOW-QUICKREF.md         # Structured workflow quick reference (one-page cheat sheet)
 │       ├── parallel-task-management.md  # Parallel task protocol shared by the 3 primary agents (phase barriers, completion check)
 │       ├── review-feedback-discipline.md # Review feedback discipline: verify each finding before implementing, no sycophancy
 │       ├── debug-methodology.md          # Debug methodology: no fix before root-cause investigation is done, three-strikes rule
+│       ├── drill-playbook.md             # Behavior drill playbook: post-change regression drills for the contract
 │       └── isolated-workspace.md         # Isolated workspace: worktree isolation for parallel writes, provenance-based cleanup
 ├── .gitignore                   # Git ignore rules
 ├── AGENTS.md                    # Agent configuration and usage guide
@@ -390,6 +392,8 @@ Cross-agent protocols live in `references/workflow/`; the primary agents keep on
 - [review-feedback-discipline.md](references/workflow/review-feedback-discipline.md) — Receiving review feedback: verify each finding against the codebase before implementing, no sycophantic agreement
 - [debug-methodology.md](references/workflow/debug-methodology.md) — Debug methodology: no fix proposal before root-cause investigation is complete; stop and escalate after three failed attempts
 - [isolated-workspace.md](references/workflow/isolated-workspace.md) — Isolated workspace: `worktree_create` + `session_move` to isolate parallel write tasks, provenance-based cleanup
+
+After any change to the handoff contract, its copies, or a prompt batch, run the behavior drill per [drill-playbook.md](references/workflow/drill-playbook.md) — the consistency gate verifies files, drills verify that models actually honor the contract at runtime; receipts can be spot-checked with `scripts/check-receipt.ps1`, and field lessons accumulate in [lessons.md](references/lessons.md).
 
 ### When to Use the Structured Workflow
 

@@ -48,8 +48,14 @@
     the same trap when PowerShell parses it.
 
 .PARAMETER Sync
-    Reserved for the future "propagate the SSOT block to every subagent" mode.
-    Not implemented yet: it only prints a notice, and the audit still runs.
+    Propagation mode: extracts the synced block from
+    references/workflow/handoff-contract.md (SSOT) and replaces the block in
+    every subagent file (agents/*.md minus the three primaries) with it. Each
+    file keeps its own line-ending style (CRLF stays CRLF, LF stays LF) and a
+    possible BOM is preserved; files whose block already matches are left
+    untouched on disk. Every file is reported as 'synced' or 'unchanged'
+    (or 'skipped' when no block is found). The full 7-check audit always runs
+    after the sync, so the result is verified in the same run.
 
 .EXAMPLE
     pwsh -NoProfile -File scripts/check-agents.ps1
@@ -220,23 +226,90 @@ function Get-LeadingCodePoint {
     return $c
 }
 
-function Get-ContractBlock {
-    # Extracts the synced handoff-contract block: from the '**Status semantics:**'
-    # line through the end of the line containing 'do differently.' (inclusive).
-    # Line endings are normalized to LF so CRLF/LF mixes are not treated as drift.
-    # Returns $null when the block cannot be found.
+function Get-ContractSpan {
+    # Char span [Start, End) of the synced handoff-contract block inside $Text:
+    # from the beginning of the line holding '**Status semantics:**' through the
+    # end of the line holding 'differently.' (line terminator excluded). Any
+    # surrounding decoration (indent, '>' quote markers, a leading list bullet)
+    # stays inside the span so callers can replace the whole region verbatim.
+    # Returns $null when either marker is missing.
     param([string]$Text)
     if ($null -eq $Text -or $Text.Length -eq 0) { return $null }
     $startIdx = $Text.IndexOf('**Status semantics:**', [System.StringComparison]::Ordinal)
     if ($startIdx -lt 0) { return $null }
-    $endIdx = $Text.IndexOf('do differently.', $startIdx, [System.StringComparison]::Ordinal)
+    $endIdx = $Text.IndexOf('differently.', $startIdx, [System.StringComparison]::Ordinal)
     if ($endIdx -lt 0) { return $null }
+    $lineStart = $Text.LastIndexOf("`n", $startIdx)
+    if ($lineStart -lt 0) { $lineStart = 0 } else { $lineStart = $lineStart + 1 }
     $eol = $Text.IndexOf("`n", $endIdx)
     if ($eol -lt 0) { $eol = $Text.Length }
-    $block = $Text.Substring($startIdx, $eol - $startIdx)
-    if ($block.EndsWith("`r")) { $block = $block.Substring(0, $block.Length - 1) }
+    $contentEnd = $eol
+    if ($contentEnd -gt $lineStart -and $Text[$contentEnd - 1] -eq "`r") { $contentEnd = $contentEnd - 1 }
+    return @{ Start = $lineStart; End = $contentEnd }
+}
+
+function Remove-BlockDecorations {
+    # Strips external markdown decorations some contexts wrap around the
+    # contract block (shared indentation, '>' blockquote markers, a list bullet
+    # in front of the marker line) so the canonical lines come out clean.
+    # Identity for plain blocks like the ones currently in the repo.
+    param([string[]]$Lines)
+    $out = @()
+    foreach ($ln in $Lines) { $out += $ln }
+
+    # 1) shared leading whitespace indent
+    $minIndent = -1
+    foreach ($ln in $out) {
+        if ($ln.Trim().Length -eq 0) { continue }
+        $ws = [regex]::Match($ln, '^[ \t]*').Value.Length
+        if ($minIndent -lt 0 -or $ws -lt $minIndent) { $minIndent = $ws }
+    }
+    if ($minIndent -gt 0) {
+        for ($i = 0; $i -lt $out.Count; $i++) {
+            if ($out[$i].Length -gt $minIndent) { $out[$i] = $out[$i].Substring($minIndent) }
+            elseif ($out[$i].Length -gt 0) { $out[$i] = '' }
+        }
+    }
+
+    # 2) blockquote markers shared by every non-empty line
+    while ($true) {
+        $allQuoted = $true
+        foreach ($ln in $out) {
+            if ($ln.Trim().Length -eq 0) { continue }
+            if (-not [regex]::IsMatch($ln, '^[ \t]*>')) { $allQuoted = $false; break }
+        }
+        if (-not $allQuoted) { break }
+        for ($i = 0; $i -lt $out.Count; $i++) {
+            if ($out[$i].Trim().Length -eq 0) { continue }
+            $out[$i] = [regex]::Replace($out[$i], '^[ \t]*>[ \t]?', '')
+        }
+    }
+
+    # 3) list bullet directly in front of the marker line (continuation lines
+    #    of such a list carry at most two extra spaces of indent)
+    if ($out.Count -gt 0 -and [regex]::IsMatch($out[0], '^[-*+][ \t]+')) {
+        $out[0] = [regex]::Replace($out[0], '^[-*+][ \t]+', '')
+        for ($i = 1; $i -lt $out.Count; $i++) {
+            if ($out[$i].Trim().Length -eq 0) { continue }
+            $out[$i] = [regex]::Replace($out[$i], '^[ \t]{1,2}', '')
+        }
+    }
+    return ,$out
+}
+
+function Get-ContractBlock {
+    # Extracts the synced handoff-contract block: from the '**Status semantics:**'
+    # line through the end of the line containing 'do differently.' (inclusive),
+    # with external decorations removed. Line endings are normalized to LF so
+    # CRLF/LF mixes are not treated as drift. Returns $null when the block
+    # cannot be found.
+    param([string]$Text)
+    $span = Get-ContractSpan $Text
+    if ($null -eq $span) { return $null }
+    $block = $Text.Substring($span['Start'], $span['End'] - $span['Start'])
     $block = $block.Replace("`r`n", "`n").Replace("`r", "`n")
-    return $block
+    $lines = Remove-BlockDecorations ($block -split "`n")
+    return ($lines -join "`n")
 }
 
 function Get-Sha256Hex {
@@ -286,7 +359,75 @@ function Write-Check {
 }
 
 if ($Sync) {
-    Write-Host ('Sync mode: update all copies from SSOT ' + [char]0x2014 + ' not implemented yet; manual propagation required')
+    # Propagation mode: copy the SSOT block into every subagent file, keeping
+    # each file's own line-ending style, then fall through to the full audit.
+    Write-Host ''
+    Write-Host ('Sync: propagating the SSOT block to every subagent file')
+
+    if (-not (Test-Path -LiteralPath $SsotPath)) {
+        Write-Host ($script:FailMark + ' Sync aborted: SSOT missing: references/workflow/handoff-contract.md')
+        exit 1
+    }
+    $ssotBlock = Get-ContractBlock (Read-TextUtf8 $SsotPath)
+    if ($null -eq $ssotBlock) {
+        Write-Host ($script:FailMark + ' Sync aborted: synced block not found in handoff-contract.md (expected **Status semantics:** .. do differently.)')
+        exit 1
+    }
+    if (-not (Test-Path -LiteralPath $AgentsDir)) {
+        Write-Host ($script:FailMark + ' Sync aborted: agents/ directory not found under ' + $RepoRoot)
+        exit 1
+    }
+
+    $ssotHash = Get-Sha256Hex $ssotBlock
+    $blockLineCount = @($ssotBlock -split "`n").Count
+    Write-Host ('       source: references/workflow/handoff-contract.md (' + $blockLineCount + ' lines, sha256 ' + $ssotHash.Substring(0, 12) + ')')
+
+    $syncFiles = @(Get-ChildItem -LiteralPath $AgentsDir -Filter '*.md' -File |
+        Where-Object { $PrimaryNames -notcontains $_.BaseName } |
+        Sort-Object Name)
+    $syncedCount = 0
+    $unchangedCount = 0
+    $skippedCount = 0
+
+    foreach ($f in $syncFiles) {
+        $text = Read-TextUtf8 $f.FullName
+        $span = Get-ContractSpan $text
+        if ($null -eq $span) {
+            Write-Host ('       - ' + $f.Name + ': skipped (synced block not found)')
+            $skippedCount = $skippedCount + 1
+            continue
+        }
+
+        $oldRaw = $text.Substring($span['Start'], $span['End'] - $span['Start'])
+        $oldNorm = $oldRaw.Replace("`r`n", "`n").Replace("`r", "`n")
+        $oldCanon = (Remove-BlockDecorations ($oldNorm -split "`n")) -join "`n"
+        if ($oldCanon -ceq $ssotBlock) {
+            Write-Host ('       - ' + $f.Name + ': unchanged')
+            $unchangedCount = $unchangedCount + 1
+            continue
+        }
+
+        # Keep the file's own line-ending style: CRLF files stay CRLF, LF stay LF.
+        $eolSeq = "`n"
+        $crlfCount = ([regex]::Matches($text, "`r`n")).Count
+        $lfCount = ([regex]::Matches($text, "`n")).Count
+        if ($crlfCount -gt 0 -and ($crlfCount * 2) -ge $lfCount) { $eolSeq = "`r`n" }
+        $newRaw = $ssotBlock.Replace("`n", $eolSeq)
+        $newText = $text.Substring(0, $span['Start']) + $newRaw + $text.Substring($span['End'])
+
+        # ReadAllText strips a BOM; preserve one when the file originally had it.
+        $enc = $script:Utf8
+        $bytes = [System.IO.File]::ReadAllBytes($f.FullName)
+        if ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) {
+            $enc = New-Object -TypeName System.Text.UTF8Encoding -ArgumentList $true
+        }
+        [System.IO.File]::WriteAllText($f.FullName, $newText, $enc)
+        Write-Host ('       - ' + $f.Name + ': synced')
+        $syncedCount = $syncedCount + 1
+    }
+
+    Write-Host ('Sync: ' + $syncFiles.Count + ' file(s) scanned - ' + $syncedCount + ' synced, ' + $unchangedCount + ' unchanged, ' + $skippedCount + ' skipped')
+    Write-Host ''
 }
 
 # ----------------------------------------------------------------------------

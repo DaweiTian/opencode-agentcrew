@@ -67,7 +67,7 @@ Two units, two rules: the **task** is the reviewable unit — one thing a review
 **Covers:** [S1, S3]
 <!-- spec section anchors this task implements -->
 
-**Interfaces:** (required whenever this task depends on another task or another task depends on this one — see Interfaces Block below)
+**Interfaces:** (when required — see Interfaces Block below)
 - Consumes: `decodeToken(raw: string): TokenPayload` — from Task 2
 - Produces: `requireAuth(handler: RequestHandler): RequestHandler` in `src/auth/middleware.py`
 
@@ -128,8 +128,6 @@ Example:
 ```markdown
 ## Global Constraints
 
-> Copied verbatim from the spec. Every task below inherits these implicitly.
-
 - Must run on Python 3.11+ and PostgreSQL 15; no new runtime dependencies without approval
 - All public endpoints require authentication via the existing JWT middleware
 - Never log or store raw tokens, passwords, or personally identifiable information (PII)
@@ -151,7 +149,6 @@ Any task whose output another task depends on must declare `**Interfaces:**` wit
 - Include error and nullability contracts when a consumer branches on them (`throws TokenExpiredError`, `returns null when the user is missing`).
 - The `Produces:` text and the consuming task's `Consumes:` text must be **byte-identical apart from the task reference**. Self-Review Checklist item 4 (Interface match) enforces this.
 - A task with no upstream or downstream dependencies may omit the block entirely; a task others depend on may not.
-- Never reference a symbol no task produces — that is already a placeholder failure.
 
 Example (producer and consumer pair):
 
@@ -183,7 +180,7 @@ Example (producer and consumer pair):
 - Identify all `[Sn]` anchors
 - Map requirements to components
 - Identify dependencies between components
-- **Extract every constraint statement verbatim** into the `## Global Constraints` block before designing tasks — numbers, units, and named technologies preserved
+- **Extract every constraint statement** into the `## Global Constraints` block before designing tasks (Global Constraints Block above covers the wording rules)
 
 ### 2. Design File Structure
 
@@ -196,14 +193,14 @@ Before defining tasks, map out which files will be created or modified:
 
 ### 3. Decompose into Tasks
 
-Split by the **smallest independently-vetoable unit**: one task is one thing a reviewer can approve or reject on its own (see Task Right-Sizing below).
+Split by the **smallest independently-vetoable unit** (Task Right-Sizing below).
 
 Each task should:
 - **Produce self-contained changes** that make sense independently
 - **Cover at least one spec section** (via `Covers:` field)
 - **Follow TDD cycle** (test first, then implement)
 - **Be atomic** (one logical change per task)
-- **Declare its contract** via `**Interfaces:**` whenever another task depends on it (or it depends on another task)
+- **Declare its contract** via `**Interfaces:**` where required (Interfaces Block above)
 - **Inherit the global constraints** rather than repeating them
 
 ### 4. Define Steps
@@ -291,7 +288,7 @@ Two questions decide whether a candidate task is the right size:
 1. **Can a reviewer veto it alone?** If approving it only makes sense once another change lands, the two belong in one task. If rejecting it leaves the codebase green and coherent, it is a real task.
 2. **Does it change one contract or one behavior?** A task that adds a schema *and* a migration *and* a handler is three vetoable units folded into one review that can only be rejected as a whole.
 
-Sizing at this level, individual **steps** inside the task remain 2-5 minutes of focused work — the task is the reviewable unit, the step is the executable unit. Do not confuse the two: "Write the failing test" is a step, not a task; it cannot be shipped or vetoed on its own.
+Sizing at this level, individual **steps** inside the task remain 2-5 minutes of focused work. Do not confuse the two: "Write the failing test" is a step, not a task; it cannot be shipped or vetoed on its own.
 
 **Right-sized examples:**
 
@@ -306,18 +303,6 @@ Sizing at this level, individual **steps** inside the task remain 2-5 minutes of
 | Too large | "Implement authentication" | A reviewer cannot veto this without vetoing the feature; the TDD steps inside run for an hour | Split into decode utility, middleware, login endpoint, refresh flow, revocation |
 | Wrong cut | "Add endpoint and update the client to call it" | Two contracts, two owners, two independent reviews; one can be rejected while the other stands | Task N: endpoint (Produces the API contract) + Task N+1: client (Consumes it) |
 | Too small | "Rename `token` to `accessToken` across the module" | Nothing a reviewer can approve as a feature or a fix — it is a step inside a rename task | Make it Step 1 of "Refactor token naming" with its test-run steps |
-
-### Good Granularity (2-5 minutes per step):
-- "Write the failing test" — step
-- "Run it to make sure it fails" — step
-- "Implement the minimal code to make the test pass" — step
-- "Run the tests and make sure they pass" — step
-- "Commit" — step
-
-### Bad Granularity (too large):
-- "Implement the entire authentication system"
-- "Add all error handling"
-- "Write comprehensive tests"
 
 ### Bad Granularity (too small):
 - "Add import statement"
@@ -348,9 +333,8 @@ After writing the complete plan, verify:
 
 ### Output:
 - Structured implementation plan
-- `## Global Constraints` block copied verbatim from the spec
+- `## Global Constraints` block and `**Interfaces:**` contracts (rules above)
 - Task list with TDD steps
-- `**Interfaces:**` contracts (`Consumes:` / `Produces:`) on every depended-on task
 - File structure mapping
 - Dependency graph
 
