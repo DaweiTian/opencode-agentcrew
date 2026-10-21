@@ -1,4 +1,4 @@
-# opencode-agents 一键安装脚本 (Windows PowerShell)
+﻿# opencode-agents 一键安装脚本 (Windows PowerShell)
 # 用法: irm https://raw.githubusercontent.com/DaweiTian/opencode-agentcrew/master/install.ps1 | iex
 # 注: URL 中的 raw/master 分支已核实——GitHub 仓库默认分支为 master（2026-10-09 推送验证）
 

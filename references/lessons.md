@@ -70,8 +70,10 @@ platform reading files differently than we did.
 A perfect prompt file does not guarantee perfect behavior. Compliance is measured,
 never assumed.
 
-- **File-perfect contract does not mean the model follows it: flash-tier agents dropped the entire metadata header, and spec-reviewer used legacy `Status` vocabulary, DESPITE byte-identical prompt blocks — reinforcement sentences must live OUTSIDE the hashed contract block; if drift recurs after reinforcement, escalate to a model-tier upgrade, not more wording.**
+- **File-perfect contract does not mean the model follows it: flash-tier agents dropped the entire metadata header, and spec-reviewer used legacy `Status` vocabulary, DESPITE byte-identical prompt blocks — reinforcement sentences must live OUTSIDE the hashed contract block; if drift recurs after reinforcement, escalate to a model-tier upgrade, not more wording.** [CORRECTION 2026-10-22: see Append Log — the drill ran against a stale local config (pre-training prompts); spec-reviewer's legacy vocabulary was old-prompt fidelity, NOT model disobedience. The lite dropped-header finding still stands as an old-prompt compliance failure; compliance with the NEW reinforced prompts remains untested.]
   Evidence: the first behavior drill.
+
+- **Verify WHICH prompt version the runtime actually loaded before attributing behavior to the model** — the local config (~/.config/opencode/agents) silently lags the repo; the first drill tested the pre-training snapshot, producing a false misattribution. Diff local config against the repo (or confirm a fresh install) before trusting any behavioral finding. (evidence: 38/38 local files stale; install.ps1 had never been run this session)
 
 - **Pro-tier (`mimo-v2.6-pro`) showed 100% contract compliance in the drill while flash / deepseek-flash tiers degrade — weight critical-coordination roles toward pro when budget allows.**
   Evidence: drill scenario 2 vs scenario 1.
@@ -134,3 +136,6 @@ Rules:
 ## Append Log
 
 *(empty — new dated entries go here)*
+
+### 2026-10-22 — environment — install.ps1 crashed under Windows PowerShell 5.1 (UTF-8 no-BOM + GBK); pwsh 7 bypassed it
+Evidence: direct `& install.ps1` → parser errors on markdown-table lines (here-string boundary broken by GBK mojibake); `pwsh -File install.ps1` → exit 0, 39 agents installed, content verified 0-diff after newline normalization. Fix: added UTF-8 BOM (parse errors → 0 under 5.1). The GBK trap is not theoretical — it broke the installer itself; any .ps1 shipping CJK text to 5.1 users needs a BOM, and pure-ASCII source (scripts/*.ps1) remains the stronger alternative.
