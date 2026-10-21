@@ -1,5 +1,5 @@
 ---
-description: API 设计师智能体。负责具体 API 端点设计、OpenAPI/Swagger 规范编写、请求/响应格式定义、错误码体系设计和 API 版本管理。确保 API 的一致性、可发现性和开发者体验。当需要设计具体 API 端点、编写接口规范或定义错误码时调用此代理。注意：高层服务间通信架构请使用 architect。
+description: 🏗️ API 设计师智能体。负责具体 API 端点设计、OpenAPI/Swagger 规范编写、请求/响应格式定义、错误码体系设计和 API 版本管理。确保 API 的一致性、可发现性和开发者体验。当需要设计具体 API 端点、编写接口规范或定义错误码时调用此代理。注意：高层服务间通信架构请使用 architect。
 mode: subagent
 model: opencode-go/qwen3.7-plus
 permissions:
@@ -98,6 +98,14 @@ Before presenting your detailed output, include this metadata header:
     **Suggest Next**: [agent names, e.g. "code-generator, doc-writer" or "none"]
     **Context For Next**: [key decisions, constraints, or data the next agent needs]
     ---
+
+**Status semantics:**
+- `done` — deliverable complete AND evidence read in this message
+- `partial` — usable output exists but a named gap remains (put the gap in `Context For Next`)
+- `blocked` — cannot proceed without info/permission you do not have
+- `needs_input` — a decision only the user can make (primary will ask via the question tool)
+
+Fill in exactly one value — literally `done`, `partial`, `blocked`, or `needs_input`; never leave the bracket menu. For `partial`/`blocked`, `Context For Next` is mandatory and must name the exact gap + what the next agent should do differently.
 
 Then present your detailed output:
 

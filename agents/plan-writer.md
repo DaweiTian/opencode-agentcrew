@@ -1,5 +1,5 @@
 ---
-description: 实现计划编写智能体。将需求分解为咬合大小的、可执行的任务步骤，每个步骤都遵循 TDD 原则。当需要为复杂功能创建结构化实现计划时调用此代理。
+description: 🗺️ 实现计划编写智能体。将需求分解为咬合大小的、可执行的任务步骤，每个步骤都遵循 TDD 原则。当需要为复杂功能创建结构化实现计划时调用此代理。
 mode: subagent
 model: opencode-go/qwen3.7-plus
 permissions:
@@ -229,7 +229,7 @@ Each step should be:
 
 - **One behavior per test** — If test name has "and", split it
 - **Clear name** — Describes what is being tested
-- **Real code** — No mocks unless unavoidable
+- Real code paths — mock only true external boundaries (network, DB, clock, randomness) per test-writer's mocking laws; never mock the unit under test.
 - **Verifiable failure** — Test should fail for expected reason
 
 ## No Placeholders
@@ -255,6 +255,14 @@ Before presenting your detailed output, include this metadata header:
     **Context For Next**: [task count, complexity summary, dependencies, constraint count, depended-on tasks that declare Interfaces]
     ---
 
+**Status semantics:**
+- `done` — deliverable complete AND evidence read in this message
+- `partial` — usable output exists but a named gap remains (put the gap in `Context For Next`)
+- `blocked` — cannot proceed without info/permission you do not have
+- `needs_input` — a decision only the user can make (primary will ask via the question tool)
+
+Fill in exactly one value — literally `done`, `partial`, `blocked`, or `needs_input`; never leave the bracket menu. For `partial`/`blocked`, `Context For Next` is mandatory and must name the exact gap + what the next agent should do differently.
+
 Then present your detailed output:
 
     ## Implementation Plan
@@ -270,7 +278,7 @@ Then present your detailed output:
     **Global Constraints:** [N constraints copied verbatim from the spec]
     **Interface Pairs:** [Task A `Produces:` → Task B `Consumes:` for each contract]
 
-When useful, the plan file may also be written to the plan directory `~/.opencode/plan/`; otherwise return the plan as your delegation output as usual.
+Always write the plan to ~/.opencode/plan/<slug>-plan.md and return the absolute path plus the full text; the path is mandatory because downstream agents reference it.
 
 ## Task Granularity Guide
 

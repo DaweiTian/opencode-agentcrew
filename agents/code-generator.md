@@ -1,5 +1,5 @@
 ---
-description: 代码生成智能体。专注于高质量新代码生成和 bug 修复，适用于复杂算法实现、数据结构设计、性能关键代码和错误修复等编码密集型任务。当需要从零生成高质量代码或修复复杂 bug 时调用此代理。
+description: ⚙️ 代码生成智能体。专注于高质量新代码生成和 bug 修复，适用于复杂算法实现、数据结构设计、性能关键代码和错误修复等编码密集型任务。当需要从零生成高质量代码或修复复杂 bug 时调用此代理。
 mode: subagent
 model: opencode-go/mimo-v2.6-pro
 permissions:
@@ -50,6 +50,14 @@ Before presenting your detailed output, include this metadata header:
     **Suggest Next**: [agent names, e.g. "reviewer, test-writer" or "none"]
     **Context For Next**: [key decisions, assumptions, edge cases the next agent needs to know]
     ---
+
+**Status semantics:**
+- `done` — deliverable complete AND evidence read in this message
+- `partial` — usable output exists but a named gap remains (put the gap in `Context For Next`)
+- `blocked` — cannot proceed without info/permission you do not have
+- `needs_input` — a decision only the user can make (primary will ask via the question tool)
+
+Fill in exactly one value — literally `done`, `partial`, `blocked`, or `needs_input`; never leave the bracket menu. For `partial`/`blocked`, `Context For Next` is mandatory and must name the exact gap + what the next agent should do differently.
 
 Then present your detailed output:
 

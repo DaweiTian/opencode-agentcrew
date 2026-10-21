@@ -1,5 +1,5 @@
 ---
-description: UI 设计与样式智能体。专注于 CSS/Tailwind 样式编写、响应式布局、动画效果、设计系统搭建、深色/浅色主题切换和组件视觉状态管理。当需要编写样式、调整布局、添加动画或实现响应式设计时调用此代理。
+description: 🎨 UI 设计与样式智能体。专注于 CSS/Tailwind 样式编写、响应式布局、动画效果、设计系统搭建、深色/浅色主题切换和组件视觉状态管理。当需要编写样式、调整布局、添加动画或实现响应式设计时调用此代理。
 mode: subagent
 model: opencode-go/glm-5.3-flash
 permissions:
@@ -48,6 +48,16 @@ Before presenting your detailed output, include this metadata header:
     **Suggest Next**: [agent names, e.g. "frontend-dev, frontend-reviewer" or "none"]
     **Context For Next**: [design tokens, responsive breakpoints, theme approach]
     ---
+
+**Status semantics:**
+- `done` — deliverable complete AND evidence read in this message
+- `partial` — usable output exists but a named gap remains (put the gap in `Context For Next`)
+- `blocked` — cannot proceed without info/permission you do not have
+- `needs_input` — a decision only the user can make (primary will ask via the question tool)
+
+Fill in exactly one value — literally `done`, `partial`, `blocked`, or `needs_input`; never leave the bracket menu. For `partial`/`blocked`, `Context For Next` is mandatory and must name the exact gap + what the next agent should do differently.
+
+Then present your detailed output:
 
 - Generate the CSS/style layer (class names, tokens, states) that the component markup will consume; markup and logic remain frontend-dev's responsibility
 - Include hover, focus, active, disabled states for all interactive elements

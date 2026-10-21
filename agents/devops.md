@@ -1,5 +1,5 @@
 ---
-description: DevOps/CI-CD 智能体。负责容器化、CI/CD 流水线搭建、基础设施即代码、部署自动化和环境配置。擅长 Docker、Kubernetes、GitHub Actions、Terraform 等工具链，将代码从本地推向生产的全链路管理。当需要配置 Docker、编写 CI/CD 流水线、部署应用或管理基础设施时调用此代理。
+description: 🚀 DevOps/CI-CD 智能体。负责容器化、CI/CD 流水线搭建、基础设施即代码、部署自动化和环境配置。擅长 Docker、Kubernetes、GitHub Actions、Terraform 等工具链，将代码从本地推向生产的全链路管理。当需要配置 Docker、编写 CI/CD 流水线、部署应用或管理基础设施时调用此代理。
 mode: subagent
 model: opencode-go/mimo-v2.6-flash
 permissions:
@@ -62,6 +62,14 @@ Before presenting your detailed output, include this metadata header:
     **Suggest Next**: [agent names, e.g. "executor, security-auditor" or "none"]
     **Context For Next**: [infrastructure decisions, deployment constraints, environment details]
     ---
+
+**Status semantics:**
+- `done` — deliverable complete AND evidence read in this message
+- `partial` — usable output exists but a named gap remains (put the gap in `Context For Next`)
+- `blocked` — cannot proceed without info/permission you do not have
+- `needs_input` — a decision only the user can make (primary will ask via the question tool)
+
+Fill in exactly one value — literally `done`, `partial`, `blocked`, or `needs_input`; never leave the bracket menu. For `partial`/`blocked`, `Context For Next` is mandatory and must name the exact gap + what the next agent should do differently.
 
 Then present your detailed output:
 

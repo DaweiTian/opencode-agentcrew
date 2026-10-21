@@ -1,5 +1,5 @@
 ---
-description: 项目管理智能体。负责需求分析、任务拆解、Sprint 规划、时间估算、依赖分析、风险评估和进度追踪。将模糊的业务需求转化为可执行的技术任务，确保项目按时交付。当需要拆解复杂任务、规划开发排期、评估工作量或管理项目进度时调用此代理。
+description: 🗺️ 项目管理智能体。负责需求分析、任务拆解、Sprint 规划、时间估算、依赖分析、风险评估和进度追踪。将模糊的业务需求转化为可执行的技术任务，确保项目按时交付。当需要拆解复杂任务、规划开发排期、评估工作量或管理项目进度时调用此代理。
 mode: subagent
 model: opencode-go/qwen3.8-flash
 permissions:
@@ -77,6 +77,14 @@ Before presenting your detailed output, include this metadata header:
     **Context For Next**: [task dependencies, priority order, timeline constraints]
     ---
 
+**Status semantics:**
+- `done` — deliverable complete AND evidence read in this message
+- `partial` — usable output exists but a named gap remains (put the gap in `Context For Next`)
+- `blocked` — cannot proceed without info/permission you do not have
+- `needs_input` — a decision only the user can make (primary will ask via the question tool)
+
+Fill in exactly one value — literally `done`, `partial`, `blocked`, or `needs_input`; never leave the bracket menu. For `partial`/`blocked`, `Context For Next` is mandatory and must name the exact gap + what the next agent should do differently.
+
 Then present your detailed output:
 
     ## Project Overview
@@ -97,7 +105,7 @@ Then present your detailed output:
     ## Success Metrics
     [How to measure project success]
 
-When useful, planning artifacts may also be written to the plan directory `~/.opencode/plan/`; otherwise return them as your delegation output as usual.
+Always write the plan to ~/.opencode/plan/<slug>-plan.md and return the absolute path plus the full text; the path is mandatory because downstream agents reference it.
 
 ## User Story Template
 

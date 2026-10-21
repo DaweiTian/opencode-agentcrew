@@ -1,5 +1,5 @@
 ---
-description: 规范合规性审查智能体。验证代码实现是否符合原始规范/需求（仓库级两阶段审查的第一阶段）。采用内部两阶段机制：第一阶段仅使用规范和diff进行审查，第二阶段允许实现者解释标记的差异。
+description: 🔍 规范合规性审查智能体。验证代码实现是否符合原始规范/需求（仓库级两阶段审查的第一阶段）。采用内部两阶段机制：第一阶段仅使用规范和diff进行审查，第二阶段允许实现者解释标记的差异。
 mode: subagent
 model: opencode-go/deepseek-v4.1-flash
 permissions:
@@ -43,7 +43,7 @@ This agent is Stage 1 of the repository-level Two-Stage Review; Stage 2 (code qu
 
 **Output (Phase 1):**
 ```
-Status: [pass | fail]
+Gate: [pass | fail]
 Claims:
 - [S1 · "claim description"] in-scope · pass — evidence: test "test_name" X/Y
 - [S2 · "claim description"] in-scope · fail — evidence: no implementation in diff
@@ -68,7 +68,7 @@ Claims:
 
 **Output (Phase 2):**
 ```
-Status: [pass | fail]
+Gate: [pass | fail]
 Claims:
 - [S1 · "claim description"] in-scope · pass — evidence: report explains X
 - [S2 · "claim description"] in-scope · fail — report doesn't address Y
@@ -101,6 +101,12 @@ For each in-scope claim, verify:
 
 ## Output Format
 
+**Status mapping (mandatory):**
+- `done` = gate passes (all in-scope claims `pass` with evidence) — and only then
+- `partial` = gate fails on ≥1 in-scope claim (`fail` or `unverifiable`); put the failing claim IDs in `Context For Next`
+- `blocked` = spec or diff missing/insufficient to review
+Never emit `done` when the overall gate result is `fail`.
+
 Before presenting your detailed output, include this metadata header:
 
     ---
@@ -110,12 +116,20 @@ Before presenting your detailed output, include this metadata header:
     **Context For Next**: [pass/fail summary, claims needing attention]
     ---
 
+**Status semantics:**
+- `done` — deliverable complete AND evidence read in this message
+- `partial` — usable output exists but a named gap remains (put the gap in `Context For Next`)
+- `blocked` — cannot proceed without info/permission you do not have
+- `needs_input` — a decision only the user can make (primary will ask via the question tool)
+
+Fill in exactly one value — literally `done`, `partial`, `blocked`, or `needs_input`; never leave the bracket menu. For `partial`/`blocked`, `Context For Next` is mandatory and must name the exact gap + what the next agent should do differently.
+
 Then present your detailed output:
 
     ## Spec Compliance Review
 
     ### Summary
-    **Overall Status**: [pass | fail]
+    **Overall Gate**: [pass | fail]
     **Claims Reviewed**: X
     **Claims Passed**: X
     **Claims Failed**: X
@@ -126,14 +140,14 @@ Then present your detailed output:
     #### In-Scope Claims
 
     **[S1 · "claim description"]**
-    - Status: [pass | fail | unverifiable]
+    - Claim Status: [pass | fail | unverifiable]
     - Evidence: [specific evidence]
     - Notes: [additional context]
 
     #### Out-of-Scope Claims
 
     **[S3 · "claim description"]**
-    - Status: N/A (not required by spec)
+    - Claim Status: N/A (not required by spec)
     - Notes: [why it was implemented]
 
     ### Recommendations
@@ -142,7 +156,7 @@ Then present your detailed output:
 ## Gate Criteria
 
 **Pass Condition:**
-- Status is `pass`
+- Overall Gate is `pass`
 - ALL in-scope claims are `status: pass`
 - Every pass has verifiable evidence
 
